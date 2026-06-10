@@ -18,10 +18,10 @@ export function Footer() {
         {/* Links */}
         <div className="flex items-center gap-6">
           <a
-            href="mailto:hello@callvia.com"
+            href="mailto:team@callvia.io"
             className="text-xs text-[#555555] hover:text-[#aaaaaa] transition-colors duration-200"
           >
-            hello@callvia.com
+            team@callvia.io
           </a>
         </div>
       </div>
