@@ -23,6 +23,18 @@ export function Footer() {
           >
             team@callvia.io
           </a>
+          <a
+            href="/privacy"
+            className="text-xs text-[#555555] hover:text-[#aaaaaa] transition-colors duration-200"
+          >
+            Privacy Policy
+          </a>
+          <a
+            href="/terms"
+            className="text-xs text-[#555555] hover:text-[#aaaaaa] transition-colors duration-200"
+          >
+            Terms &amp; Conditions
+          </a>
         </div>
       </div>
     </footer>
