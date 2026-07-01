@@ -37,6 +37,9 @@ export default function TermsPage() {
             <p className="mb-4">
               By providing your phone number to a business using Callvia, or by otherwise consenting to receive SMS messages, you agree to receive text messages from that business via the Callvia platform. These messages may include appointment confirmations, service follow-ups, lead capture confirmations, and other business-related communications.
             </p>
+            <p className="mb-4">
+              <strong className="text-white">How we collect consent.</strong> SMS consent is collected through a clear, voluntary opt-in form. Before any text messages are sent, you submit your mobile phone number and expressly agree to receive SMS communications by checking a consent box on that form. We never purchase, rent, or obtain phone numbers or SMS consent from third parties, and consent is collected only from the individual to whom the phone number belongs. You may withdraw your consent at any time by replying <strong className="text-white">STOP</strong>.
+            </p>
             <ul className="space-y-2 list-disc list-inside">
               <li>Message frequency varies based on your interactions with the business.</li>
               <li>Message and data rates may apply depending on your mobile carrier and plan.</li>
