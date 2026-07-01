@@ -39,6 +39,13 @@ export function Footer() {
           >
             Terms &amp; Conditions
           </a>
+          <span className="text-[#333333] text-xs">·</span>
+          <a
+            href="/service-agreement"
+            className="text-xs text-[#555555] hover:text-[#aaaaaa] transition-colors duration-200"
+          >
+            Service Agreement
+          </a>
         </div>
 
       </div>
