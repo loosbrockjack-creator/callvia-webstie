@@ -86,7 +86,7 @@ export function DemoSection() {
             </svg>
           </div>
 
-          {/* Number — font-light to match all headings */}
+          {/* Number, font-light to match all headings */}
           <span
             className="font-light text-white group-hover:text-accent transition-colors duration-300"
             style={{ fontSize: "clamp(36px, 6vw, 72px)", letterSpacing: "-0.025em" }}

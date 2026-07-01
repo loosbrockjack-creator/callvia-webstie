@@ -89,7 +89,7 @@ export function CTASection() {
             <path d="M4.5 7l2 2 3-3" stroke="#4ade80" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-sm font-medium" style={{ color: "#e5e5e5" }}>
-            Free demo — no credit card, no commitment
+            Free demo. No credit card, no commitment
           </span>
         </motion.div>
       </div>

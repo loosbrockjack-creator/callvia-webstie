@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Terms & Conditions — Callvia",
+  title: "Terms & Conditions | Callvia",
   description: "Terms and Conditions for Callvia services including SMS communications.",
 };
 

@@ -12,7 +12,7 @@ const stats = [
   {
     value: "27%",
     label: "of inbound calls to home-service businesses go unanswered.",
-    source: "Invoca — 60M+ calls analyzed",
+    source: "Invoca (60M+ calls analyzed)",
     href: "https://www.hicira.com/missed-call-statistics",
   },
   {
@@ -67,7 +67,7 @@ export function Research() {
           className="mt-5 text-base max-w-xl leading-relaxed"
           style={{ color: "#888888" }}
         >
-          These aren&#39;t guesses. Across the trades, the data on unanswered calls tells the same story &mdash; and it&#39;s more expensive than most owners think.
+          These aren&#39;t guesses. Across the trades, the data on unanswered calls tells the same story, and it&#39;s more expensive than most owners think.
         </motion.p>
 
         {/* Stat grid */}
@@ -121,7 +121,7 @@ export function Research() {
           className="mt-12 text-lg md:text-xl font-light leading-relaxed max-w-3xl"
           style={{ color: "#cccccc", letterSpacing: "-0.01em" }}
         >
-          The pattern is simple: when your phone goes unanswered, the customer doesn&#39;t wait &mdash; they dial the next name on Google. A single HVAC or plumbing job is worth{" "}
+          The pattern is simple: when your phone goes unanswered, the customer doesn&#39;t wait. They dial the next name on Google. A single HVAC or plumbing job is worth{" "}
           <span className="text-white font-normal">$650&ndash;$2,400</span> on average, and the ones you miss add up fast. Callvia answers every one, so the job stays yours.
         </motion.p>
       </div>

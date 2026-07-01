@@ -11,7 +11,7 @@ export function WaveformMark({
   className = "",
   opacity = 1,
 }: WaveformMarkProps) {
-  // Larger viewBox gives more room — bars stay thin even at big display sizes
+  // Larger viewBox gives more room, bars stay thin even at big display sizes
   const viewW = 400;
   const viewH = 400;
   const barW = 5;

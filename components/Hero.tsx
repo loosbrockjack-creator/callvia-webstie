@@ -15,7 +15,7 @@ export function Hero() {
         }}
       />
 
-      {/* Waveform glow layer — blurred for glow effect */}
+      {/* Waveform glow layer, blurred for glow effect */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         initial={{ opacity: 0, scale: 0.8 }}
@@ -50,7 +50,7 @@ export function Hero() {
           </span>
         </motion.div>
 
-        {/* Main headline — font-light matches all section headings */}
+        {/* Main headline, font-light matches all section headings */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}

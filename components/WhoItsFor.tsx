@@ -76,7 +76,7 @@ export function WhoItsFor() {
             </motion.div>
           </div>
 
-          {/* Right column — numbered list */}
+          {/* Right column: numbered list */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}

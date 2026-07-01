@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Callvia — AI Receptionists for Small Businesses",
+  title: "Callvia | AI Receptionists for Small Businesses",
   description:
     "Callvia answers your calls 24/7, captures leads, and sends you a clear summary. Never miss a customer again.",
   openGraph: {
-    title: "Callvia — AI Receptionists for Small Businesses",
+    title: "Callvia | AI Receptionists for Small Businesses",
     description:
       "Callvia answers your calls 24/7, captures leads, and sends you a clear summary.",
     images: ["/logo.png"],

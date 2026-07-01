@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Privacy Policy — Callvia",
+  title: "Privacy Policy | Callvia",
   description: "Privacy Policy for Callvia services including how we collect, use, and protect your information.",
 };
 

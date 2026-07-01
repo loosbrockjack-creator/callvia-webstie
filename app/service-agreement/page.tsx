@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Service Agreement — Callvia",
+  title: "Service Agreement | Callvia",
   description: "The Callvia Service Agreement governing AI receptionist services, billing, cancellation, and client responsibilities.",
 };
 
