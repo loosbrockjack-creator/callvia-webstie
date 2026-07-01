@@ -6,22 +6,26 @@ const stats = [
   {
     value: "85%",
     label: "of callers who reach voicemail never call back.",
-    source: "Forbes / BrightLocal",
+    source: "Forbes / BIA Kelsey",
+    href: "https://www.hicira.com/missed-call-statistics",
   },
   {
-    value: "30–50%",
-    label: "of inbound calls to the average contractor go unanswered.",
-    source: "CallRail / Invoca benchmarks",
+    value: "27%",
+    label: "of inbound calls to home-service businesses go unanswered.",
+    source: "Invoca — 60M+ calls analyzed",
+    href: "https://www.hicira.com/missed-call-statistics",
   },
   {
     value: "78%",
     label: "of customers hire the first business that responds.",
-    source: "HubSpot / lead-response research",
+    source: "Lead Connect / Vendasta",
+    href: "https://www.hicira.com/missed-call-statistics",
   },
   {
     value: "$45K–$120K",
     label: "lost per year by the average contractor to missed calls.",
     source: "Analysis of 1,200+ home-service contractors",
+    href: "https://www.callbirdai.com/blog-contractors-lose-money-missed-calls",
   },
 ];
 
@@ -88,11 +92,21 @@ export function Research() {
               <p className="mt-4 text-base leading-relaxed" style={{ color: "#999999" }}>
                 {s.label}
               </p>
-              <div
-                className="mt-6 pt-4 border-t text-xs tracking-wide"
-                style={{ borderColor: "rgba(255,255,255,0.06)", color: "#555555" }}
-              >
-                {s.source}
+              <div className="mt-6 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs tracking-wide inline-flex items-center gap-1.5 transition-colors duration-200"
+                  style={{ color: "#555555" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#9b7ffd")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#555555")}
+                >
+                  {s.source}
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 7L7 3M7 3H3.5M7 3V6.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
               </div>
             </motion.div>
           ))}
@@ -107,8 +121,8 @@ export function Research() {
           className="mt-12 text-lg md:text-xl font-light leading-relaxed max-w-3xl"
           style={{ color: "#cccccc", letterSpacing: "-0.01em" }}
         >
-          The pattern is simple: when your phone goes unanswered, the customer doesn&#39;t wait &mdash; they dial the next name on Google. A single HVAC or plumbing call can be worth{" "}
-          <span className="text-white font-normal">$350&ndash;$1,200</span>, and the ones you miss add up fast. Callvia answers every one, so the job stays yours.
+          The pattern is simple: when your phone goes unanswered, the customer doesn&#39;t wait &mdash; they dial the next name on Google. A single HVAC or plumbing job is worth{" "}
+          <span className="text-white font-normal">$650&ndash;$2,400</span> on average, and the ones you miss add up fast. Callvia answers every one, so the job stays yours.
         </motion.p>
       </div>
     </section>
