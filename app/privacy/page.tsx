@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         <h1 className="text-4xl font-light tracking-tight mb-2" style={{ letterSpacing: "-0.025em" }}>
           Privacy Policy
         </h1>
-        <p className="text-sm text-white/30 mb-12">Last updated: June 10, 2026</p>
+        <p className="text-sm text-white/30 mb-12">Last updated: July 1, 2026</p>
 
         <div className="space-y-10 text-base leading-relaxed" style={{ color: "#999999" }}>
 
@@ -67,8 +67,10 @@ export default function PrivacyPage() {
               <li>We do not sell, rent, or share your phone number with third parties for their own marketing purposes.</li>
               <li>You may opt out at any time by replying <strong className="text-white">STOP</strong> to any message. You will receive a confirmation and no further messages will be sent.</li>
               <li>Reply <strong className="text-white">HELP</strong> to any message for assistance.</li>
+              <li>Message frequency varies depending on your interactions with the business.</li>
               <li>Message and data rates may apply.</li>
               <li>No mobile information will be shared with third parties or affiliates for marketing or promotional purposes.</li>
+              <li>Text messaging originator opt-in data and consent will not be shared with, sold to, or disclosed to any third parties.</li>
             </ul>
           </section>
 
