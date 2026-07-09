@@ -14,7 +14,14 @@ const TRADES = [
   { id: "gc", label: "General Contractor", jobValue: 1500 },
 ] as const;
 
-const NEVER_CALL_BACK = 0.85; // Forbes / BIA Kelsey
+// How likely a caller is gone for good after hitting no answer.
+// New/prospective callers: sourced (Forbes / BIA Kelsey). Repeat customers who
+// already trust you are far less likely to give up, but no published research
+// measures that specifically, so it's shown as a conservative-to-moderate
+// assumed range rather than a single fake-precise number.
+const NEW_CALLER_CHURN = 0.85; // Forbes / BIA Kelsey
+const REPEAT_CHURN_LOW = 0.1; // assumption
+const REPEAT_CHURN_HIGH = 0.35; // assumption
 const WEEKS_PER_MONTH = 4.33;
 
 const SCAN_STATUSES = [
@@ -56,6 +63,7 @@ export function MissedCallTool() {
   const [phase, setPhase] = useState<Phase>("form");
   const [trade, setTrade] = useState<(typeof TRADES)[number] | null>(null);
   const [calls, setCalls] = useState("20");
+  const [repeatSharePct, setRepeatSharePct] = useState(40);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [lookup, setLookup] = useState<LookupResult>({ carrier: null, lineType: null });
@@ -105,10 +113,20 @@ export function MissedCallTool() {
     setLookup({ carrier: null, lineType: null });
   }
 
-  // The estimate math, all assumptions visible
+  // The estimate math, all assumptions visible.
+  // Range narrows to the sourced 85% figure when repeat share is 0 (all new
+  // callers), and widens as repeat share grows, since that segment's churn
+  // is an assumed range, not a cited number.
   const missedCallsPerMonth = callsNum * WEEKS_PER_MONTH;
-  const lostCallers = missedCallsPerMonth * NEVER_CALL_BACK;
-  const revenueAtStake = lostCallers * (trade?.jobValue ?? 0);
+  const repeatShare = repeatSharePct / 100;
+  const newShare = 1 - repeatShare;
+  const lowChurn = repeatShare * REPEAT_CHURN_LOW + newShare * NEW_CALLER_CHURN;
+  const highChurn = repeatShare * REPEAT_CHURN_HIGH + newShare * NEW_CALLER_CHURN;
+  const lowLostCallers = missedCallsPerMonth * lowChurn;
+  const highLostCallers = missedCallsPerMonth * highChurn;
+  const jobValue = trade?.jobValue ?? 0;
+  const lowRevenue = lowLostCallers * jobValue;
+  const highRevenue = highLostCallers * jobValue;
   const lt = lineTypeLabel(lookup.lineType);
 
   return (
@@ -144,7 +162,7 @@ export function MissedCallTool() {
           className="mt-5 text-base leading-relaxed max-w-xl mx-auto text-center"
           style={{ color: "#888888" }}
         >
-          Two questions and your business number. We run a live carrier lookup, then apply the research above to estimate what those missed calls are costing you every month.
+          A few quick questions and your business number. We run a live carrier lookup, then apply the research above to estimate what those missed calls are costing you every month.
         </motion.p>
 
         <motion.div
@@ -204,6 +222,29 @@ export function MissedCallTool() {
                     className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
                     style={{ background: "#000000", borderColor: "#1f1f1f" }}
                   />
+                </div>
+
+                {/* Repeat vs new customer share */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
+                      Share that are repeat customers
+                    </label>
+                    <span className="text-sm text-white font-medium">{repeatSharePct}%</span>
+                  </div>
+                  <input
+                    id="mct-repeat"
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={repeatSharePct}
+                    onChange={(e) => setRepeatSharePct(parseInt(e.target.value, 10))}
+                    className="w-full accent-[#7c5cfc]"
+                  />
+                  <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
+                    People who already know you are more likely to wait or call back. New callers usually just try the next name on Google.
+                  </p>
                 </div>
 
                 {/* Phone */}
@@ -287,18 +328,19 @@ export function MissedCallTool() {
                   Estimated monthly revenue at stake
                 </p>
                 <div
-                  className="text-5xl md:text-6xl font-semibold text-white tracking-tight"
+                  className="text-4xl md:text-5xl font-semibold text-white tracking-tight"
                   style={{ letterSpacing: "-0.03em" }}
                 >
-                  ${Math.round(revenueAtStake).toLocaleString()}
+                  ${Math.round(lowRevenue).toLocaleString()} &ndash; ${Math.round(highRevenue).toLocaleString()}
                 </div>
 
                 {/* Breakdown */}
                 <div className="mt-8 flex flex-col gap-3">
                   {[
                     { label: "Missed calls per month", value: Math.round(missedCallsPerMonth).toLocaleString() },
-                    { label: "Never call back (85%, Forbes / BIA Kelsey)", value: `~${Math.round(lostCallers)}` },
-                    { label: `Average ${trade?.label ?? ""} job value`, value: `$${(trade?.jobValue ?? 0).toLocaleString()}` },
+                    { label: "Repeat customers (10-35% gone for good, assumed)", value: `~${Math.round(missedCallsPerMonth * repeatShare)}` },
+                    { label: "New callers (85% gone for good, Forbes / BIA Kelsey)", value: `~${Math.round(missedCallsPerMonth * newShare)}` },
+                    { label: `Average ${trade?.label ?? ""} job value`, value: `$${jobValue.toLocaleString()}` },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span style={{ color: "#888888" }}>{row.label}</span>
@@ -325,7 +367,7 @@ export function MissedCallTool() {
                 </button>
 
                 <p className="mt-8 text-xs leading-relaxed" style={{ color: "#444444" }}>
-                  Estimate built from published industry research: Forbes / BIA Kelsey callback research and average trade job values, applied to the missed-call number you entered. It is not a reading of your call records, those are private to you and your carrier.
+                  New-caller churn (85%) is sourced from Forbes / BIA Kelsey. Repeat-customer churn (10&ndash;35%) is a conservative assumption, since no published research measures how often existing customers give up after one missed call. That range is why this shows as a range, not a single number. It is not a reading of your call records, those are private to you and your carrier.
                 </p>
               </motion.div>
             )}
