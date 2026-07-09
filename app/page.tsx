@@ -1,10 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
-import { Research } from "@/components/Research";
 import { Features } from "@/components/Features";
-import { HowItWorks } from "@/components/HowItWorks";
-import { WhoItsFor } from "@/components/WhoItsFor";
-import { DemoSection } from "@/components/DemoSection";
+import { MissedCallsTeaser } from "@/components/MissedCallsTeaser";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -13,11 +10,8 @@ export default function Home() {
     <main className="bg-black min-h-screen">
       <Nav />
       <Hero />
-      <Research />
       <Features />
-      <HowItWorks />
-      <WhoItsFor />
-      <DemoSection />
+      <MissedCallsTeaser />
       <CTASection />
       <Footer />
     </main>
