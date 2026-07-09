@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
 
 // Average job values per trade, used for the revenue estimate.
-// Sources: CallBird contractor dataset (HVAC $850, Plumbing $650),
-// industry averages for electrical service calls and GC projects.
+// HVAC $850 and Plumbing $650 are cited from the CallBird contractor dataset.
+// Electrical $500 and GC $1,500 are unverified estimates, not sourced.
 const TRADES = [
   { id: "hvac", label: "HVAC", jobValue: 850 },
   { id: "plumbing", label: "Plumbing", jobValue: 650 },
@@ -14,7 +14,6 @@ const TRADES = [
   { id: "gc", label: "General Contractor", jobValue: 1500 },
 ] as const;
 
-const UNANSWERED_RATE = 0.27; // Invoca, 60M+ calls analyzed
 const NEVER_CALL_BACK = 0.85; // Forbes / BIA Kelsey
 const WEEKS_PER_MONTH = 4.33;
 
@@ -72,7 +71,7 @@ export function MissedCallTool() {
       return;
     }
     if (!parseInt(calls, 10)) {
-      setError("How many calls do you get in a week?");
+      setError("How many calls do you miss in a week?");
       return;
     }
     if (digits.length !== 10) {
@@ -107,9 +106,8 @@ export function MissedCallTool() {
   }
 
   // The estimate math, all assumptions visible
-  const monthlyCalls = callsNum * WEEKS_PER_MONTH;
-  const missedCalls = monthlyCalls * UNANSWERED_RATE;
-  const lostCallers = missedCalls * NEVER_CALL_BACK;
+  const missedCallsPerMonth = callsNum * WEEKS_PER_MONTH;
+  const lostCallers = missedCallsPerMonth * NEVER_CALL_BACK;
   const revenueAtStake = lostCallers * (trade?.jobValue ?? 0);
   const lt = lineTypeLabel(lookup.lineType);
 
@@ -146,7 +144,7 @@ export function MissedCallTool() {
           className="mt-5 text-base leading-relaxed max-w-xl mx-auto text-center"
           style={{ color: "#888888" }}
         >
-          Two questions and your business number. We run a live carrier lookup, then apply the research above to estimate what unanswered calls cost you every month.
+          Two questions and your business number. We run a live carrier lookup, then apply the research above to estimate what those missed calls are costing you every month.
         </motion.p>
 
         <motion.div
@@ -191,10 +189,10 @@ export function MissedCallTool() {
                   </div>
                 </div>
 
-                {/* Calls per week */}
+                {/* Missed calls per week */}
                 <div>
                   <label htmlFor="mct-calls" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-                    Inbound calls per week
+                    Missed calls per week
                   </label>
                   <input
                     id="mct-calls"
@@ -298,8 +296,7 @@ export function MissedCallTool() {
                 {/* Breakdown */}
                 <div className="mt-8 flex flex-col gap-3">
                   {[
-                    { label: "Inbound calls per month", value: Math.round(monthlyCalls).toLocaleString() },
-                    { label: "Go unanswered (27%, Invoca)", value: `~${Math.round(missedCalls)}` },
+                    { label: "Missed calls per month", value: Math.round(missedCallsPerMonth).toLocaleString() },
                     { label: "Never call back (85%, Forbes / BIA Kelsey)", value: `~${Math.round(lostCallers)}` },
                     { label: `Average ${trade?.label ?? ""} job value`, value: `$${(trade?.jobValue ?? 0).toLocaleString()}` },
                   ].map((row) => (
@@ -328,7 +325,7 @@ export function MissedCallTool() {
                 </button>
 
                 <p className="mt-8 text-xs leading-relaxed" style={{ color: "#444444" }}>
-                  Estimate built from published industry research: Invoca unanswered-call data, Forbes / BIA Kelsey callback research, and average trade job values. It is not a reading of your call records, those are private to you and your carrier.
+                  Estimate built from published industry research: Forbes / BIA Kelsey callback research and average trade job values, applied to the missed-call number you entered. It is not a reading of your call records, those are private to you and your carrier.
                 </p>
               </motion.div>
             )}
