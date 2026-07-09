@@ -32,22 +32,18 @@ export function Nav() {
 
       {/* CTA */}
       <a
-        href="https://cal.com/jack-loosbrock-wzgbta/meeting-callvia"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/build"
         className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-accent border border-accent/40 rounded-full hover:bg-accent hover:text-white transition-all duration-200"
       >
-        Book a Demo
+        Build My Receptionist
       </a>
 
       {/* Mobile CTA */}
       <a
-        href="https://cal.com/jack-loosbrock-wzgbta/meeting-callvia"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/build"
         className="md:hidden inline-flex items-center px-3 py-1.5 text-xs font-medium text-accent border border-accent/40 rounded-full"
       >
-        Demo
+        Build
       </a>
     </nav>
   );

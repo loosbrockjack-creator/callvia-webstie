@@ -3,26 +3,7 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
-
-// Average job values per trade, used for the revenue estimate.
-// HVAC $850 and Plumbing $650 are cited from the CallBird contractor dataset.
-// Electrical $500 and GC $1,500 are unverified estimates, not sourced.
-const TRADES = [
-  { id: "hvac", label: "HVAC", jobValue: 850 },
-  { id: "plumbing", label: "Plumbing", jobValue: 650 },
-  { id: "electrical", label: "Electrical", jobValue: 500 },
-  { id: "gc", label: "General Contractor", jobValue: 1500 },
-] as const;
-
-// How likely a caller is gone for good after hitting no answer.
-// New/prospective callers: sourced (Forbes / BIA Kelsey). Repeat customers who
-// already trust you are far less likely to give up, but no published research
-// measures that specifically, so it's shown as a conservative-to-moderate
-// assumed range rather than a single fake-precise number.
-const NEW_CALLER_CHURN = 0.85; // Forbes / BIA Kelsey
-const REPEAT_CHURN_LOW = 0.1; // assumption
-const REPEAT_CHURN_HIGH = 0.35; // assumption
-const WEEKS_PER_MONTH = 4.33;
+import { TRADES, estimateRange } from "@/lib/estimate";
 
 const SCAN_STATUSES = [
   "Validating number format",
@@ -30,8 +11,6 @@ const SCAN_STATUSES = [
   "Identifying line type",
   "Crunching industry benchmarks",
 ];
-
-const BOOKING_URL = "https://cal.com/jack-loosbrock-wzgbta/meeting-callvia";
 
 type Phase = "form" | "scanning" | "result";
 
@@ -113,20 +92,11 @@ export function MissedCallTool() {
     setLookup({ carrier: null, lineType: null });
   }
 
-  // The estimate math, all assumptions visible.
-  // Range narrows to the sourced 85% figure when repeat share is 0 (all new
-  // callers), and widens as repeat share grows, since that segment's churn
-  // is an assumed range, not a cited number.
-  const missedCallsPerMonth = callsNum * WEEKS_PER_MONTH;
-  const repeatShare = repeatSharePct / 100;
-  const newShare = 1 - repeatShare;
-  const lowChurn = repeatShare * REPEAT_CHURN_LOW + newShare * NEW_CALLER_CHURN;
-  const highChurn = repeatShare * REPEAT_CHURN_HIGH + newShare * NEW_CALLER_CHURN;
-  const lowLostCallers = missedCallsPerMonth * lowChurn;
-  const highLostCallers = missedCallsPerMonth * highChurn;
+  // The estimate math lives in lib/estimate.ts, shared with the /build funnel
+  // so both always show identical numbers for identical inputs.
   const jobValue = trade?.jobValue ?? 0;
-  const lowRevenue = lowLostCallers * jobValue;
-  const highRevenue = highLostCallers * jobValue;
+  const { missedCallsPerMonth, repeatShare, newShare, lowRevenue, highRevenue } =
+    estimateRange(callsNum, repeatSharePct, jobValue);
   const lt = lineTypeLabel(lookup.lineType);
 
   return (
@@ -350,12 +320,10 @@ export function MissedCallTool() {
                 </div>
 
                 <a
-                  href={BOOKING_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/build?trade=${trade?.id ?? ""}&missed=${callsNum}&repeat=${repeatSharePct}`}
                   className="mt-10 inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
                 >
-                  Never Miss Another Call
+                  Build My Receptionist
                 </a>
 
                 <button

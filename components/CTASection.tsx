@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { BOOKING_URL } from "@/lib/site";
 
 export function CTASection() {
   return (
@@ -68,14 +69,25 @@ export function CTASection() {
           className="mt-10 flex flex-col sm:flex-row items-center gap-4"
         >
           <a
-            href="https://cal.com/jack-loosbrock-wzgbta/meeting-callvia"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/build"
             className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
           >
-            Book a Demo
+            Build My Receptionist
           </a>
         </motion.div>
+
+        <motion.a
+          href={BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, delay: 0.25 }}
+          className="mt-5 text-xs tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors duration-200"
+        >
+          or book a live demo
+        </motion.a>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
