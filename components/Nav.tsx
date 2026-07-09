@@ -1,32 +1,33 @@
-import Link from "next/link";
-
 export function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-black/80 backdrop-blur-md border-b border-white/5">
       {/* Wordmark */}
-      <Link href="/" className="flex items-center">
+      <a href="#" className="flex items-center">
         <span
           className="text-white font-[200] tracking-[0.22em] uppercase"
           style={{ fontSize: "13px", letterSpacing: "0.22em" }}
         >
           Callvia
         </span>
-      </Link>
+      </a>
 
       {/* Links */}
       <div className="hidden md:flex items-center gap-7">
-        <Link href="/#features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+        <a href="#features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
           Features
-        </Link>
-        <Link href="/how-it-works" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+        </a>
+        <a href="#how-it-works" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
           How It Works
-        </Link>
-        <Link href="/missed-calls" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-          Missed Calls
-        </Link>
-        <Link href="/demo" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+        </a>
+        <a href="#who-its-for" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+          Who It&#39;s For
+        </a>
+        <a href="#demo" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
           Live Demo
-        </Link>
+        </a>
+        <a href="#get-started" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+          Get Started
+        </a>
       </div>
 
       {/* CTA */}

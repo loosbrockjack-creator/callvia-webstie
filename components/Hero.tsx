@@ -91,13 +91,13 @@ export function Hero() {
           className="mt-10 flex flex-col sm:flex-row items-center gap-4"
         >
           <a
-            href="/demo"
+            href="#demo"
             className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
           >
             Experience It
           </a>
           <a
-            href="/how-it-works"
+            href="#how-it-works"
             className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white/70 border border-white/15 rounded-full hover:border-white/30 hover:text-white transition-all duration-200"
           >
             See How It Works
