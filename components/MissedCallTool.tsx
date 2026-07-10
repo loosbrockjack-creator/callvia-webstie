@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
-import { TRADES, estimateRange } from "@/lib/estimate";
+import { TRADES } from "@/lib/estimate";
 
 const SCAN_STATUSES = [
   "Validating number format",
@@ -12,12 +13,7 @@ const SCAN_STATUSES = [
   "Crunching industry benchmarks",
 ];
 
-type Phase = "form" | "scanning" | "result";
-
-interface LookupResult {
-  carrier: string | null;
-  lineType: string | null;
-}
+type Phase = "form" | "scanning";
 
 function formatPhone(raw: string): string {
   const d = raw.replace(/\D/g, "").slice(0, 10);
@@ -26,26 +22,14 @@ function formatPhone(raw: string): string {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
-function lineTypeLabel(type: string | null): string | null {
-  if (!type) return null;
-  const map: Record<string, string> = {
-    mobile: "mobile line",
-    landline: "landline",
-    fixedVoip: "VoIP line",
-    nonFixedVoip: "VoIP line",
-    voip: "VoIP line",
-  };
-  return map[type] ?? `${type} line`;
-}
-
 export function MissedCallTool() {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("form");
   const [trade, setTrade] = useState<(typeof TRADES)[number] | null>(null);
   const [calls, setCalls] = useState("20");
   const [repeatSharePct, setRepeatSharePct] = useState(40);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [lookup, setLookup] = useState<LookupResult>({ carrier: null, lineType: null });
   const [statusIdx, setStatusIdx] = useState(0);
   const statusTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -83,21 +67,17 @@ export function MissedCallTool() {
 
     const [result] = await Promise.all([fetchLookup, minDelay]);
     if (statusTimer.current) clearInterval(statusTimer.current);
-    setLookup(result);
-    setPhase("result");
-  }
 
-  function reset() {
-    setPhase("form");
-    setLookup({ carrier: null, lineType: null });
+    // Results live on their own page
+    const params = new URLSearchParams({
+      trade: trade.id,
+      missed: String(callsNum),
+      repeat: String(repeatSharePct),
+    });
+    if (result.carrier) params.set("carrier", result.carrier);
+    if (result.lineType) params.set("lt", result.lineType);
+    router.push(`/report?${params.toString()}`);
   }
-
-  // The estimate math lives in lib/estimate.ts, shared with the /build funnel
-  // so both always show identical numbers for identical inputs.
-  const jobValue = trade?.jobValue ?? 0;
-  const { missedCallsPerMonth, repeatShare, newShare, lowRevenue, highRevenue } =
-    estimateRange(callsNum, repeatSharePct, jobValue);
-  const lt = lineTypeLabel(lookup.lineType);
 
   return (
     <section id="tool" className="py-32 px-6 border-t border-white/5">
@@ -266,76 +246,6 @@ export function MissedCallTool() {
                 <p className="mt-8 text-sm tracking-wide" style={{ color: "#888888" }}>
                   {SCAN_STATUSES[statusIdx]}
                   <span className="animate-pulse">…</span>
-                </p>
-              </motion.div>
-            )}
-
-            {phase === "result" && (
-              <motion.div
-                key="result"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex flex-col"
-              >
-                {/* Carrier line, only when the lookup returned real data */}
-                {(lookup.carrier || lt) && (
-                  <div
-                    className="flex items-center gap-2.5 pb-6 mb-6 border-b"
-                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block" />
-                    <span className="text-sm" style={{ color: "#999999" }}>
-                      Line identified:{" "}
-                      <span className="text-white">
-                        {[lookup.carrier, lt].filter(Boolean).join(", ")}
-                      </span>
-                    </span>
-                  </div>
-                )}
-
-                <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "#555555" }}>
-                  Estimated monthly revenue at stake
-                </p>
-                <div
-                  className="text-4xl md:text-5xl font-semibold text-white tracking-tight"
-                  style={{ letterSpacing: "-0.03em" }}
-                >
-                  ${Math.round(lowRevenue).toLocaleString()} &ndash; ${Math.round(highRevenue).toLocaleString()}
-                </div>
-
-                {/* Breakdown */}
-                <div className="mt-8 flex flex-col gap-3">
-                  {[
-                    { label: "Missed calls per month", value: Math.round(missedCallsPerMonth).toLocaleString() },
-                    { label: "Repeat customers (10-35% gone for good, assumed)", value: `~${Math.round(missedCallsPerMonth * repeatShare)}` },
-                    { label: "New callers (85% gone for good, Forbes / BIA Kelsey)", value: `~${Math.round(missedCallsPerMonth * newShare)}` },
-                    { label: `Average ${trade?.label ?? ""} job value`, value: `$${jobValue.toLocaleString()}` },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center justify-between text-sm">
-                      <span style={{ color: "#888888" }}>{row.label}</span>
-                      <span className="text-white font-medium">{row.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <a
-                  href={`/build?trade=${trade?.id ?? ""}&missed=${callsNum}&repeat=${repeatSharePct}`}
-                  className="mt-10 inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
-                >
-                  Build My Receptionist
-                </a>
-
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="mt-4 text-xs tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors duration-200"
-                >
-                  Run it again
-                </button>
-
-                <p className="mt-8 text-xs leading-relaxed" style={{ color: "#444444" }}>
-                  New-caller churn (85%) is sourced from Forbes / BIA Kelsey. Repeat-customer churn (10&ndash;35%) is a conservative assumption, since no published research measures how often existing customers give up after one missed call. That range is why this shows as a range, not a single number. It is not a reading of your call records, those are private to you and your carrier.
                 </p>
               </motion.div>
             )}

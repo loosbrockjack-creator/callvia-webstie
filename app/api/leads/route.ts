@@ -1,18 +1,25 @@
 // Build-funnel lead notifications, emailed to team@callvia.io via Resend.
-// Two stages:
-//   stage "background": full form answers, sent the moment the form completes
-//   stage "choice":     which delivery option they picked (live demo / email demo)
+// Events:
+//   "insights-reached": they finished the questions (answers only, no contact
+//                       info is collected in the funnel anymore)
+//   "choice":           picked live-demo (contact comes via cal.com) or
+//                       email-demo (email collected right on that card)
 //
-// Same policy as /api/onboarding: this route NEVER blocks the funnel. If the
-// email send fails, the full payload is logged (recoverable in Vercel function
-// logs) and the route still returns ok.
+// Policy: this route NEVER blocks the funnel. If the email send fails, the
+// full payload is logged (recoverable in Vercel function logs) and the route
+// still returns ok.
 
 const NOTIFY_TO = "team@callvia.io";
 
-type Stage = "background" | "choice";
-
 function str(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
+}
+
+function answerLines(answers: Record<string, unknown>): string[] {
+  return Object.entries(answers).map(([k, v]) => {
+    const val = Array.isArray(v) ? v.join(", ") : String(v ?? "");
+    return `${k}: ${val || "(blank)"}`;
+  });
 }
 
 async function sendEmail(subject: string, text: string, record: unknown) {
@@ -49,68 +56,56 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "Invalid payload." }, { status: 400 });
   }
 
-  const stage = body.stage as Stage;
+  const event = str(body.event);
+  const answers = (body.answers ?? {}) as Record<string, unknown>;
+  const repeatShare = typeof body.repeatShare === "number" ? body.repeatShare : null;
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const timestamp = new Date().toISOString();
 
-  if (stage === "background") {
-    const fullName = str(body.fullName);
-    const email = str(body.email);
-    const business = str(body.business);
-    if (!fullName || !email || !business) {
-      return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 });
-    }
+  const commonLines = [
+    `--- Funnel answers ---`,
+    ...answerLines(answers),
+    ...(repeatShare !== null ? [`repeatShare: ${repeatShare}%`] : []),
+    ``,
+    `Timestamp (UTC): ${timestamp}`,
+    `Requester IP:    ${ip}`,
+  ];
 
-    const answers = (body.answers ?? {}) as Record<string, unknown>;
-    const record = { stage, fullName, email, business, answers, timestamp, ip };
-
-    const answerLines = Object.entries(answers).map(([k, v]) => {
-      const val = Array.isArray(v) ? v.join(", ") : String(v ?? "");
-      return `${k}: ${val || "(blank)"}`;
-    });
-
-    const text = [
-      `New build request`,
-      ``,
-      `Name:     ${fullName}`,
-      `Email:    ${email}`,
-      `Business: ${business}`,
-      `Phone:    ${str(body.phone) || "(not given)"}`,
-      ``,
-      `--- Background answers ---`,
-      ...answerLines,
-      ``,
-      `Timestamp (UTC): ${timestamp}`,
-      `Requester IP:    ${ip}`,
-    ].join("\n");
-
-    await sendEmail(`New build request: ${business}`, text, record);
+  if (event === "insights-reached") {
+    const business = str(answers.trade) || "unknown trade";
+    const record = { event, answers, repeatShare, timestamp, ip };
+    const text = [`Someone finished the build questions (no contact info yet).`, ``, ...commonLines].join("\n");
+    await sendEmail(`Build funnel: questions completed (${business})`, text, record);
     return Response.json({ ok: true });
   }
 
-  if (stage === "choice") {
-    const email = str(body.email);
-    const business = str(body.business);
+  if (event === "choice") {
     const choice = str(body.choice);
-    if (!email || !business || !["live-demo", "email-demo"].includes(choice)) {
-      return Response.json({ ok: false, error: "Missing required fields." }, { status: 400 });
+    if (!["live-demo", "email-demo"].includes(choice)) {
+      return Response.json({ ok: false, error: "Unknown choice." }, { status: 400 });
     }
 
-    const label = choice === "live-demo" ? "live demo" : "email demo";
-    const record = { stage, email, business, choice, timestamp, ip };
+    const email = str(body.email);
+    if (choice === "email-demo" && !email) {
+      return Response.json({ ok: false, error: "Email required for email demo." }, { status: 400 });
+    }
+
+    const record = { event, choice, email, answers, repeatShare, timestamp, ip };
+    const label = choice === "live-demo" ? "live demo (contact via cal.com booking)" : `email demo for ${email}`;
     const text = [
-      `Build request update`,
+      `New build request: ${label}`,
       ``,
-      `Business: ${business}`,
-      `Email:    ${email}`,
-      `Chose:    ${label}`,
-      ``,
-      `Timestamp (UTC): ${timestamp}`,
+      ...(email ? [`Email: ${email}`, ``] : []),
+      ...commonLines,
     ].join("\n");
 
-    await sendEmail(`Build request: ${business} chose ${label}`, text, record);
+    const subject =
+      choice === "live-demo"
+        ? "Build request: live demo booked"
+        : `Build request: email demo for ${email}`;
+    await sendEmail(subject, text, record);
     return Response.json({ ok: true });
   }
 
-  return Response.json({ ok: false, error: "Unknown stage." }, { status: 400 });
+  return Response.json({ ok: false, error: "Unknown event." }, { status: 400 });
 }
