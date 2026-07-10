@@ -29,8 +29,10 @@ function parseSubmission(body: unknown): Submission | null {
   const email = typeof b.email === "string" ? b.email.trim() : "";
   const phone = typeof b.phone === "string" ? b.phone.replace(/\D/g, "") : "";
   const business = typeof b.business === "string" ? b.business.trim() : "";
-  // SMS consent is explicitly NOT required. Only the service agreement is.
-  if (!fullName || !email || !business || phone.length !== 10 || b.agreedToServiceAgreement !== true) {
+  // Neither checkbox is required. Service Agreement acceptance is effected by
+  // submitting payment (per the agreement itself); the checkbox is recorded
+  // as an extra acknowledgment when given.
+  if (!fullName || !email || !business || phone.length !== 10) {
     return null;
   }
   return {
@@ -38,7 +40,7 @@ function parseSubmission(body: unknown): Submission | null {
     email,
     phone,
     business,
-    agreedToServiceAgreement: true,
+    agreedToServiceAgreement: b.agreedToServiceAgreement === true,
     smsConsent: b.smsConsent === true,
   };
 }
@@ -69,7 +71,7 @@ export async function POST(request: Request) {
     `Phone:          ${sub.phone}`,
     `Business:       ${sub.business}`,
     ``,
-    `Service Agreement accepted: yes`,
+    `Service Agreement box checked: ${sub.agreedToServiceAgreement ? "YES" : "no"}`,
     `SMS consent:    ${sub.smsConsent ? "YES" : "no"}`,
     ``,
     `--- Consent audit trail ---`,

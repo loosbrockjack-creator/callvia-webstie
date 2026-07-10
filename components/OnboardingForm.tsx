@@ -41,10 +41,6 @@ export function OnboardingForm() {
       setError("Please enter a valid 10-digit phone number.");
       return;
     }
-    if (!agreed) {
-      setError("Please review and agree to the Service Agreement to continue.");
-      return;
-    }
     setError(null);
     setSubmitting(true);
 
@@ -133,7 +129,8 @@ export function OnboardingForm() {
         />
       </div>
 
-      {/* Required: Service Agreement */}
+      {/* Optional: Service Agreement acknowledgment. Acceptance is effected by
+          submitting payment per the agreement itself, so this does not gate submission. */}
       <label className="flex items-start gap-3.5 cursor-pointer">
         <input
           type="checkbox"
@@ -151,7 +148,7 @@ export function OnboardingForm() {
           >
             Callvia Service Agreement
           </a>
-          . *
+          . (Optional)
         </span>
       </label>
 
