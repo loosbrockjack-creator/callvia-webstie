@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 
 const stats = [
   {
@@ -71,17 +72,13 @@ export function Research() {
         </motion.p>
 
         {/* Stat grid */}
-        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CursorCardsContainer className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {stats.map((s, i) => (
-            <motion.div
+            <CursorCard
               key={s.value}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.65, ease: "easeOut", delay: i * 0.1 }}
-              className="group relative flex flex-col p-8 md:p-10 rounded-2xl border transition-all duration-300"
-              style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
-              whileHover={{ borderColor: "rgba(124,92,252,0.3)", transition: { duration: 0.2 } }}
+              reveal
+              revealDelay={i * 0.1}
+              className="flex flex-col p-8 md:p-10 rounded-2xl"
             >
               <div
                 className="text-5xl md:text-6xl font-semibold text-white tracking-tight"
@@ -108,9 +105,9 @@ export function Research() {
                   </svg>
                 </a>
               </div>
-            </motion.div>
+            </CursorCard>
           ))}
-        </div>
+        </CursorCardsContainer>
 
         {/* Bottom line */}
         <motion.p

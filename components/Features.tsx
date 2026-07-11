@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 
 const features = [
   {
@@ -91,17 +92,13 @@ export function Features() {
         </motion.p>
 
         {/* Cards grid */}
-        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CursorCardsContainer className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {features.map((f, i) => (
-            <motion.div
+            <CursorCard
               key={f.title}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.65, ease: "easeOut", delay: i * 0.1 }}
-              className="group relative p-7 rounded-2xl border transition-all duration-300"
-              style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
-              whileHover={{ borderColor: "rgba(124,92,252,0.3)", transition: { duration: 0.2 } }}
+              reveal
+              revealDelay={i * 0.1}
+              className="p-7 rounded-2xl"
             >
               <div
                 className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-5"
@@ -113,9 +110,9 @@ export function Features() {
               <p className="text-sm leading-relaxed" style={{ color: "#666666" }}>
                 {f.description}
               </p>
-            </motion.div>
+            </CursorCard>
           ))}
-        </div>
+        </CursorCardsContainer>
       </div>
     </section>
   );

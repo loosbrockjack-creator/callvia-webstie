@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { TRADES, estimateRange } from "@/lib/estimate";
 import { BOOKING_URL } from "@/lib/site";
+import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 
 // ---------------------------------------------------------------------------
 // Question config. Jack: revise wording, order, or options here, one place.
@@ -604,21 +605,19 @@ export function BuildFunnel() {
               Here&#39;s what your receptionist fixes.
             </h2>
 
-            <div className="mt-10 flex flex-col gap-4">
+            <CursorCardsContainer className="mt-10 flex flex-col gap-4">
               {insights.map((card, i) => (
-                <motion.div
+                <CursorCard
                   key={card.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15 + i * 0.12 }}
-                  className="rounded-2xl border p-6 md:p-7"
-                  style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
+                  reveal
+                  revealDelay={0.15 + i * 0.12}
+                  className="rounded-2xl p-6 md:p-7"
                 >
                   <h3 className="text-base font-semibold text-white mb-2">{card.title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
                     {card.body}
                   </p>
-                </motion.div>
+                </CursorCard>
               ))}
 
               {/* Cost card */}
@@ -647,7 +646,7 @@ export function BuildFunnel() {
                   Based on the {missedNum} missed calls a week you told us about. Research shows about 85% of first-time callers who can&#39;t reach you never call back (Forbes / BIA Kelsey). Your regular customers are more patient, so we assume only 10 to 35% of them give up. That&#39;s why you see a range instead of one exact number.
                 </p>
               </motion.div>
-            </div>
+            </CursorCardsContainer>
 
             <button
               type="button"
@@ -669,48 +668,52 @@ export function BuildFunnel() {
               How do you want your demo?
             </h2>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-              <div className="rounded-2xl border p-7 flex flex-col" style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}>
-                <h3 className="text-base font-semibold text-white mb-2">Watch it live</h3>
-                <p className="text-sm leading-relaxed flex-1" style={{ color: "#888888" }}>
-                  A short call where we walk you through your receptionist handling real scenarios, and you can ask anything.
-                </p>
-                <button
-                  type="button"
-                  onClick={chooseLive}
-                  className="mt-6 inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200"
-                >
-                  Book a Live Demo
-                </button>
-              </div>
+            <CursorCardsContainer className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <CursorCard className="rounded-2xl p-7">
+                <div className="flex h-full flex-col">
+                  <h3 className="text-base font-semibold text-white mb-2">Watch it live</h3>
+                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#888888" }}>
+                    A short call where we walk you through your receptionist handling real scenarios, and you can ask anything.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={chooseLive}
+                    className="mt-6 inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200"
+                  >
+                    Book a Live Demo
+                  </button>
+                </div>
+              </CursorCard>
 
-              <div className="rounded-2xl border p-7 flex flex-col" style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}>
-                <h3 className="text-base font-semibold text-white mb-2">Send it to me</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
-                  No calls, no meetings. We build your receptionist and email you a recording of it handling a real call.
-                </p>
-                <input
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError(null);
-                  }}
-                  onKeyDown={(e) => e.key === "Enter" && chooseEmail()}
-                  placeholder="you@yourbusiness.com"
-                  className={`${inputClass} mt-5`}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={chooseEmail}
-                  className="mt-4 inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white/80 border border-white/15 rounded-full hover:border-white/30 hover:text-white transition-all duration-200"
-                >
-                  Email Me My Demo
-                </button>
-              </div>
-            </div>
+              <CursorCard className="rounded-2xl p-7">
+                <div className="flex h-full flex-col">
+                  <h3 className="text-base font-semibold text-white mb-2">Send it to me</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+                    No calls, no meetings. We build your receptionist and email you a recording of it handling a real call.
+                  </p>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError(null);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && chooseEmail()}
+                    placeholder="you@yourbusiness.com"
+                    className={`${inputClass} mt-5`}
+                    style={inputStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={chooseEmail}
+                    className="mt-4 inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white/80 border border-white/15 rounded-full hover:border-white/30 hover:text-white transition-all duration-200"
+                  >
+                    Email Me My Demo
+                  </button>
+                </div>
+              </CursorCard>
+            </CursorCardsContainer>
 
             {error && (
               <p className="mt-4 text-sm" style={{ color: "#f87171" }}>
