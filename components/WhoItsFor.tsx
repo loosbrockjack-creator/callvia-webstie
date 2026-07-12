@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
 
 const industries = [
   { name: "HVAC" },
@@ -96,16 +95,19 @@ export function WhoItsFor() {
                   className="group flex items-center justify-between py-7 border-b cursor-default transition-all duration-200"
                   style={{ borderColor: "rgba(255,255,255,0.05)" }}
                 >
-                  <div className="flex items-center gap-6 flex-1">
+                  <div className="flex items-center gap-6">
                     <span
                       className="text-xs font-mono w-5 shrink-0"
                       style={{ color: "#333333" }}
                     >
                       0{i + 1}
                     </span>
-                    <div className="flex-1 h-9 md:h-11">
-                      <TextHoverEffect text={industry.name} />
-                    </div>
+                    <span
+                      className="text-2xl md:text-3xl font-light tracking-tight text-white/70 group-hover:text-white transition-colors duration-200"
+                      style={{ letterSpacing: "-0.02em" }}
+                    >
+                      {industry.name}
+                    </span>
                   </div>
                 </motion.div>
               ))}
