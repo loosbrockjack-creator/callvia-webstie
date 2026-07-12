@@ -20,7 +20,7 @@ export default function OnboardingPage() {
           Let&#39;s get you set up.
         </h1>
         <p className="text-base leading-relaxed mb-12" style={{ color: "#888888" }}>
-          A few details and you&#39;re done. After this you&#39;ll be taken straight to secure payment, and we&#39;ll reach out to build your receptionist.
+          A few details, and you&#39;re done. After this, you&#39;ll be taken straight to your secure payment.
         </p>
 
         <OnboardingForm />

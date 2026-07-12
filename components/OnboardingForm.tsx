@@ -106,7 +106,6 @@ export function OnboardingForm() {
           type="tel"
           inputMode="tel"
           autoComplete="tel"
-          placeholder="(612) 555-0134"
           value={phone}
           onChange={(e) => setPhone(formatPhone(e.target.value))}
           className={inputClass}
