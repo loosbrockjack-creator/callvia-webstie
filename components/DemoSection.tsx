@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
 
 export function DemoSection() {
   return (
@@ -53,7 +54,7 @@ export function DemoSection() {
           className="mt-5 max-w-lg text-base leading-relaxed"
           style={{ color: "#888888" }}
         >
-          This is a live Callvia receptionist set up for an electrical contractor. Call it right now and see exactly what your customers experience. Ask it anything. Try to confuse it. See how it performs before you commit to a single thing.
+          This is a live Callvia receptionist set up for a home services contractor. Call it right now and see exactly what your customers experience. Ask it anything. Try to confuse it. See how it performs before you commit to a single thing.
         </motion.p>
 
         {/* Phone number */}
@@ -63,7 +64,7 @@ export function DemoSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.85, delay: 0.2 }}
-          className="group mt-14 flex flex-col items-center gap-4"
+          className="group mt-14 w-full flex flex-col items-center gap-4"
         >
           {/* Phone icon */}
           <div
@@ -86,13 +87,15 @@ export function DemoSection() {
             </svg>
           </div>
 
-          {/* Number, font-light to match all headings */}
-          <span
-            className="font-light text-white group-hover:text-accent transition-colors duration-300"
-            style={{ fontSize: "clamp(36px, 6vw, 72px)", letterSpacing: "-0.025em" }}
-          >
-            (612) 712-3298
-          </span>
+          {/* Number, cursor-reveal text effect */}
+          <div className="w-full h-16 md:h-[100px]">
+            <TextHoverEffect
+              text="(612) 712-3298"
+              align="middle"
+              restFill="rgba(255,255,255,0.96)"
+              hoverFill="#ffffff"
+            />
+          </div>
 
           <span className="text-xs tracking-widest uppercase text-white/25 group-hover:text-white/50 transition-colors duration-300">
             Tap or click to call

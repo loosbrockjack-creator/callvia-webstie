@@ -3,18 +3,32 @@
 // Cursor-following gradient reveal on text, adapted from a 21st.dev component.
 // Adapted for this project: the Callvia purple gradient (not the sample
 // rainbow), Geist inherited instead of Helvetica, fixed colors instead of the
-// `dark:` variants (this site is always dark regardless of OS theme), left
-// alignment for list rows, and a readable base fill so names stay legible.
+// `dark:` variants (this site is always dark regardless of OS theme), a
+// readable base fill so names stay legible, optional alignment, and cursor
+// mapping computed in true SVG user-space so the reveal tracks accurately
+// despite the responsive aspect scaling.
 
 import { useEffect, useId, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
+const VBW = 640;
+const VBH = 80;
+
 interface TextHoverEffectProps {
   text: string;
   duration?: number;
+  align?: "start" | "middle";
+  restFill?: string;
+  hoverFill?: string;
 }
 
-export function TextHoverEffect({ text, duration = 0 }: TextHoverEffectProps) {
+export function TextHoverEffect({
+  text,
+  duration = 0,
+  align = "start",
+  restFill = "rgba(255,255,255,0.6)",
+  hoverFill = "rgba(255,255,255,0.78)",
+}: TextHoverEffectProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const uid = useId().replace(/[:]/g, "");
   const gradientId = `thg-${uid}`;
@@ -24,26 +38,27 @@ export function TextHoverEffect({ text, duration = 0 }: TextHoverEffectProps) {
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
   // Reveal center in SVG user-space units (viewBox coords), not screen %.
-  const [maskPosition, setMaskPosition] = useState({ cx: -200, cy: 40 });
+  const [maskPosition, setMaskPosition] = useState({ cx: -200, cy: VBH / 2 });
 
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
     const rect = svg.getBoundingClientRect();
     if (!rect.height) return;
-    // preserveAspectRatio "xMinYMid meet" on a wide row is height-constrained,
-    // so viewBox units scale by rect.height / viewBoxHeight and left-align.
-    const scale = rect.height / 80;
+    // "…YMid meet" on a wide row is height-constrained, so viewBox units scale
+    // by rect.height / VBH. Account for horizontal centering when align=middle.
+    const scale = rect.height / VBH;
+    const offsetX = align === "middle" ? (rect.width - VBW * scale) / 2 : 0;
     setMaskPosition({
-      cx: (cursor.x - rect.left) / scale,
+      cx: (cursor.x - rect.left - offsetX) / scale,
       cy: (cursor.y - rect.top) / scale,
     });
-  }, [cursor]);
+  }, [cursor, align]);
 
   const textProps = {
-    x: 6,
+    x: align === "middle" ? VBW / 2 : 6,
     y: "50%",
-    textAnchor: "start" as const,
+    textAnchor: align,
     dominantBaseline: "middle" as const,
     fontSize: 52,
     fontWeight: 500,
@@ -55,8 +70,8 @@ export function TextHoverEffect({ text, duration = 0 }: TextHoverEffectProps) {
       ref={svgRef}
       width="100%"
       height="100%"
-      viewBox="0 0 640 80"
-      preserveAspectRatio="xMinYMid meet"
+      viewBox={`0 0 ${VBW} ${VBH}`}
+      preserveAspectRatio={align === "middle" ? "xMidYMid meet" : "xMinYMid meet"}
       xmlns="http://www.w3.org/2000/svg"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -93,7 +108,7 @@ export function TextHoverEffect({ text, duration = 0 }: TextHoverEffectProps) {
       {/* Readable base name. */}
       <text
         {...textProps}
-        fill={hovered ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.6)"}
+        fill={hovered ? hoverFill : restFill}
         className="transition-[fill] duration-300"
       >
         {text}
