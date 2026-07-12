@@ -196,10 +196,6 @@ export function OnboardingForm() {
       >
         {submitting ? "Setting things up…" : "Complete Setup"}
       </button>
-
-      <p className="text-xs leading-relaxed" style={{ color: "#444444" }}>
-        After submitting you&#39;ll be redirected to our secure Stripe checkout to finalize payment.
-      </p>
     </form>
   );
 }
