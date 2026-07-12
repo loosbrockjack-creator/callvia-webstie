@@ -70,7 +70,7 @@ export function CTASection() {
         >
           <a
             href="/build"
-            className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
+            className="btn-shine inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
           >
             Build My Receptionist
           </a>

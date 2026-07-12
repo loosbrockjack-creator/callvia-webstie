@@ -52,3 +52,69 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Rotating gradient border button (GradientButton).
+   The provided 21st.dev snippet omitted this CSS; implemented here in the
+   Callvia purple. --r is the animated conic angle. */
+@property --r {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes rotating-gradient {
+  to {
+    --r: 360deg;
+  }
+}
+
+.rotatingGradient {
+  --r: 0deg;
+  background: conic-gradient(
+    from var(--r),
+    #7c5cfc,
+    #b79cff,
+    #ffffff,
+    #b79cff,
+    #7c5cfc
+  );
+  animation: rotating-gradient 5s linear infinite;
+}
+
+/* Shine sweep on hover, for the recurring primary CTAs. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -160%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  transition: left 0.65s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shine:hover::after {
+  left: 160%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotatingGradient {
+    animation: none;
+  }
+  .btn-shine::after {
+    transition: none;
+  }
+}
