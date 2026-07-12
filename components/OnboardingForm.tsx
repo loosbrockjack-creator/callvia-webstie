@@ -152,7 +152,9 @@ export function OnboardingForm() {
         </span>
       </label>
 
-      {/* Optional: SMS consent. Unchecked by default, never required. */}
+      {/* SMS consent. Unchecked by default and never required to submit, so a
+          user can decline and still complete signup (Twilio A2P requirement).
+          The Complete Setup button does not check this box or block on it. */}
       <label className="flex items-start gap-3.5 cursor-pointer">
         <input
           type="checkbox"
@@ -161,7 +163,7 @@ export function OnboardingForm() {
           className="mt-1 h-4 w-4 shrink-0 accent-[#7c5cfc]"
         />
         <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
-          I consent to receive SMS text messages from Callvia at the phone number provided above. Message frequency varies. Message &amp; data rates may apply. Reply STOP to opt out at any time, reply HELP for help. See our{" "}
+          By checking this box, I agree to receive recurring SMS messages from Callvia related to appointment scheduling and customer service at the phone number provided. Message frequency varies. Message and data rates may apply. Reply <strong className="text-white">STOP</strong> to opt out at any time or <strong className="text-white">HELP</strong> for help. View our{" "}
           <a
             href="/privacy"
             target="_blank"
@@ -177,9 +179,9 @@ export function OnboardingForm() {
             rel="noopener noreferrer"
             className="text-white hover:text-white/70 transition-colors duration-200 underline underline-offset-4"
           >
-            Terms
+            Terms of Service
           </a>
-          . (Optional)
+          .
         </span>
       </label>
 

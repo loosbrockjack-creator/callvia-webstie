@@ -3,7 +3,6 @@ import { OnboardingForm } from "@/components/OnboardingForm";
 export const metadata = {
   title: "Get Set Up | Callvia",
   description: "Complete your Callvia setup.",
-  robots: { index: false, follow: false },
 };
 
 export default function OnboardingPage() {
