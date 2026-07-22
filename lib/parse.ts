@@ -47,13 +47,19 @@ export function userAgent(request: Request): string | null {
 
 // Cheap CSRF defense for state-changing admin endpoints: the browser sets
 // Origin on cross-site POSTs and it cannot be forged by page script.
+//
+// Compared against the request's own Host header, not a separately configured
+// env var: an env var can drift out of sync with whatever domain is actually
+// serving the app (www vs apex, a preview alias, a typo) and fail closed. The
+// Host header is always exactly the domain the request arrived on, so this
+// can't drift.
 export function sameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return true; // non-browser callers (curl, Stripe) send no Origin
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!site) return true;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (!host) return true;
   try {
-    return new URL(origin).origin === new URL(site).origin;
+    return new URL(origin).host === host;
   } catch {
     return false;
   }
