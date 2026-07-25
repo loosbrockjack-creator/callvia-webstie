@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
 
 export function DemoSection() {
   return (
@@ -87,14 +86,12 @@ export function DemoSection() {
             </svg>
           </div>
 
-          {/* Number, cursor-reveal text effect */}
-          <div className="w-full h-16 md:h-[100px]">
-            <TextHoverEffect
-              text="(612) 712-3298"
-              align="middle"
-              restFill="rgba(255,255,255,0.96)"
-              hoverFill="#ffffff"
-            />
+          {/* Number */}
+          <div
+            className="text-4xl md:text-6xl font-light text-white tracking-tight"
+            style={{ letterSpacing: "-0.02em" }}
+          >
+            (612) 712-3298
           </div>
 
           <span className="text-xs tracking-widest uppercase text-white/25 group-hover:text-white/50 transition-colors duration-300">

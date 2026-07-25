@@ -1,0 +1,19 @@
+import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
+import { AboutContent } from "@/components/AboutContent";
+
+export const metadata = {
+  title: "About | Callvia",
+  description:
+    "Callvia is an AI receptionist for businesses that live by the phone. We answer every call, capture every lead, and hand you the work that needs a human.",
+};
+
+export default function AboutPage() {
+  return (
+    <div className="bg-black min-h-screen">
+      <Nav />
+      <AboutContent />
+      <Footer />
+    </div>
+  );
+}

@@ -19,6 +19,30 @@ export function Footer() {
           </a>
         </div>
 
+        {/* Primary pages */}
+        <div className="flex items-center justify-center gap-6">
+          <a
+            href="/about"
+            className="text-xs text-[#777777] hover:text-white transition-colors duration-200"
+          >
+            About
+          </a>
+          <span className="text-[#333333] text-xs">·</span>
+          <a
+            href="/contact"
+            className="text-xs text-[#777777] hover:text-white transition-colors duration-200"
+          >
+            Contact
+          </a>
+          <span className="text-[#333333] text-xs">·</span>
+          <a
+            href="/login"
+            className="text-xs text-[#777777] hover:text-white transition-colors duration-200"
+          >
+            Login
+          </a>
+        </div>
+
         {/* Middle: copyright centered */}
         <p className="text-xs text-center" style={{ color: "#444444" }}>
           © {new Date().getFullYear()} Callvia. All rights reserved.

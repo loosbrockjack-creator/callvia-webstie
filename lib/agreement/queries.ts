@@ -127,6 +127,21 @@ export async function listAgreements(): Promise<AgreementRow[]> {
   return q<AgreementRow>(`${SELECT_AGREEMENT} order by a.created_at desc limit 200`, []);
 }
 
+// For the client login: resolve an email to its Stripe customer, if any. Only
+// clients who have paid have a stripe_customer_id, so this returns null for
+// everyone else. Callers must not reveal which case occurred (no enumeration).
+export async function findBillingCustomerByEmail(
+  email: string,
+): Promise<{ customerId: string; businessName: string } | null> {
+  const rows = await q<{ stripe_customer_id: string | null; business_name: string }>(
+    `select stripe_customer_id, business_name from clients where lower(email) = lower($1) limit 1`,
+    [email],
+  );
+  const row = rows[0];
+  if (!row || !row.stripe_customer_id) return null;
+  return { customerId: row.stripe_customer_id, businessName: row.business_name };
+}
+
 export async function logEvent(
   agreementId: string,
   type: string,

@@ -142,6 +142,70 @@ export class Cursor {
     this.y -= 12;
   }
 
+  // Invoice-style fee row. The amount is right-aligned to the margin and the
+  // label wraps in the space left of it, so a long package label can never
+  // overprint the amount the way a fixed key column would.
+  feeRow(label: string, amount: string, opts: { emphasize?: boolean } = {}) {
+    const size = 9.5;
+    const font = opts.emphasize ? this.fonts.bold : this.fonts.regular;
+    const amountText = sanitize(amount);
+    const amountW = this.fonts.bold.widthOfTextAtSize(amountText, size);
+    const gap = 24;
+    const lines = wrap(label, font, size, CONTENT_W - amountW - gap);
+    this.reserve(lines.length * 15 + 6);
+    // Amount sits on the baseline of the first label line.
+    this.page.drawText(amountText, {
+      x: PAGE_W - MARGIN - amountW,
+      y: this.y - size,
+      size,
+      font: opts.emphasize ? this.fonts.bold : this.fonts.regular,
+      color: BLACK,
+    });
+    let first = true;
+    for (const line of lines) {
+      if (!first && this.y - size < MARGIN + 40) this.newPage();
+      this.page.drawText(line, {
+        x: MARGIN,
+        y: this.y - size,
+        size,
+        font,
+        color: opts.emphasize ? BLACK : rgb(0.3, 0.3, 0.3),
+      });
+      this.y -= 15;
+      first = false;
+    }
+    this.y -= 3;
+  }
+
+  // A light divider, tighter than rule(), for separating a total from the
+  // line items above it.
+  thinRule() {
+    if (this.y - 8 < MARGIN + 40) this.newPage();
+    this.y -= 4;
+    this.page.drawLine({
+      start: { x: MARGIN, y: this.y },
+      end: { x: PAGE_W - MARGIN, y: this.y },
+      thickness: 0.5,
+      color: rgb(0.88, 0.88, 0.88),
+    });
+    this.y -= 8;
+  }
+
+  // One captured consent on the audit page: a grey label, the captured value
+  // indented beneath it, and an optional block of verbatim consent text below
+  // that. Every consent uses this so the section reads as one consistent list.
+  consent(label: string, value: string, detail?: string) {
+    this.reserve(46);
+    this.text(label, { size: 9, bold: true, color: GREY });
+    this.space(2);
+    this.text(value, { size: 9, indent: 12 });
+    if (detail) {
+      this.space(1);
+      this.text(detail, { size: 9, indent: 12, color: GREY });
+    }
+    this.space(9);
+  }
+
   // Two-column key/value row, used throughout the audit page.
   keyValue(key: string, value: string) {
     const keyW = 150;

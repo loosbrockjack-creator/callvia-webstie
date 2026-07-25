@@ -180,7 +180,16 @@ export function MissedCallTool() {
                     <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                       Share that are repeat customers
                     </label>
-                    <span className="text-sm text-white font-medium">{repeatSharePct}%</span>
+                    <motion.span
+                      key={repeatSharePct}
+                      initial={{ scale: 1.25 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                      className="text-sm font-semibold tabular-nums"
+                      style={{ color: "#9b7ffd" }}
+                    >
+                      {repeatSharePct}%
+                    </motion.span>
                   </div>
                   <input
                     id="mct-repeat"
@@ -190,7 +199,10 @@ export function MissedCallTool() {
                     step={5}
                     value={repeatSharePct}
                     onChange={(e) => setRepeatSharePct(parseInt(e.target.value, 10))}
-                    className="w-full accent-[#7c5cfc]"
+                    className="roi-slider"
+                    style={{
+                      background: `linear-gradient(90deg, #7c5cfc 0%, #9b7ffd ${repeatSharePct}%, #171717 ${repeatSharePct}%, #171717 100%)`,
+                    }}
                   />
                   <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
                     People who already know you are more likely to wait or call back. New callers usually just try the next name on Google.

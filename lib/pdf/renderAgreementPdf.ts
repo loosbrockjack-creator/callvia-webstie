@@ -125,12 +125,13 @@ export async function renderAgreementPdf(
   }
 
   c.text("Fees", { size: 10, bold: true });
-  c.space(4);
-  if (s.setupFeeCents > 0) c.keyValue(s.setupFeeLabel, formatCents(s.setupFeeCents));
-  if (s.monthlyCents > 0) c.keyValue(s.monthlyLabel, `${formatCents(s.monthlyCents)} per month`);
-  c.keyValue("Due at signing", formatCents(s.dueTodayCents));
+  c.space(8);
+  if (s.setupFeeCents > 0) c.feeRow(s.setupFeeLabel, formatCents(s.setupFeeCents));
+  if (s.monthlyCents > 0) c.feeRow(s.monthlyLabel, `${formatCents(s.monthlyCents)} per month`);
+  c.thinRule();
+  c.feeRow("Due at signing", formatCents(s.dueTodayCents), { emphasize: true });
   if (s.monthlyCents > 0) {
-    c.space(4);
+    c.space(6);
     c.text(
       `Recurring charge: ${formatCents(s.monthlyCents)} per month, beginning on the date of first payment, continuing automatically until cancelled.`,
       { size: 9, bold: true },
@@ -188,21 +189,20 @@ export async function renderAgreementPdf(
   c.space(8);
 
   c.text("Consents captured", { size: 10, bold: true });
-  c.space(4);
-  c.text("Intent to sign, shown next to the signature field:", { size: 9, bold: true, color: GREY });
-  c.text(sig.intentText, { size: 9, indent: 10 });
-  c.space(4);
-  c.text("Consent to transact electronically, affirmatively checked:", { size: 9, bold: true, color: GREY });
-  c.text(sig.esignConsentText, { size: 9, indent: 10 });
-  c.space(4);
-  c.keyValue("Authority to bind", sig.authorityAck ? "Confirmed" : "Not confirmed");
-  c.space(4);
-  c.text("SMS marketing consent (optional, not required to sign):", { size: 9, bold: true, color: GREY });
-  c.text(sig.smsConsent ? "GRANTED" : "Not granted", { size: 9, indent: 10 });
-  if (sig.smsConsent && sig.smsConsentText) {
-    c.text(sig.smsConsentText, { size: 9, indent: 10, color: GREY });
-  }
-  c.space(10);
+  c.space(8);
+
+  // Every consent renders the same way: a label, then the captured content
+  // indented beneath it. Uniform structure keeps the block from reading as the
+  // mix of two-column and stacked rows it used to be.
+  c.consent("Intent to sign, shown next to the signature field", sig.intentText);
+  c.consent("Consent to transact electronically, affirmatively checked", sig.esignConsentText);
+  c.consent("Authority to bind the business", sig.authorityAck ? "Confirmed" : "Not confirmed");
+  c.consent(
+    "SMS marketing consent (optional, not required to sign)",
+    sig.smsConsent ? "Granted" : "Not granted",
+    sig.smsConsent && sig.smsConsentText ? sig.smsConsentText : undefined,
+  );
+  c.space(2);
 
   c.text(
     "Timestamps are recorded in Coordinated Universal Time by Callvia's servers. The document hash above is a SHA-256 digest of the exact agreement content presented to the signer, and can be used to verify that this document has not been altered since signature.",
