@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
 import { GradientButton } from "./ui/gradient-button";
@@ -7,7 +8,7 @@ import { GradientButton } from "./ui/gradient-button";
 const PRINCIPLES = [
   {
     title: "The call comes first",
-    body: "For a service business, the phone is the front door. A missed call is a missed customer, often gone to the next name on the list. Everything we build starts there.",
+    body: "For a service business, the phone is the front door. A missed call is a missed customer, often gone to the next name on the list. Everything I build starts there.",
   },
   {
     title: "You stay in control",
@@ -15,7 +16,7 @@ const PRINCIPLES = [
   },
   {
     title: "Simple beats clever",
-    body: "No dashboards to babysit, no scripts to maintain. You tell us how you work, and your receptionist just handles the calls the way you would.",
+    body: "No dashboards to babysit, no scripts to maintain. You tell me how you work, and your receptionist just handles the calls the way you would.",
   },
 ];
 
@@ -57,7 +58,7 @@ export function AboutContent() {
             className="text-4xl md:text-6xl font-light tracking-tight leading-tight"
             style={{ letterSpacing: "-0.03em" }}
           >
-            Built so no customer ever hits a dead line.
+            I built this because my uncle kept losing jobs to a ringing phone.
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -66,38 +67,105 @@ export function AboutContent() {
             className="mt-7 text-lg leading-relaxed max-w-xl mx-auto"
             style={{ color: "#888888" }}
           >
-            Callvia is an AI receptionist for the businesses that live and die by the phone. We answer every call, capture every lead, and hand you the work that needs a human.
+            Callvia is an AI receptionist for the businesses that live and die by the phone. I built it to answer every call, capture every lead, and hand you back only the moment that actually needs you.
           </motion.p>
         </div>
       </section>
 
-      {/* Story */}
+      {/* Founder letter */}
       <section className="px-6 py-20 border-t border-white/5">
-        <div className="max-w-3xl mx-auto space-y-10 text-lg leading-relaxed" style={{ color: "#999999" }}>
+        <div className="max-w-4xl mx-auto">
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6 }}
+            className="text-xs tracking-widest uppercase mb-6 text-center"
+            style={{ color: "#7c5cfc" }}
+          >
+            From the founder
+          </motion.p>
+
+          {/* Portrait, sized for the source photo's actual portrait crop (2:3) */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7 }}
+            className="w-full max-w-[420px] mx-auto"
           >
-            <span className="text-white">Most small businesses lose money to the same quiet problem.</span> The owner is on a job, under a truck, or on another line, and the phone rings out. That caller does not leave a voicemail. They call the next company, and a paying customer is gone before anyone knew they existed.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-          >
-            We started Callvia to close that gap without asking owners to hire a front desk or learn new software. Your receptionist answers in your business's voice, collects the details that matter, and either transfers the call to you or texts you the lead on the spot. You do less phone tag and keep more of the work that comes your way.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-          >
-            No call center scripts. No long contracts. Just a receptionist that never sleeps, never takes a lunch break, and never lets your line ring out.
-          </motion.p>
+            <div
+              className="relative aspect-[2/3] rounded-2xl overflow-hidden border"
+              style={{ borderColor: "#1f1f1f" }}
+            >
+              <Image
+                src="/founder.png"
+                alt="Jack Loosbrock, founder of Callvia"
+                fill
+                sizes="(min-width: 768px) 420px, 90vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-white">Jack Loosbrock</p>
+              <p className="text-xs" style={{ color: "#666666" }}>
+                Founder, Callvia · Iowa State University, Sophomore
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Letter */}
+          <div className="mt-14">
+            <div className="space-y-6 text-lg leading-relaxed" style={{ color: "#999999" }}>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.7 }}
+              >
+                <span className="text-white">My uncle Scott runs Loosbrock Electric.</span> He has spent years building that business one job at a time, and more than once he has lost work simply because he could not get to the phone. He is up a ladder or inside a panel mid job, the phone rings, and by the time he is free to call back, the customer has already hired someone else.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.7, delay: 0.05 }}
+              >
+                That is the story behind Callvia. I am not a call center trying to sell you software. I am a sophomore at Iowa State University, and I built this myself, over the past several months, because I watched this happen to someone in my own family and knew it was not just him.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+              >
+                There is no team behind Callvia yet. I built the AI voice system, the call handling, the text alerts, all of it, myself. When you sign up, you are not routed through account managers or a rotating cast of reps. You are working directly with the person who built it.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.7, delay: 0.15 }}
+              >
+                I think that matters, especially if you are a contractor. You did not build your business by handing it off to the biggest name in the room. You built it by showing up, doing the work right, and trusting people who show up the same way. That is what I am trying to be here: not a faceless platform, but someone who is actually in it, working just as hard as you are so the next call does not slip through.
+              </motion.p>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-10 pt-6 border-t"
+              style={{ borderColor: "#1f1f1f" }}
+            >
+              <p className="text-white font-medium">Jack Loosbrock</p>
+              <p className="text-sm" style={{ color: "#666666" }}>
+                Founder, Callvia
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -112,7 +180,7 @@ export function AboutContent() {
             className="text-3xl md:text-4xl font-light tracking-tight text-center mb-14"
             style={{ letterSpacing: "-0.02em" }}
           >
-            What we build around.
+            What I build around.
           </motion.h2>
           <div className="grid md:grid-cols-3 gap-5">
             {PRINCIPLES.map((p, i) => (

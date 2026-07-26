@@ -70,18 +70,7 @@ export function Hero() {
           className="mt-7 text-xl md:text-2xl font-light tracking-tight"
           style={{ color: "#cccccc", letterSpacing: "-0.01em" }}
         >
-          Catches the call. Hands you the job.
-        </motion.p>
-
-        {/* Subheading */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.8 }}
-          className="mt-4 max-w-xl text-base leading-relaxed"
-          style={{ color: "#666666" }}
-        >
-          Your AI receptionist answers every call. When something needs you, it either transfers the call straight to you or texts you the lead instantly. You stay in control of every customer.
+          Every call matters. Answer every one.
         </motion.p>
 
         {/* CTA buttons */}
