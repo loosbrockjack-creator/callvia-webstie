@@ -24,7 +24,7 @@ export function AboutContent() {
   return (
     <main className="bg-black text-white">
       {/* Hero */}
-      <section className="relative pt-40 pb-24 px-6 overflow-hidden">
+      <section className="relative pt-40 pb-10 px-6 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -67,20 +67,20 @@ export function AboutContent() {
             className="mt-7 text-lg leading-relaxed max-w-xl mx-auto"
             style={{ color: "#888888" }}
           >
-            Callvia is an AI receptionist for the businesses that live and die by the phone. I built it to answer every call, capture every lead, and hand you back only the moment that actually needs you.
+            Callvia is an AI receptionist for the businesses that live and die by the phone. I built it to answer all the calls you need, capturing every lead, making sure you aren't the one that dies by the phone.
           </motion.p>
         </div>
       </section>
 
       {/* Founder letter */}
-      <section className="px-6 py-20 border-t border-white/5">
+      <section className="px-6 pt-10 pb-20 border-t border-white/5">
         <div className="max-w-4xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-6 text-center"
+            className="text-xs tracking-widest uppercase mb-4 text-center"
             style={{ color: "#7c5cfc" }}
           >
             From the founder
@@ -116,7 +116,7 @@ export function AboutContent() {
           </motion.div>
 
           {/* Letter */}
-          <div className="mt-14">
+          <div className="mt-10">
             <div className="space-y-6 text-lg leading-relaxed" style={{ color: "#999999" }}>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
