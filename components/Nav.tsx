@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { RandomLetterSwap } from "@/components/ui/random-letter-swap";
 
 const LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export function Nav() {
@@ -39,7 +39,7 @@ export function Nav() {
                 isActive(link.href) ? "text-white" : "text-white/50 hover:text-white"
               }`}
             >
-              {link.label}
+              <RandomLetterSwap label={link.label} />
             </a>
           ))}
         </div>
@@ -52,7 +52,7 @@ export function Nav() {
               isActive("/login") ? "text-white" : "text-white/50 hover:text-white"
             }`}
           >
-            Login
+            <RandomLetterSwap label="Login" />
           </a>
           <a
             href="/build"

@@ -29,13 +29,6 @@ export function Footer() {
           </a>
           <span className="text-[#333333] text-xs">·</span>
           <a
-            href="/contact"
-            className="text-xs text-[#777777] hover:text-white transition-colors duration-200"
-          >
-            Contact
-          </a>
-          <span className="text-[#333333] text-xs">·</span>
-          <a
             href="/login"
             className="text-xs text-[#777777] hover:text-white transition-colors duration-200"
           >

@@ -103,3 +103,32 @@ export function idOf(value: string | { id: string } | null | undefined): string 
   if (!value) return null;
   return typeof value === "string" ? value : value.id;
 }
+
+export interface InvoiceSummary {
+  id: string;
+  number: string | null;
+  status: string | null;
+  amountDueCents: number;
+  amountPaidCents: number;
+  currency: string;
+  created: number; // unix seconds
+  hostedInvoiceUrl: string | null;
+  invoicePdf: string | null;
+}
+
+// Fetched live for the client dashboard. No invoice data is persisted; at this
+// traffic level a per-load Stripe call is simpler than a cache to keep in sync.
+export async function listRecentInvoices(customerId: string, limit = 12): Promise<InvoiceSummary[]> {
+  const res = await stripe().invoices.list({ customer: customerId, limit });
+  return res.data.map((inv) => ({
+    id: inv.id ?? "",
+    number: inv.number ?? null,
+    status: inv.status ?? null,
+    amountDueCents: inv.amount_due ?? 0,
+    amountPaidCents: inv.amount_paid ?? 0,
+    currency: inv.currency ?? "usd",
+    created: inv.created,
+    hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
+    invoicePdf: inv.invoice_pdf ?? null,
+  }));
+}

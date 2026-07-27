@@ -127,19 +127,36 @@ export async function listAgreements(): Promise<AgreementRow[]> {
   return q<AgreementRow>(`${SELECT_AGREEMENT} order by a.created_at desc limit 200`, []);
 }
 
-// For the client login: resolve an email to its Stripe customer, if any. Only
-// clients who have paid have a stripe_customer_id, so this returns null for
-// everyone else. Callers must not reveal which case occurred (no enumeration).
-export async function findBillingCustomerByEmail(
-  email: string,
-): Promise<{ customerId: string; businessName: string } | null> {
-  const rows = await q<{ stripe_customer_id: string | null; business_name: string }>(
-    `select stripe_customer_id, business_name from clients where lower(email) = lower($1) limit 1`,
-    [email],
+// For the client dashboard: the client's current agreement. "Current" ranks
+// active first, then the in-flight states, then everything else, breaking ties
+// by most recent. A void/expired-only client still gets their latest row so
+// the dashboard can show why they have no live plan.
+export async function findCurrentAgreementForClient(clientId: string): Promise<AgreementRow | null> {
+  const rows = await q<AgreementRow>(
+    `${SELECT_AGREEMENT}
+     where a.client_id = $1
+     order by case a.status
+                when 'active' then 0
+                when 'payment_pending' then 1
+                when 'signed' then 2
+                when 'viewed' then 3
+                when 'sent' then 4
+                when 'draft' then 5
+                else 6
+              end,
+              a.created_at desc
+     limit 1`,
+    [clientId],
   );
-  const row = rows[0];
-  if (!row || !row.stripe_customer_id) return null;
-  return { customerId: row.stripe_customer_id, businessName: row.business_name };
+  return rows[0] ?? null;
+}
+
+// For the client dashboard: full agreement history, newest first.
+export async function listAgreementsForClient(clientId: string): Promise<AgreementRow[]> {
+  return q<AgreementRow>(
+    `${SELECT_AGREEMENT} where a.client_id = $1 order by a.created_at desc limit 50`,
+    [clientId],
+  );
 }
 
 export async function logEvent(

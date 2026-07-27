@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 type Status = "idle" | "sending" | "sent";
 
-export function BillingLoginForm() {
+export function LoginForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export function BillingLoginForm() {
     setError(null);
     setStatus("sending");
     try {
-      await fetch("/api/billing-portal", {
+      await fetch("/api/account/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -53,7 +53,7 @@ export function BillingLoginForm() {
         </div>
         <h3 className="text-white text-xl font-light">Check your inbox.</h3>
         <p className="mt-2 text-sm leading-relaxed max-w-xs mx-auto" style={{ color: "#888888" }}>
-          If that email is tied to an active Callvia account, we just sent a secure link to manage your billing.
+          If that email is tied to a Callvia account, we just sent a secure link to log in. It expires in 15 minutes.
         </p>
       </motion.div>
     );
@@ -93,11 +93,11 @@ export function BillingLoginForm() {
         disabled={status === "sending"}
         className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-60"
       >
-        {status === "sending" ? "Sending…" : "Email Me My Billing Link"}
+        {status === "sending" ? "Sending…" : "Email Me a Login Link"}
       </button>
 
       <p className="text-xs leading-relaxed" style={{ color: "#555555" }}>
-        For existing clients. We email a secure link to the address on your account, so only you can reach your billing.
+        No password needed. We email a secure link to the address on your account, so only you can log in.
       </p>
     </div>
   );

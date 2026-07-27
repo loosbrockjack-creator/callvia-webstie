@@ -3,6 +3,7 @@ import { requireAdminPage } from "@/lib/require-admin";
 import { findAgreementById, listEvents } from "@/lib/agreement/queries";
 import { formatCents } from "@/lib/money";
 import { statusLabel } from "@/lib/agreement/status";
+import { RevokeSessionsButton } from "@/components/admin/RevokeSessionsButton";
 
 export const metadata = {
   title: "Agreement | Callvia",
@@ -66,6 +67,9 @@ export default async function AgreementDetailPage(props: PageProps<"/admin/agree
           <Field label="Contact" value={row.contact_name} />
           <Field label="Email" value={row.email} />
           <Field label="Phone" value={row.phone ?? "not provided"} />
+          <div className="pt-5">
+            <RevokeSessionsButton clientId={row.client_id} />
+          </div>
         </section>
 
         <section className="mb-14">

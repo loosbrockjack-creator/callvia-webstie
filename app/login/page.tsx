@@ -1,10 +1,10 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { BillingLoginForm } from "@/components/BillingLoginForm";
+import { LoginForm } from "@/components/LoginForm";
 
 export const metadata = {
   title: "Login | Callvia",
-  description: "Existing Callvia clients: get a secure link to manage your billing, payment method, and plan.",
+  description: "Log in to your Callvia account to manage your plan, billing, and payment method.",
 };
 
 export default function LoginPage() {
@@ -30,14 +30,14 @@ export default function LoginPage() {
               className="text-4xl md:text-5xl font-light tracking-tight leading-tight"
               style={{ letterSpacing: "-0.03em" }}
             >
-              Manage your billing.
+              Log in to your account.
             </h1>
             <p className="mt-5 text-base leading-relaxed" style={{ color: "#888888" }}>
-              Update your payment method, view invoices, or change your plan. Enter your account email and we will send you a secure link.
+              View your plan, manage billing, and update your payment method. Enter your account email and we will send you a secure login link.
             </p>
           </div>
 
-          <BillingLoginForm />
+          <LoginForm />
 
           <p className="mt-8 text-center text-sm" style={{ color: "#666666" }}>
             New to Callvia?{" "}
