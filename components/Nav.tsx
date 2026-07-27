@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { VariableFontHover } from "@/components/ui/variable-font-hover";
+import { FlowButton } from "@/components/ui/flow-button";
 
 const LINKS = [
   { label: "Home", href: "/" },
@@ -98,29 +99,17 @@ export function Nav() {
 
         {/* Right cluster */}
         <div className="hidden lg:flex items-center gap-3">
-          <a
+          <FlowButton
             href="/login"
-            className={`inline-flex items-center px-4 py-2 text-sm font-medium border rounded-full transition-all duration-200 ${
-              isActive("/login")
-                ? "text-white border-white/25"
-                : "text-white/60 border-white/15 hover:text-white hover:border-white/30"
-            }`}
+            variant="neutral"
+            size="sm"
+            className={isActive("/login") ? "text-white border-white/25" : undefined}
           >
-            <VariableFontHover
-              label="Login"
-              fromFontVariationSettings="'wght' 500"
-              toFontVariationSettings="'wght' 700"
-              staggerFrom="center"
-              staggerDuration={0.03}
-              active={isActive("/login")}
-            />
-          </a>
-          <a
-            href="/build"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-accent border border-accent/40 rounded-full hover:bg-accent hover:text-white transition-all duration-200"
-          >
+            Login
+          </FlowButton>
+          <FlowButton href="/build" variant="accent" size="sm">
             Build My Receptionist
-          </a>
+          </FlowButton>
         </div>
 
         {/* Mobile toggle */}
@@ -165,20 +154,24 @@ export function Nav() {
                 </a>
               ))}
               <div className="mt-4 flex flex-col gap-2">
-                <a
+                <FlowButton
                   href="/login"
+                  variant="neutral"
+                  size="sm"
                   onClick={() => setOpen(false)}
-                  className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white/70 border border-white/15 rounded-full"
+                  className="justify-center"
                 >
                   Login
-                </a>
-                <a
+                </FlowButton>
+                <FlowButton
                   href="/build"
+                  variant="accent"
+                  size="sm"
                   onClick={() => setOpen(false)}
-                  className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-accent border border-accent/40 rounded-full"
+                  className="justify-center"
                 >
                   Build My Receptionist
-                </a>
+                </FlowButton>
               </div>
             </div>
           </motion.div>

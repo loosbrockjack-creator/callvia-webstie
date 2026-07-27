@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
 import { GradientButton } from "./ui/gradient-button";
+import { FlowButton } from "./ui/flow-button";
 
 export function Hero() {
   return (
@@ -81,12 +82,9 @@ export function Hero() {
           className="mt-10 flex flex-col sm:flex-row items-center gap-4"
         >
           <GradientButton href="#demo">Experience It</GradientButton>
-          <a
-            href="#how-it-works"
-            className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white/70 border border-white/15 rounded-full hover:border-white/30 hover:text-white transition-all duration-200"
-          >
+          <FlowButton href="#how-it-works" variant="neutral" size="md">
             See How It Works
-          </a>
+          </FlowButton>
         </motion.div>
 
       </div>
