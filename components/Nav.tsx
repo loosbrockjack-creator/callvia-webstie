@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { VariableFontHover } from "@/components/ui/variable-font-hover";
@@ -15,8 +15,25 @@ const LINKS = [
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [hash, setHash] = useState("");
 
-  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  // pathname alone can't distinguish "/#how-it-works" from "/#demo" from plain
+  // "/" — they all resolve to the same route. Track the fragment separately so
+  // each in-page section link can light up on its own.
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, []);
+
+  const isActive = (href: string) => {
+    const [path, rawHash] = href.split("#");
+    const pathMatches = path === "/" ? pathname === "/" : pathname.startsWith(path);
+    if (!pathMatches) return false;
+    const targetHash = rawHash ? `#${rawHash}` : "";
+    return targetHash === hash;
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-black/80 backdrop-blur-md border-b border-white/5">
