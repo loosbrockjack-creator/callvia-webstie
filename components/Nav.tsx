@@ -18,14 +18,40 @@ export function Nav() {
   const [hash, setHash] = useState("");
 
   // pathname alone can't distinguish "/#how-it-works" from "/#demo" from plain
-  // "/" — they all resolve to the same route. Track the fragment separately so
-  // each in-page section link can light up on its own.
+  // "/" — they all resolve to the same route. Scroll-spy instead: whichever
+  // section's top has scrolled past the fixed nav is the active one, so the
+  // bold link follows what's actually in view, not just the last click.
   useEffect(() => {
-    const updateHash = () => setHash(window.location.hash);
-    updateHash();
-    window.addEventListener("hashchange", updateHash);
-    return () => window.removeEventListener("hashchange", updateHash);
-  }, []);
+    if (pathname !== "/") return;
+
+    const NAV_HEIGHT = 64; // matches h-16 on <nav>
+    const sectionIds = ["how-it-works", "demo"];
+
+    let frame = 0;
+    const updateActiveSection = () => {
+      let current = "";
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= NAV_HEIGHT) {
+          current = id;
+        }
+      }
+      setHash(current ? `#${current}` : "");
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateActiveSection);
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [pathname]);
 
   const isActive = (href: string) => {
     const [path, rawHash] = href.split("#");
