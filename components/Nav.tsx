@@ -47,6 +47,7 @@ export function Nav() {
                 toFontVariationSettings="'wght' 700"
                 staggerFrom="center"
                 staggerDuration={0.03}
+                active={isActive(link.href)}
               />
             </a>
           ))}
@@ -68,6 +69,7 @@ export function Nav() {
               toFontVariationSettings="'wght' 700"
               staggerFrom="center"
               staggerDuration={0.03}
+              active={isActive("/login")}
             />
           </a>
           <a

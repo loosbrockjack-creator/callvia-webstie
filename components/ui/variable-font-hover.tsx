@@ -17,6 +17,9 @@ interface VariableFontHoverProps {
   transition?: Transition;
   staggerDuration?: number;
   staggerFrom?: "first" | "last" | "center" | number;
+  // When true the letters stay pinned at `toFontVariationSettings` (e.g. the
+  // active nav link keeps the bold weight it reaches on hover).
+  active?: boolean;
   onClick?: () => void;
 }
 
@@ -28,6 +31,7 @@ export function VariableFontHover({
   transition = { type: "spring", duration: 0.7 },
   staggerDuration = 0.03,
   staggerFrom = "first",
+  active = false,
   onClick,
 }: VariableFontHoverProps) {
   const [hovered, setHovered] = useState(false);
@@ -70,9 +74,10 @@ export function VariableFontHover({
           className="inline-block"
           initial={{ fontVariationSettings: fromFontVariationSettings }}
           animate={{
-            fontVariationSettings: hovered
-              ? toFontVariationSettings
-              : fromFontVariationSettings,
+            fontVariationSettings:
+              hovered || active
+                ? toFontVariationSettings
+                : fromFontVariationSettings,
           }}
           transition={{ ...transition, delay: delayFor(i) }}
         >
