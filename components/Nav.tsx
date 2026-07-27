@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { RandomLetterSwap } from "@/components/ui/random-letter-swap";
+import { VariableFontHover } from "@/components/ui/variable-font-hover";
 
 const LINKS = [
   { label: "Home", href: "/" },
@@ -41,7 +41,13 @@ export function Nav() {
                 isActive(link.href) ? "text-white" : "text-white/50 hover:text-white"
               }`}
             >
-              <RandomLetterSwap label={link.label} />
+              <VariableFontHover
+                label={link.label}
+                fromFontVariationSettings="'wght' 400"
+                toFontVariationSettings="'wght' 700"
+                staggerFrom="center"
+                staggerDuration={0.03}
+              />
             </a>
           ))}
         </div>
@@ -56,7 +62,13 @@ export function Nav() {
                 : "text-white/60 border-white/15 hover:text-white hover:border-white/30"
             }`}
           >
-            <RandomLetterSwap label="Login" />
+            <VariableFontHover
+              label="Login"
+              fromFontVariationSettings="'wght' 500"
+              toFontVariationSettings="'wght' 700"
+              staggerFrom="center"
+              staggerDuration={0.03}
+            />
           </a>
           <a
             href="/build"
