@@ -1,53 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
-  <defs>
-    <radialGradient id="bg" cx="50%" cy="42%" r="78%">
-      <stop offset="0%" stop-color="#4a4a4d"/>
-      <stop offset="100%" stop-color="#2b2b2d"/>
-    </radialGradient>
-    <radialGradient id="bloom" cx="50%" cy="44%" r="44%">
-      <stop offset="0%" stop-color="#e0d6ff" stop-opacity="0.6"/>
-      <stop offset="55%" stop-color="#beaaff" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#beaaff" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f6f1ff"/>
-      <stop offset="38%" stop-color="#b79cff"/>
-      <stop offset="100%" stop-color="#7c5cfc"/>
-    </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="9"/>
-    </filter>
-  </defs>
-  <rect width="400" height="400" fill="url(#bg)"/>
-  <rect width="400" height="400" fill="url(#bloom)"/>
-  <g filter="url(#glow)" opacity="0.85">
-      <rect x="30" y="184.0" width="16" height="32" rx="6" fill="url(#bar)"/>
-      <rect x="57" y="168.0" width="16" height="64" rx="6" fill="url(#bar)"/>
-      <rect x="84" y="148.0" width="16" height="104" rx="6" fill="url(#bar)"/>
-      <rect x="111" y="124.5" width="16" height="151" rx="6" fill="url(#bar)"/>
-      <rect x="138" y="100.0" width="16" height="200" rx="6" fill="url(#bar)"/>
-      <rect x="165" y="72.5" width="16" height="255" rx="6" fill="url(#bar)"/>
-      <rect x="192" y="47.5" width="16" height="305" rx="6" fill="url(#bar)"/>
-      <rect x="219" y="72.5" width="16" height="255" rx="6" fill="url(#bar)"/>
-      <rect x="246" y="100.0" width="16" height="200" rx="6" fill="url(#bar)"/>
-      <rect x="273" y="124.5" width="16" height="151" rx="6" fill="url(#bar)"/>
-      <rect x="300" y="148.0" width="16" height="104" rx="6" fill="url(#bar)"/>
-      <rect x="327" y="168.0" width="16" height="64" rx="6" fill="url(#bar)"/>
-      <rect x="354" y="184.0" width="16" height="32" rx="6" fill="url(#bar)"/>
-  </g>
-  <g>
-      <rect x="30" y="184.0" width="16" height="32" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="57" y="168.0" width="16" height="64" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="84" y="148.0" width="16" height="104" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="111" y="124.5" width="16" height="151" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="138" y="100.0" width="16" height="200" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="165" y="72.5" width="16" height="255" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="192" y="47.5" width="16" height="305" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="219" y="72.5" width="16" height="255" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="246" y="100.0" width="16" height="200" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="273" y="124.5" width="16" height="151" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="300" y="148.0" width="16" height="104" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="327" y="168.0" width="16" height="64" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-      <rect x="354" y="184.0" width="16" height="32" rx="6" fill="url(#bar)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect x="5" y="10" width="4" height="12" rx="2" fill="#7c5cfc"/>
+  <rect x="11" y="6" width="4" height="20" rx="2" fill="#7c5cfc"/>
+  <rect x="17" y="8" width="4" height="16" rx="2" fill="#7c5cfc"/>
+  <rect x="23" y="12" width="4" height="8" rx="2" fill="#7c5cfc"/>
 </svg>
