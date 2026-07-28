@@ -61,7 +61,7 @@ export default async function CompletePage(props: PageProps<"/agreement/[token]/
             </h1>
             <p className="text-base leading-relaxed mb-10" style={{ color: "#999999" }}>
               Payment received and your Callvia service is active. Your signed agreement is in your
-              inbox, and we will be in touch shortly to get you configured.
+              inbox, and we will be in touch shortly to go over the next steps.
             </p>
             {row.monthly_cents > 0 && (
               <p className="text-sm leading-relaxed mb-10" style={{ color: "#555555" }}>
