@@ -24,7 +24,7 @@ export function FloatingBookCall() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay: 1 }}
-      className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 px-5 py-3 rounded-full border border-white/10 bg-black/90 backdrop-blur-md text-sm font-medium text-white/85 shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:text-white hover:border-white/25 transition-all duration-200"
+      className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 px-5 py-3 rounded-full border border-white/30 bg-black/90 backdrop-blur-md text-sm font-medium text-white/85 shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:text-white hover:border-white/50 transition-all duration-200"
     >
       <svg
         width="15"
