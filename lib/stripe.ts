@@ -90,6 +90,10 @@ export function buildCheckoutParams(row: AgreementRow, successUrl: string, cance
     // for the billing portal later.
     base.customer_creation = "always";
     base.payment_intent_data = { metadata };
+    // Payment mode does not generate a Stripe Invoice by default, unlike
+    // subscription mode. Without this a setup-fee-only agreement pays fine
+    // but never shows up in the client's Invoices list.
+    base.invoice_creation = { enabled: true };
   }
 
   return base;
