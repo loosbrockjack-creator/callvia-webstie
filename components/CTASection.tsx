@@ -5,7 +5,7 @@ import { BOOKING_URL } from "@/lib/site";
 
 export function CTASection() {
   return (
-    <section id="get-started" className="relative py-36 px-6 border-t border-white/5 overflow-hidden">
+    <section id="get-started" className="relative py-16 md:py-36 px-6 border-t border-white/5 overflow-hidden">
       {/* Purple radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"

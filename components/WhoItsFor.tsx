@@ -17,7 +17,7 @@ const stats = [
 
 export function WhoItsFor() {
   return (
-    <section id="who-its-for" className="py-32 px-6 border-t border-white/5">
+    <section id="who-its-for" className="py-16 md:py-32 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left column */}
@@ -63,7 +63,7 @@ export function WhoItsFor() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-10 flex items-center gap-10"
+              className="mt-10 flex flex-wrap items-center gap-6 sm:gap-10"
             >
               {stats.map((s) => (
                 <div key={s.label}>

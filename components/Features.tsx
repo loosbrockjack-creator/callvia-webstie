@@ -52,7 +52,7 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="py-32 px-6 border-t border-white/5">
+    <section id="features" className="py-16 md:py-32 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         {/* Section label */}
         <motion.p

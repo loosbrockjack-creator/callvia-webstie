@@ -12,7 +12,7 @@ export default function LoginPage() {
     <div className="bg-black min-h-screen text-white">
       <Nav />
 
-      <main className="relative pt-40 pb-28 px-6 overflow-hidden">
+      <main className="relative pt-28 md:pt-40 pb-16 md:pb-28 px-6 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

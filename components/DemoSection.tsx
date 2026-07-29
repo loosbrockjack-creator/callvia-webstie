@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function DemoSection() {
   return (
-    <section id="demo" className="relative py-36 px-6 border-t border-white/5 overflow-hidden">
+    <section id="demo" className="relative py-16 md:py-36 px-6 border-t border-white/5 overflow-hidden">
       {/* Radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"

@@ -31,7 +31,7 @@ export default function ServiceAgreementPage() {
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-24">
+      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <a
           href="/"
           className="text-xs tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors duration-200 mb-12 inline-block"

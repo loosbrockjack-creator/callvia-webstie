@@ -49,7 +49,7 @@ export default async function CompletePage(props: PageProps<"/agreement/[token]/
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-24">
+      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <p className="text-xs tracking-widest uppercase mb-12" style={{ color: "#555555" }}>
           Callvia
         </p>

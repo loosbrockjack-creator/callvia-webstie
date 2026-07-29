@@ -18,6 +18,7 @@ interface FlowButtonProps {
   variant?: "accent" | "neutral";
   size?: "sm" | "md";
   className?: string;
+  showArrow?: boolean;
 }
 
 const SIZES: Record<"sm" | "md", string> = {
@@ -40,6 +41,7 @@ export function FlowButton({
   variant = "neutral",
   size = "sm",
   className = "",
+  showArrow = true,
 }: FlowButtonProps) {
   const classes = cn(
     "group inline-flex items-center gap-1.5 rounded-full border transition-all duration-300 ease-out",
@@ -51,7 +53,9 @@ export function FlowButton({
   const content = (
     <>
       <span>{children}</span>
-      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+      {showArrow && (
+        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+      )}
     </>
   );
 

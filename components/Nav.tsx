@@ -216,7 +216,7 @@ export function Nav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-md border-b border-white/5"
+            className="lg:hidden absolute top-16 left-0 right-0 bg-black border-b border-white/5"
           >
             <div className="flex flex-col px-6 py-4">
               <a
@@ -271,6 +271,7 @@ export function Nav() {
                   size="sm"
                   onClick={() => setOpen(false)}
                   className="justify-center"
+                  showArrow={false}
                 >
                   Login
                 </FlowButton>

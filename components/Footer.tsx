@@ -4,14 +4,19 @@ import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { NAV_LINK_GROUPS } from "@/lib/nav-links";
 
-// Sticky-reveal footer: the <footer> box reserves its own height in the flow,
-// but the visible panel is position:fixed to the bottom of the viewport. The
-// clip-path makes the footer a containing block for that fixed child, so the
-// panel is clipped to whatever slice of the footer box has scrolled into view.
-// Net effect: the page slides up off the footer instead of pushing it down.
-// Heights are duplicated below (box, panel, sticky offset) and must stay in sync.
-const H = "h-[600px] md:h-[640px]";
-const STICKY_TOP = "top-[calc(100vh-600px)] md:top-[calc(100vh-640px)]";
+// Sticky-reveal footer, md and up: the <footer> box reserves its own height in
+// the flow, but the visible panel is position:fixed to the bottom of the
+// viewport. The clip-path makes the footer a containing block for that fixed
+// child, so the panel is clipped to whatever slice of the footer box has
+// scrolled into view. Net effect: the page slides up off the footer instead of
+// pushing it down. Heights are duplicated below (box, panel, sticky offset) and
+// must stay in sync.
+//
+// Below md the whole mechanism is off and the footer is a plain flowing block:
+// a fixed 640px panel can't fit this much content on a phone, which forced the
+// wordmark and copyright row to overlap.
+const H = "md:h-[640px]";
+const STICKY_TOP = "md:top-[calc(100vh-640px)]";
 
 export function Footer() {
   // The panel is position:fixed, so it is always "in view" as far as an
@@ -27,9 +32,9 @@ export function Footer() {
       className={`relative w-full ${H}`}
       style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}
     >
-      <div className={`fixed bottom-0 w-full ${H}`}>
-        <div className={`sticky ${STICKY_TOP} h-full overflow-y-auto`}>
-          <div className="relative flex size-full flex-col justify-between bg-black border-t border-white/5 px-6 md:px-12 pt-14 pb-6">
+      <div className={`w-full md:fixed md:bottom-0 ${H}`}>
+        <div className={`md:sticky ${STICKY_TOP} md:h-full md:overflow-y-auto`}>
+          <div className="relative flex w-full md:size-full flex-col justify-between bg-black border-t border-white/5 px-6 sm:px-8 md:px-12 pt-10 sm:pt-12 md:pt-14 pb-6">
             {/* Purple wash rising from the bottom edge, matching the CTA section */}
             <div
               aria-hidden
@@ -40,7 +45,7 @@ export function Footer() {
               }}
             />
 
-            <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col gap-12 md:flex-row md:gap-8">
+            <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col gap-8 md:flex-row">
               <AnimatedContainer show={revealed} className="w-full md:max-w-xs">
                 <span
                   className="text-white font-[200] uppercase"
@@ -60,7 +65,7 @@ export function Footer() {
                 </a>
               </AnimatedContainer>
 
-              <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:flex-1">
+              <div className="grid grid-cols-2 gap-8 sm:gap-10 sm:grid-cols-3 md:flex-1">
                 {NAV_LINK_GROUPS.map((group, index) => (
                   <AnimatedContainer
                     key={group.label}
@@ -90,11 +95,13 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Oversized hollow wordmark, with the copyright row layered over it */}
-            <div className="relative z-10 w-full max-w-6xl mx-auto">
+            {/* Oversized hollow wordmark. The copyright row layers over it from
+                md up, where there's room inside the glyphs; below that it stacks
+                underneath so the two can't collide. */}
+            <div className="relative z-10 w-full max-w-6xl mx-auto mt-12 md:mt-0">
               <AnimatedContainer show={revealed} delay={0.3} className="relative">
                 <Wordmark />
-                <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-between gap-3 pt-6 text-xs sm:flex-row">
+                <div className="mt-5 flex flex-col items-center justify-between gap-3 text-xs sm:flex-row md:absolute md:inset-x-0 md:bottom-0 md:mt-0 md:pt-6">
                   <p style={{ color: "#444444" }}>
                     © {new Date().getFullYear()} Callvia. All rights reserved.
                   </p>

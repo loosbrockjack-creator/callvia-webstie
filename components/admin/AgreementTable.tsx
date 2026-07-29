@@ -59,7 +59,9 @@ export function AgreementTable({ agreements }: { agreements: AdminAgreement[] })
       </h2>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
+        {/* min-width keeps the wrapper scrolling rather than letting seven
+            columns squeeze into a phone width and wrap. */}
+        <table className="w-full min-w-[760px] text-sm border-collapse">
           <thead>
             <tr className="text-left" style={{ color: "#555555" }}>
               <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Client</th>

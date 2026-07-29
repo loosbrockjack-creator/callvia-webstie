@@ -24,7 +24,7 @@ export function AboutContent() {
   return (
     <main className="bg-black text-white">
       {/* Hero */}
-      <section className="relative pt-40 pb-10 px-6 overflow-hidden">
+      <section className="relative pt-28 md:pt-40 pb-8 md:pb-10 px-6 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -73,7 +73,7 @@ export function AboutContent() {
       </section>
 
       {/* Founder letter */}
-      <section className="px-6 pt-10 pb-20 border-t border-white/5">
+      <section className="px-6 pt-8 md:pt-10 pb-12 md:pb-20 border-t border-white/5">
         <div className="max-w-4xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -170,7 +170,7 @@ export function AboutContent() {
       </section>
 
       {/* Principles */}
-      <section className="px-6 py-20 border-t border-white/5">
+      <section className="px-6 py-12 md:py-20 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -204,7 +204,7 @@ export function AboutContent() {
       </section>
 
       {/* Closing CTA */}
-      <section className="px-6 py-28 border-t border-white/5 text-center">
+      <section className="px-6 py-16 md:py-28 border-t border-white/5 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

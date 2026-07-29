@@ -80,7 +80,7 @@ export function MissedCallTool() {
   }
 
   return (
-    <section id="tool" className="py-32 px-6 border-t border-white/5">
+    <section id="tool" className="py-16 md:py-32 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         <motion.p
           initial={{ opacity: 0, y: 16 }}

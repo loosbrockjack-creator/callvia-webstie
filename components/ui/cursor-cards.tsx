@@ -15,6 +15,7 @@ import {
 } from "framer-motion";
 
 import { cn } from "@/lib/utils";
+import { useHasFinePointer } from "@/components/ui/use-fine-pointer";
 
 interface CursorCardsContainerProps {
   children: React.ReactNode;
@@ -41,10 +42,12 @@ interface InternalCursorCardProps extends CursorCardProps {
   globalMouseX?: number;
   globalMouseY?: number;
   isWithinRange?: boolean;
+  hasFinePointer?: boolean;
 }
 
 function useMousePosition(proximityRange: number) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const hasFinePointer = useHasFinePointer();
   const [mouseState, setMouseState] = useState({
     mousePositionX: 0,
     mousePositionY: 0,
@@ -79,13 +82,17 @@ function useMousePosition(proximityRange: number) {
     [proximityRange]
   );
 
+  // Touch devices fire pointermove only mid-drag and never a leave event, so
+  // the glow would either never show or stick where it was last touched. Skip
+  // tracking entirely there and let the static border below stand in.
   useEffect(() => {
+    if (!hasFinePointer) return;
     document.addEventListener("pointermove", handlePointerMovement);
     return () =>
       document.removeEventListener("pointermove", handlePointerMovement);
-  }, [handlePointerMovement]);
+  }, [handlePointerMovement, hasFinePointer]);
 
-  return { wrapperRef, mouseState };
+  return { wrapperRef, mouseState, hasFinePointer };
 }
 
 function useCardActivation(
@@ -144,7 +151,8 @@ export function CursorCardsContainer({
   className,
   proximityRange = 400,
 }: CursorCardsContainerProps) {
-  const { wrapperRef, mouseState } = useMousePosition(proximityRange);
+  const { wrapperRef, mouseState, hasFinePointer } =
+    useMousePosition(proximityRange);
 
   const enhancedChildren = React.Children.map(children, (child) => {
     if (React.isValidElement(child) && child.type === CursorCard) {
@@ -154,6 +162,7 @@ export function CursorCardsContainer({
           globalMouseX: mouseState.mousePositionX,
           globalMouseY: mouseState.mousePositionY,
           isWithinRange: mouseState.isWithinRange,
+          hasFinePointer,
         }
       );
     }
@@ -182,6 +191,7 @@ export function CursorCard({
   globalMouseX = 0,
   globalMouseY = 0,
   isWithinRange = false,
+  hasFinePointer = false,
 }: InternalCursorCardProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const { localMouseX, localMouseY, isCardActive } = useCardActivation(
@@ -220,24 +230,37 @@ export function CursorCard({
       className={cn("group relative", className)}
       {...revealProps}
     >
-      {/* Gradient layer, revealed at the 1px edge as the glowing border. */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 rounded-[inherit]"
-        style={{ background: gradientBackground }}
-      />
+      {/* Gradient layer, revealed at the 1px edge as the glowing border.
+          Without a cursor it can't animate, so touch gets a static accent
+          edge instead of a flat one. */}
+      {hasFinePointer ? (
+        <motion.div
+          className="pointer-events-none absolute inset-0 rounded-[inherit]"
+          style={{ background: gradientBackground }}
+        />
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-0 rounded-[inherit]"
+          style={{
+            background: `linear-gradient(160deg, ${primaryHue}55, ${secondaryHue}22 45%, ${borderColor} 100%)`,
+          }}
+        />
+      )}
       {/* Card fill, inset 1px so the gradient shows only as a border. */}
       <div
         className="absolute inset-px rounded-[inherit]"
         style={{ background: cardColor }}
       />
       {/* Soft interior spotlight that follows the cursor. */}
-      <motion.div
-        className="pointer-events-none absolute inset-px rounded-[inherit] transition-opacity duration-300"
-        style={{
-          background: illuminationBackground,
-          opacity: isCardActive ? illuminationOpacity : 0,
-        }}
-      />
+      {hasFinePointer && (
+        <motion.div
+          className="pointer-events-none absolute inset-px rounded-[inherit] transition-opacity duration-300"
+          style={{
+            background: illuminationBackground,
+            opacity: isCardActive ? illuminationOpacity : 0,
+          }}
+        />
+      )}
       {/* Content. */}
       <div className="relative h-full">{children}</div>
     </motion.div>
