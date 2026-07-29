@@ -3,17 +3,21 @@
 import { motion } from "framer-motion";
 import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 
+// Named as capabilities, not as story beats: the How It Works section already
+// walks through the answer/capture/hand-off narrative, so anything here that
+// restates it is dead weight.
 const features = [
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M7 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M3 8h14M7 2.5v3M13 2.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M7.5 12.2l1.4 1.4 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "Always Answers",
+    title: "Appointment Booking",
     description:
-      "Your AI receptionist picks up every call, 24 hours a day, 7 days a week, even when you're on a job site, with a customer, or off the clock.",
+      "Turn it on and your receptionist offers your open times, puts the job on your calendar, and confirms it with the caller before hanging up.",
   },
   {
     icon: (
@@ -22,20 +26,21 @@ const features = [
         <path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     ),
-    title: "Captures Every Lead",
+    title: "Lead Capture",
     description:
-      "Automatically collects names, phone numbers, addresses, and job details. Every caller's information organized and ready when you need it.",
+      "Names, phone numbers, addresses, and job details, collected and confirmed while the caller is still on the line. Nothing written on the back of a receipt.",
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M10 3.5l7.5 13H2.5l7.5-13z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M10 8.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="10" cy="14" r="0.75" fill="currentColor" />
       </svg>
     ),
-    title: "Texts You the Lead",
+    title: "Urgency Detection",
     description:
-      "The moment a call ends, you get a clear summary including who called, what they need, and their contact info. No more digging through voicemail.",
+      "Your receptionist works out what the caller needs and how urgent it is in the first few seconds, so a burst pipe never gets handled like a routine quote.",
   },
   {
     icon: (
@@ -44,9 +49,32 @@ const features = [
         <path d="M13 3l2 2-2 2M13 5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "Knows When to Reach You",
+    title: "Urgent Call Routing",
     description:
       "When a call needs a real decision, Callvia connects the customer straight to you. Can't pick up? It texts you the details instantly, flagged urgent. Your customers never get stuck with a robot that can't help.",
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+    title: "Call Summaries",
+    description:
+      "The moment a call ends you get a summary by text and email: who called, what they need, and their number. No more digging through voicemail.",
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 6h8.5M15.5 6H17M3 14h1.5M8.5 14H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="13.5" cy="6" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="6.5" cy="14" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+    ),
+    title: "Custom Call Handling",
+    description:
+      "Your greeting, your hours, your instructions. We build the receptionist around how you already run the business, so callers hear what you would have told them.",
   },
 ];
 
@@ -88,7 +116,7 @@ export function Features() {
           className="mt-5 text-base max-w-xl leading-relaxed"
           style={{ color: "#888888" }}
         >
-          Callvia handles your front line so you never lose a customer because you were too busy to answer. Every call sounds professional. Every job comes back to you.
+          Callvia handles your phones so you never have to lose a customer because you were too busy to answer every call. Sounds professional. Every job comes back to you.
         </motion.p>
 
         {/* Cards grid */}

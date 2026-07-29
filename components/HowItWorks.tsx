@@ -25,7 +25,7 @@ const steps = [
     ),
     title: "AI Answers Every Call You Want It To",
     description:
-      "When a customer calls, the AI answers immediately and collects exactly what you need. But you can still pick up whenever you want. The AI works quietly in the background, stepping in only when you need it to. It doesn't replace you. It just covers the calls you can't.",
+      "You choose what it answers: every call that comes in, only the ones you miss, or just nights and weekends. Switch it on or off whenever you want, in a couple of taps, and change your mind as often as you like. You can always pick up yourself. Callvia covers the calls you don't.",
   },
   {
     number: "03",
@@ -37,7 +37,7 @@ const steps = [
     ),
     title: "You Get the Lead, You Close the Job",
     description:
-      "If a call needs you in the moment, Callvia transfers it straight to you. If you're busy, you get a text with everything you need. Either way, the lead is yours. No middlemen, no missed money.",
+      "However you set it, the lead still ends up with you. If a call needs you right then, Callvia transfers it straight to your cell. If you're busy, you get a text and an email with who called, what they need, and their number. No middleman, no lost job.",
   },
 ];
 
