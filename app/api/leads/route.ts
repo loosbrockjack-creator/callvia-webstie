@@ -1,7 +1,8 @@
 // Build-funnel lead notifications, emailed to team@callvia.io via Resend.
 // Events:
-//   "insights-reached": they finished the questions (answers only, no contact
-//                       info is collected in the funnel anymore)
+//   "insights-reached": they finished the questions. Business name and phone
+//                       are asked early, so this event usually carries enough
+//                       to follow up even if they never pick a demo option.
 //   "choice":           picked live-demo (contact comes via cal.com) or
 //                       email-demo (email collected right on that card)
 //
@@ -62,7 +63,18 @@ export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const timestamp = new Date().toISOString();
 
+  const businessName = str(answers.businessName);
+  const businessPhone = str(answers.businessPhone);
+
   const commonLines = [
+    ...(businessName || businessPhone
+      ? [
+          `--- Contact ---`,
+          `Business: ${businessName || "(blank)"}`,
+          `Phone:    ${businessPhone || "(blank)"}`,
+          ``,
+        ]
+      : []),
     `--- Funnel answers ---`,
     ...answerLines(answers),
     ...(repeatShare !== null ? [`repeatShare: ${repeatShare}%`] : []),
@@ -72,9 +84,12 @@ export async function POST(request: Request) {
   ];
 
   if (event === "insights-reached") {
-    const business = str(answers.trade) || "unknown trade";
+    const business = businessName || str(answers.trade) || "unknown trade";
     const record = { event, answers, repeatShare, timestamp, ip };
-    const text = [`Someone finished the build questions (no contact info yet).`, ``, ...commonLines].join("\n");
+    const lead = businessPhone
+      ? `Someone finished the build questions. Reachable at ${businessPhone}.`
+      : `Someone finished the build questions (no phone number given).`;
+    const text = [lead, ``, ...commonLines].join("\n");
     await sendEmail(`Build funnel: questions completed (${business})`, text, record);
     return Response.json({ ok: true });
   }

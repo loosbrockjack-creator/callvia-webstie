@@ -10,18 +10,27 @@ import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 // ---------------------------------------------------------------------------
 // Question config. Jack: revise wording, order, or options here, one place.
 // Kinds: "single" (one choice, auto-advances), "multi" (pick several),
-// "text" (short answer), "missed" (missed calls number + repeat slider),
-// "textarea" (long answer).
+// "text" (short answer), "fields" (a few related short answers on one screen),
+// "missed" (missed calls number + repeat slider), "textarea" (long answer).
 // ---------------------------------------------------------------------------
+interface Field {
+  id: string;
+  label: string;
+  placeholder?: string;
+  optional?: boolean;
+  type?: "text" | "tel";
+}
+
 interface Question {
   id: string;
-  kind: "single" | "multi" | "text" | "missed" | "textarea";
+  kind: "single" | "multi" | "text" | "fields" | "missed" | "textarea";
   label: string;
   sublabel?: string;
   options?: string[];
   otherOption?: boolean; // adds an "Other" row that reveals a text input
   optional?: boolean;
   placeholder?: string;
+  fields?: Field[]; // "fields" only. Each field stores its own answer id.
 }
 
 const QUESTIONS: Question[] = [
@@ -31,6 +40,16 @@ const QUESTIONS: Question[] = [
     label: "What's your trade?",
     options: [...TRADES.map((t) => t.label)],
     otherOption: true,
+  },
+  {
+    id: "business",
+    kind: "fields",
+    label: "Tell us about your business",
+    sublabel: "The phone number should be the line your customers already call.",
+    fields: [
+      { id: "businessName", label: "Business name", placeholder: "e.g. Loosbrock Electric" },
+      { id: "businessPhone", label: "Business phone number", placeholder: "(555) 123-4567", type: "tel" },
+    ],
   },
   {
     id: "website",
@@ -70,6 +89,23 @@ const QUESTIONS: Question[] = [
     otherOption: true,
   },
   {
+    id: "leadInfo",
+    kind: "multi",
+    label: "What should your receptionist collect from every caller?",
+    sublabel:
+      "Every call comes back to you as a written summary. These are the details your receptionist makes sure to get before the caller hangs up. Pick everything that applies.",
+    options: ["Name", "Callback number", "Address", "Service needed", "Urgency"],
+    otherOption: true,
+  },
+  {
+    id: "summaryTo",
+    kind: "single",
+    label: "Where should the call summaries be sent?",
+    sublabel: "They land within a minute of the call ending.",
+    options: ["Phone number", "Email", "Both"],
+    otherOption: true,
+  },
+  {
     id: "missedPerWeek",
     kind: "missed",
     label: "How many calls do you miss in a typical week?",
@@ -96,6 +132,21 @@ const QUESTIONS: Question[] = [
     label: "Want it to book appointments?",
     sublabel: "If a caller wants work done, your receptionist offers open times, puts the job on your calendar, and confirms it with the caller before hanging up.",
     options: ["Yes", "No"],
+  },
+  {
+    id: "carrier",
+    kind: "single",
+    label: "What cell carrier are you on?",
+    sublabel: "Call forwarding is set up differently on every carrier, so this tells us which steps to walk you through.",
+    options: ["Verizon", "AT&T", "T-Mobile", "US Cellular"],
+    otherOption: true,
+  },
+  {
+    id: "phoneType",
+    kind: "single",
+    label: "What type of phone do you have?",
+    options: ["iPhone", "Android", "Landline", "VoIP or internet phone"],
+    otherOption: true,
   },
   {
     id: "notes",
@@ -311,10 +362,24 @@ export function BuildFunnel() {
     return v === "Other";
   }
 
+  // "fields" screens validate per field, so the message can name the empty one.
+  function fieldsError(): string | null {
+    if (q?.kind !== "fields") return null;
+    for (const f of q.fields ?? []) {
+      const val = ((answers[f.id] as string) ?? "").trim();
+      if (!f.optional && val.length === 0) return `Add your ${f.label.toLowerCase()} to keep going.`;
+      if (f.type === "tel" && val.length > 0 && val.replace(/\D/g, "").length < 10) {
+        return "Enter a full phone number, area code included.";
+      }
+    }
+    return null;
+  }
+
   function currentValid(): boolean {
     if (!q) return false;
     const v = answers[q.id];
     if (hasOther(v) && otherText.trim().length === 0) return false;
+    if (q.kind === "fields") return fieldsError() === null;
     if (q.optional) return true;
     if (q.kind === "multi") return Array.isArray(v) && v.length > 0;
     if (q.kind === "missed") {
@@ -340,11 +405,13 @@ export function BuildFunnel() {
     if (!q) return;
     if (!currentValid()) {
       setError(
-        q.kind === "missed"
-          ? "Give us your best guess, 1 or more."
-          : hasOther(answers[q.id])
-            ? "Tell us what Other means for you."
-            : "This one helps us build it right."
+        q.kind === "fields"
+          ? (fieldsError() ?? "This one helps us build it right.")
+          : q.kind === "missed"
+            ? "Give us your best guess, 1 or more."
+            : hasOther(answers[q.id])
+              ? "Tell us what Other means for you."
+              : "This one helps us build it right."
       );
       return;
     }
@@ -508,6 +575,39 @@ export function BuildFunnel() {
                   className={inputClass}
                   style={inputStyle}
                 />
+              )}
+
+              {/* Several related short answers sharing one screen */}
+              {q.kind === "fields" && (
+                <div className="flex flex-col gap-5">
+                  {(q.fields ?? []).map((f, i) => (
+                    <div key={f.id}>
+                      <label
+                        htmlFor={`bf-${f.id}`}
+                        className="block mb-2 text-xs tracking-widest uppercase"
+                        style={{ color: "#555555" }}
+                      >
+                        {f.label}
+                      </label>
+                      <input
+                        id={`bf-${f.id}`}
+                        autoFocus={i === 0}
+                        type={f.type === "tel" ? "tel" : "text"}
+                        inputMode={f.type === "tel" ? "tel" : undefined}
+                        autoComplete={f.type === "tel" ? "tel" : "organization"}
+                        value={(answers[f.id] as string) ?? ""}
+                        onChange={(e) => {
+                          setAnswer(f.id, e.target.value);
+                          setError(null);
+                        }}
+                        onKeyDown={(e) => e.key === "Enter" && advance()}
+                        placeholder={f.placeholder}
+                        className={inputClass}
+                        style={inputStyle}
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
 
               {/* Missed calls + repeat-share slider, same controls as the tool */}
