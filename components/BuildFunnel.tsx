@@ -145,7 +145,7 @@ const QUESTIONS: Question[] = [
     id: "phoneType",
     kind: "single",
     label: "What type of phone do you have?",
-    options: ["iPhone", "Android", "Landline", "VoIP or internet phone"],
+    options: ["iPhone", "Samsung", "Android", "Landline", "VoIP or internet phone"],
     otherOption: true,
   },
   {
