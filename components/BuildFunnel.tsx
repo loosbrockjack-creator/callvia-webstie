@@ -80,7 +80,8 @@ const QUESTIONS: Question[] = [
     id: "missedToday",
     kind: "single",
     label: "What happens to a missed call today?",
-    options: ["Goes to voicemail", "Just rings out", "Answering service"],
+    options: ["Goes to voicemail", "Answering service"],
+    otherOption: true,
   },
   {
     id: "urgent",
@@ -190,9 +191,14 @@ function buildInsights(answers: Answers): InsightCard[] {
   const urgent = (answers.urgent as string[]) ?? [];
   const answerWhen = (answers.answerWhen as string[]) ?? [];
 
-  if (missedToday === "Goes to voicemail" || missedToday === "Just rings out") {
+  if (missedToday === "Goes to voicemail") {
     cards.push({
-      title: missedToday === "Goes to voicemail" ? "Voicemail is where callers give up" : "Unanswered rings are silent losses",
+      title: "Voicemail is where callers give up",
+      body: "Research shows about 85% of first-time callers who don't get an answer never call back (Forbes / BIA Kelsey). Your receptionist picks up in under two seconds, every time, so that leak closes completely.",
+    });
+  } else if (missedToday && missedToday.startsWith("Other:")) {
+    cards.push({
+      title: "Unanswered calls are silent losses",
       body: "Research shows about 85% of first-time callers who don't get an answer never call back (Forbes / BIA Kelsey). Your receptionist picks up in under two seconds, every time, so that leak closes completely.",
     });
   } else if (missedToday === "Answering service") {
@@ -648,7 +654,8 @@ export function BuildFunnel() {
                   </div>
                 )}
                 <p className="mt-3 text-xs leading-relaxed" style={{ color: "#444444" }}>
-                  Based on the {missedNum} missed calls a week you told us about. Research shows about 85% of first-time callers who can&#39;t reach you never call back (Forbes / BIA Kelsey). Your regular customers are more patient, so we assume only 10 to 35% of them give up. That&#39;s why you see a range instead of one exact number.
+                  Based on the {missedNum}{" "}
+                  missed calls a week you told us about. Research shows about 85% of first-time callers who can&#39;t reach you never call back (Forbes / BIA Kelsey). Your regular customers are more patient, so we assume only 10% to 35% of them give up. That&#39;s why you see a range instead of one exact number.
                 </p>
               </motion.div>
             </CursorCardsContainer>
