@@ -58,7 +58,7 @@ const QUESTIONS: Question[] = [
     kind: "multi",
     label: "When should your receptionist answer?",
     sublabel: "Pick everything that applies.",
-    options: ["24/7", "After hours only", "Missed calls only"],
+    options: ["24/7", "After hours", "Missed calls"],
     otherOption: true,
   },
   {
@@ -227,7 +227,7 @@ function buildInsights(answers: Answers): InsightCard[] {
     });
   }
 
-  if (answerWhen.includes("24/7") || answerWhen.includes("After hours only")) {
+  if (answerWhen.includes("24/7") || answerWhen.includes("After hours")) {
     cards.push({
       title: answerWhen.includes("24/7") ? "Round-the-clock coverage, zero payroll" : "After-hours calls stop going dark",
       body: "Nights and weekends are when emergencies happen and when competitors' phones also go unanswered. Being the one business that picks up at 9pm is a real edge.",
@@ -527,7 +527,9 @@ export function BuildFunnel() {
                       <span className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                         Share that are repeat customers
                       </span>
-                      <span className="text-sm text-white font-medium">{repeatShare}%</span>
+                      <span className="text-sm font-semibold tabular-nums" style={{ color: "#9b7ffd" }}>
+                        {repeatShare}%
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -536,7 +538,10 @@ export function BuildFunnel() {
                       step={5}
                       value={repeatShare}
                       onChange={(e) => setRepeatShare(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#7c5cfc]"
+                      className="roi-slider"
+                      style={{
+                        background: `linear-gradient(90deg, #7c5cfc 0%, #9b7ffd ${repeatShare}%, #171717 ${repeatShare}%, #171717 100%)`,
+                      }}
                     />
                     <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
                       People who already know you are more likely to wait or call back. New callers usually just try the next name on Google.

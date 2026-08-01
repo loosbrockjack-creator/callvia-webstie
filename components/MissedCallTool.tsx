@@ -180,16 +180,9 @@ export function MissedCallTool() {
                     <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                       Share that are repeat customers
                     </label>
-                    <motion.span
-                      key={repeatSharePct}
-                      initial={{ scale: 1.25 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                      className="text-sm font-semibold tabular-nums"
-                      style={{ color: "#9b7ffd" }}
-                    >
+                    <span className="text-sm font-semibold tabular-nums" style={{ color: "#9b7ffd" }}>
                       {repeatSharePct}%
-                    </motion.span>
+                    </span>
                   </div>
                   <input
                     id="mct-repeat"
