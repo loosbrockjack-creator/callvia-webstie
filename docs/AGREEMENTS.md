@@ -6,6 +6,8 @@ Create an agreement for a client at a specific price, email them a private link,
 they read it, sign it, and pay. A signed PDF with a full audit trail is produced
 automatically and emailed to both sides.
 
+The same pipeline now carries two other things. See `docs/TRIALS-AND-ONBOARDING.md`.
+
 ---
 
 ## How it flows

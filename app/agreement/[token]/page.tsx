@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { findAgreementByToken } from "@/lib/agreement/queries";
-import { renderAgreement } from "@/lib/agreement/render";
+import { formatTrialDate, renderAgreement } from "@/lib/agreement/render";
 import { isExpired, isSigned } from "@/lib/agreement/status";
 import { oneTimeDisclosure, recurringDisclosure } from "@/lib/agreement/consent";
 import { OrderSummary } from "@/components/agreement/OrderSummary";
@@ -42,6 +42,65 @@ function Notice({ title, body }: { title: string; body: string }) {
   );
 }
 
+// A signed trial is a completed transaction, not a pending one. The PDF link
+// stays live indefinitely: ESIGN requires the signer be able to retain what
+// they signed, and the token is the credential for it.
+function TrialSigned({
+  token,
+  signedAt,
+  startsOn,
+  endsOn,
+}: {
+  token: string;
+  signedAt: string;
+  startsOn: string | null;
+  endsOn: string | null;
+}) {
+  return (
+    <div>
+      <div
+        className="mb-8 flex h-14 w-14 items-center justify-center rounded-full border"
+        style={{ borderColor: "rgba(124,92,252,0.35)", background: "rgba(124,92,252,0.1)" }}
+      >
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+          <path
+            d="M5 11.5l4 4 8-8.5"
+            stroke="#9b7ffd"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      <h1 className="mb-4 text-3xl font-light tracking-tight" style={{ letterSpacing: "-0.025em" }}>
+        Your trial is set.
+      </h1>
+      <p className="text-base leading-relaxed" style={{ color: "#999999" }}>
+        Signed {signedAt}. A copy has been emailed to you.
+        {startsOn && endsOn && (
+          <>
+            {" "}
+            Your trial runs {formatTrialDate(startsOn)} through {formatTrialDate(endsOn)}.
+          </>
+        )}
+      </p>
+      <p className="mt-4 text-base leading-relaxed" style={{ color: "#999999" }}>
+        There is nothing to pay and no card on file. We will be in touch shortly to get your
+        receptionist built and your calls forwarded.
+      </p>
+
+      <a
+        href={`/api/agreement/${token}/pdf`}
+        className="mt-10 inline-block text-sm underline underline-offset-4 transition-colors duration-200 hover:text-white"
+        style={{ color: "#999999" }}
+      >
+        Download your signed copy
+      </a>
+    </div>
+  );
+}
+
 export default async function AgreementPage(props: PageProps<"/agreement/[token]">) {
   const { token } = await props.params;
 
@@ -76,11 +135,29 @@ export default async function AgreementPage(props: PageProps<"/agreement/[token]
     );
   }
 
+  const isTrial = row.kind === "trial";
+
   // Already signed: show the read-only state, never the sign form again.
   if (isSigned(row.status)) {
     const signedAt = row.signed_at
       ? new Date(row.signed_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
       : "";
+
+    // A signed trial is finished. There is no payment step to chase, so it gets
+    // a confirmation rather than the PaymentPending prompt.
+    if (isTrial) {
+      return (
+        <Shell>
+          <TrialSigned
+            token={token}
+            signedAt={signedAt}
+            startsOn={row.trial_starts_on}
+            endsOn={row.trial_ends_on}
+          />
+        </Shell>
+      );
+    }
+
     return (
       <Shell>
         <PaymentPending token={token} signedName={row.signed_name ?? row.contact_name} signedAt={signedAt} />
@@ -92,8 +169,11 @@ export default async function AgreementPage(props: PageProps<"/agreement/[token]
   // the client, because this is what gets frozen as the signature snapshot.
   const doc = renderAgreement(row);
 
-  const disclosure =
-    row.monthly_cents > 0
+  // A trial has no charge, so there is nothing for an automatic-renewal
+  // disclosure to disclose. Showing one would be actively misleading.
+  const disclosure = isTrial
+    ? ""
+    : row.monthly_cents > 0
       ? (recurringDisclosure(row.monthly_cents, row.setup_fee_cents) ?? "")
       : oneTimeDisclosure(row.setup_fee_cents);
 
@@ -121,6 +201,7 @@ export default async function AgreementPage(props: PageProps<"/agreement/[token]
           email={row.email}
           disclosure={disclosure}
           hasPhone={row.phone !== null}
+          isTrial={isTrial}
         />
       </div>
     </Shell>

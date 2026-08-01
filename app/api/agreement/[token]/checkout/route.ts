@@ -20,6 +20,12 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/agreement/
   if (row.status === "void") {
     return Response.json({ ok: false, error: "This agreement is no longer active." }, { status: 409 });
   }
+  // A trial has no price and must never reach Stripe. The browser already
+  // skips this call for trials; this is the guard that holds if someone posts
+  // here directly, and it is backed by a CHECK constraint in the database.
+  if (row.kind === "trial") {
+    return Response.json({ ok: false, error: "A free trial has nothing to pay." }, { status: 409 });
+  }
   if (!isSigned(row.status)) {
     return Response.json({ ok: false, error: "Sign the agreement first." }, { status: 409 });
   }

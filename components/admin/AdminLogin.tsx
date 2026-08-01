@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
-const inputClass =
-  "w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent";
-const inputStyle = { background: "#0d0d0d", borderColor: "#1f1f1f" } as const;
+import { Button } from "./ui/Button";
+import { Input } from "./ui/form";
 
 export function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -36,34 +34,19 @@ export function AdminLogin() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-      <div>
-        <label htmlFor="pw" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-          Password
-        </label>
-        <input
-          id="pw"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={inputClass}
-          style={inputStyle}
-        />
-      </div>
+      <Input
+        id="pw"
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={error}
+      />
 
-      {error && (
-        <p className="text-sm" style={{ color: "#f87171" }}>
-          {error}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={submitting || password.length === 0}
-        className="inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none"
-      >
-        {submitting ? "Checking…" : "Sign in"}
-      </button>
+      <Button type="submit" variant="primary" loading={submitting} disabled={password.length === 0}>
+        Sign in
+      </Button>
     </form>
   );
 }

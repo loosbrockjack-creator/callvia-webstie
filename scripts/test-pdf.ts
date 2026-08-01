@@ -15,7 +15,7 @@ import { renderAgreementPdf } from "../lib/pdf/renderAgreementPdf";
 import { INTENT_TO_SIGN_TEXT, ESIGN_CONSENT_TEXT, SMS_CONSENT_TEXT } from "../lib/agreement/consent";
 import type { RenderedAgreement } from "../lib/agreement/types";
 
-const template = currentTemplate();
+const template = currentTemplate("service");
 const vars = {
   businessName: "O’Brien Plumbing & Heating",
   contactName: "Dana O’Brien",
@@ -25,6 +25,8 @@ const vars = {
   dueTodayAmount: "$1,097.00",
   includedMinutes: "750 minutes",
   overageRate: "$0.40 per minute",
+  trialStartDate: "",
+  trialEndDate: "",
 };
 
 const doc: RenderedAgreement = {
@@ -63,6 +65,57 @@ const doc: RenderedAgreement = {
   vars,
 };
 
+// The trial variant. The point of rendering it here is to confirm the Schedule
+// A exhibit prints a term instead of a fee table, and that no "Due at signing"
+// amount or recurring-charge line survives on a document with no price.
+const trialTemplate = currentTemplate("trial");
+const trialVars = {
+  businessName: "O’Brien Plumbing & Heating",
+  contactName: "Dana O’Brien",
+  packageName: "Callvia AI Receptionist, free trial",
+  monthlyAmount: "$0.00",
+  setupFeeAmount: "$0.00",
+  dueTodayAmount: "$0.00",
+  includedMinutes: "not applicable",
+  overageRate: "not applicable",
+  trialStartDate: "July 23, 2026",
+  trialEndDate: "August 6, 2026",
+};
+
+const trialDoc: RenderedAgreement = {
+  templateId: trialTemplate.templateId,
+  templateVersion: trialTemplate.version,
+  title: trialTemplate.title,
+  lastUpdated: trialTemplate.lastUpdated,
+  sections: interpolateSections(trialTemplate, trialVars),
+  schedule: {
+    packageKey: null,
+    packageName: "Callvia AI Receptionist, free trial",
+    packageSummary: null,
+    includedItems: [
+      "AI receptionist answering your calls",
+      "Caller details collected and confirmed on every call",
+      "Written call summaries sent to you after each call",
+      "Urgent calls flagged and escalated the way you choose",
+      "Setup and call forwarding help to get you live",
+    ],
+    usageTerms: null,
+    currency: "usd",
+    setupFeeCents: 0,
+    monthlyCents: 0,
+    setupFeeLabel: "No setup fee during the trial",
+    monthlyLabel: "No charge during the trial",
+    dueTodayCents: 0,
+    trial: { startsOn: "2026-07-23", endsOn: "2026-08-06", days: 14 },
+  },
+  party: {
+    businessName: "O’Brien Plumbing & Heating",
+    contactName: "Dana O’Brien",
+    email: "dana@obrienplumbing.example",
+  },
+  vars: trialVars,
+};
+
 async function main() {
 const bytes = await renderAgreementPdf(doc, {
   signedName: "Dana O’Brien — Owner",
@@ -83,6 +136,26 @@ const bytes = await renderAgreementPdf(doc, {
 
   writeFileSync("/tmp/callvia-sample.pdf", bytes);
   console.log(`OK: ${bytes.length} bytes -> /tmp/callvia-sample.pdf`);
+
+  const trialBytes = await renderAgreementPdf(trialDoc, {
+    signedName: "Dana O’Brien — Owner",
+    signedEmail: "dana@obrienplumbing.example",
+    signedTitle: "Owner",
+    signedAt: new Date("2026-07-23T15:04:05Z"),
+    ip: "203.0.113.42",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+    intentText: INTENT_TO_SIGN_TEXT,
+    esignConsentText: ESIGN_CONSENT_TEXT,
+    authorityAck: true,
+    smsConsent: false,
+    smsConsentText: null,
+    snapshotSha256: "a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f708192a3b4c5d6e7f801",
+    agreementId: "7a2e3d4c-5b6f-4071-8b9c-0d1e2f3a4b5c",
+    tokenLast4: "k4Tz",
+  });
+
+  writeFileSync("/tmp/callvia-trial-sample.pdf", trialBytes);
+  console.log(`OK: ${trialBytes.length} bytes -> /tmp/callvia-trial-sample.pdf`);
 }
 
 main().catch((err) => {

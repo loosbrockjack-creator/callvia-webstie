@@ -82,8 +82,8 @@ export async function POST(request: Request) {
   await ensureTemplateRegistered(
     TEMPLATE_ID,
     CURRENT_TEMPLATE_VERSION,
-    currentTemplate().title,
-    templateSourceHash(CURRENT_TEMPLATE_VERSION),
+    currentTemplate("service").title,
+    templateSourceHash(TEMPLATE_ID, CURRENT_TEMPLATE_VERSION),
   );
 
   const { id, rawToken } = await createAgreement({
@@ -100,6 +100,7 @@ export async function POST(request: Request) {
     monthlyCents,
     setupFeeLabel: asString(body.setupFeeLabel) || "One-time setup fee",
     monthlyLabel: asString(body.monthlyLabel) || `${packageName}, monthly service`,
+    templateId: TEMPLATE_ID,
     templateVersion: CURRENT_TEMPLATE_VERSION,
     expiresInDays,
   });

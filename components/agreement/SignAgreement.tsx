@@ -19,9 +19,19 @@ interface Props {
   email: string;
   disclosure: string;
   hasPhone: boolean;
+  /** A trial signs identically but has no checkout to continue to. */
+  isTrial?: boolean;
 }
 
-export function SignAgreement({ token, businessName, contactName, email, disclosure, hasPhone }: Props) {
+export function SignAgreement({
+  token,
+  businessName,
+  contactName,
+  email,
+  disclosure,
+  hasPhone,
+  isTrial = false,
+}: Props) {
   const [typedName, setTypedName] = useState(contactName);
   const [signerEmail, setSignerEmail] = useState(email);
   const [title, setTitle] = useState("");
@@ -66,8 +76,18 @@ export function SignAgreement({ token, businessName, contactName, email, disclos
         return;
       }
 
-      // Signature is durable at this point. Payment is a separate step, and a
-      // failure here leaves a valid signed agreement rather than losing it.
+      // Signature is durable at this point.
+      //
+      // A trial stops here: there is no checkout, no card, and nothing to
+      // charge. Reloading shows the signed-trial confirmation the page renders
+      // from the database, so the state on screen always matches the record.
+      if (isTrial) {
+        window.location.reload();
+        return;
+      }
+
+      // Payment is a separate step, and a failure here leaves a valid signed
+      // agreement rather than losing it.
       const checkoutRes = await fetch(`/api/agreement/${token}/checkout`, { method: "POST" });
       const checkoutData = await checkoutRes.json().catch(() => ({}));
       if (checkoutRes.ok && checkoutData.url) {
@@ -146,24 +166,24 @@ export function SignAgreement({ token, businessName, contactName, email, disclos
         />
       </div>
 
-      <label className="flex items-start gap-3.5 cursor-pointer">
+      <label className="flex items-start gap-3.5 cursor-pointer py-1.5 -my-1.5">
         <input
           type="checkbox"
           checked={esignConsent}
           onChange={(e) => setEsignConsent(e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 accent-[#7c5cfc]"
+          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
         />
         <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
           {ESIGN_CONSENT_TEXT}
         </span>
       </label>
 
-      <label className="flex items-start gap-3.5 cursor-pointer">
+      <label className="flex items-start gap-3.5 cursor-pointer py-1.5 -my-1.5">
         <input
           type="checkbox"
           checked={authorityAck}
           onChange={(e) => setAuthorityAck(e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 accent-[#7c5cfc]"
+          className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
         />
         <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
           {AUTHORITY_ACK_TEXT.replace("the business named above", businessName)}
@@ -173,12 +193,12 @@ export function SignAgreement({ token, businessName, contactName, email, disclos
       {/* Optional. Unchecked by default and never required to submit, so the
           signer can decline and still complete the agreement. */}
       {hasPhone && (
-        <label className="flex items-start gap-3.5 cursor-pointer">
+        <label className="flex items-start gap-3.5 cursor-pointer py-1.5 -my-1.5">
           <input
             type="checkbox"
             checked={smsConsent}
             onChange={(e) => setSmsConsent(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 accent-[#7c5cfc]"
+            className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
           />
           <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
             {SMS_CONSENT_TEXT} (Optional) View our{" "}
@@ -209,7 +229,7 @@ export function SignAgreement({ token, businessName, contactName, email, disclos
         disabled={!canSubmit}
         className="mt-2 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
       >
-        {submitting ? "Signing…" : "Sign and continue to payment"}
+        {submitting ? "Signing…" : isTrial ? "Sign and start my trial" : "Sign and continue to payment"}
       </button>
     </form>
   );

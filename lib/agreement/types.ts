@@ -6,6 +6,10 @@
 // agreements always render from the snapshot, never from the template module,
 // so editing a template can never change what somebody already signed.
 
+// A paid service agreement, or a free trial agreement. Trials share the whole
+// token / signature / audit / PDF pipeline but never touch Stripe.
+export type AgreementKind = "service" | "trial";
+
 export type Block =
   | { kind: "p"; text: string }
   | { kind: "ul"; items: string[] }
@@ -45,6 +49,13 @@ export interface Schedule {
   setupFeeLabel: string;
   monthlyLabel: string;
   dueTodayCents: number;
+
+  /**
+   * Set only on a trial. Its presence is what switches the order summary and
+   * the PDF exhibit from a fee table to a trial window, so a trial can never
+   * render a "Due today" line by accident.
+   */
+  trial?: { startsOn: string; endsOn: string; days: number };
 }
 
 export interface PartySnapshot {

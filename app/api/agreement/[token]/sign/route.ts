@@ -26,7 +26,7 @@ import {
   markPdfEmailed,
   signAgreement,
 } from "@/lib/agreement/queries";
-import { renderAgreement } from "@/lib/agreement/render";
+import { formatTrialDate, renderAgreement } from "@/lib/agreement/render";
 import { isExpired, isSigned } from "@/lib/agreement/status";
 import { renderAgreementPdf } from "@/lib/pdf/renderAgreementPdf";
 
@@ -47,7 +47,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
   if (isSigned(row.status)) {
     // A double-clicked submit lands here. Report the existing state rather than
     // an error, so the client can proceed straight to checkout.
-    return Response.json({ ok: true, alreadySigned: true });
+    return Response.json({ ok: true, alreadySigned: true, kind: row.kind });
   }
   if (isExpired(row.status, row.expires_at ? new Date(row.expires_at) : null)) {
     return Response.json({ ok: false, error: "This link has expired." }, { status: 410 });
@@ -99,7 +99,9 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
   });
 
   // Zero rows from the guarded update: someone else signed it first.
-  if (!signed) return Response.json({ ok: true, alreadySigned: true });
+  if (!signed) return Response.json({ ok: true, alreadySigned: true, kind: row.kind });
+
+  const isTrial = row.kind === "trial";
 
   const pdfBytes = await renderAgreementPdf(doc, {
     signedName: signed.signed_name ?? typedName,
@@ -121,11 +123,21 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
   await attachPdf(signed.id, pdfBytes);
 
   const base64 = Buffer.from(pdfBytes).toString("base64");
-  const filename = `Callvia-Service-Agreement-${row.business_name.replace(/[^a-zA-Z0-9]+/g, "-")}.pdf`;
-  const disclosure =
-    row.monthly_cents > 0
+  const docName = isTrial ? "Free-Trial-Agreement" : "Service-Agreement";
+  const filename = `Callvia-${docName}-${row.business_name.replace(/[^a-zA-Z0-9]+/g, "-")}.pdf`;
+
+  // A trial gets no payment disclosure at all. There is nothing to disclose:
+  // no amount, no renewal, no payment method on file.
+  const disclosure = isTrial
+    ? ""
+    : row.monthly_cents > 0
       ? (recurringDisclosure(row.monthly_cents, row.setup_fee_cents) ?? "")
       : oneTimeDisclosure(row.setup_fee_cents);
+
+  const trialWindow =
+    row.trial_starts_on && row.trial_ends_on
+      ? `${formatTrialDate(row.trial_starts_on)} through ${formatTrialDate(row.trial_ends_on)}`
+      : "";
 
   // Side effects only past this point. after() runs them once the response has
   // been sent, so a slow or failing Resend call cannot break signing.
@@ -133,25 +145,41 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
     const clientMail = await sendEmail({
       to: [signerEmail],
       replyTo: notifyAddress(),
-      subject: `Your signed Callvia agreement`,
-      text: [
-        `Hi ${typedName.split(" ")[0]},`,
-        ``,
-        `Thanks for signing. Your countersigned agreement is attached for your records.`,
-        ``,
-        disclosure,
-        ``,
-        `Your plan: ${row.package_name}`,
-        row.setup_fee_cents > 0 ? `${row.setup_fee_label}: ${formatCents(row.setup_fee_cents)}` : "",
-        row.monthly_cents > 0 ? `${row.monthly_label}: ${formatCents(row.monthly_cents)} per month` : "",
-        ``,
-        `Your service starts as soon as your first payment goes through. If you closed the payment page, you can reopen your agreement link to finish.`,
-        ``,
-        `Questions? Just reply to this email.`,
-        ``,
-        `Callvia`,
-        `team@callvia.io`,
-      ]
+      subject: isTrial ? `Your Callvia free trial agreement` : `Your signed Callvia agreement`,
+      text: (isTrial
+        ? [
+            `Hi ${typedName.split(" ")[0]},`,
+            ``,
+            `Thanks for signing. Your free trial agreement is attached for your records.`,
+            ``,
+            trialWindow ? `Your trial runs ${trialWindow}.` : "",
+            ``,
+            `There is nothing to pay and no card on file. We will be in touch shortly to get your receptionist set up and your calls forwarded.`,
+            ``,
+            `Questions? Just reply to this email.`,
+            ``,
+            `Callvia`,
+            `team@callvia.io`,
+          ]
+        : [
+            `Hi ${typedName.split(" ")[0]},`,
+            ``,
+            `Thanks for signing. Your countersigned agreement is attached for your records.`,
+            ``,
+            disclosure,
+            ``,
+            `Your plan: ${row.package_name}`,
+            row.setup_fee_cents > 0 ? `${row.setup_fee_label}: ${formatCents(row.setup_fee_cents)}` : "",
+            row.monthly_cents > 0 ? `${row.monthly_label}: ${formatCents(row.monthly_cents)} per month` : "",
+            ``,
+            `Your service starts as soon as your first payment goes through. If you closed the payment page, you can reopen your agreement link to finish.`,
+            ``,
+            `Questions? Just reply to this email.`,
+            ``,
+            `Callvia`,
+            `team@callvia.io`,
+          ]
+      )
         .filter((line) => line !== "")
         .join("\n"),
       attachments: [{ filename, content: base64 }],
@@ -159,15 +187,23 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
 
     await sendEmail({
       to: [notifyAddress()],
-      subject: `SIGNED: ${row.business_name} (${formatCents(row.setup_fee_cents + row.monthly_cents)} due)`,
+      subject: isTrial
+        ? `TRIAL SIGNED: ${row.business_name}`
+        : `SIGNED: ${row.business_name} (${formatCents(row.setup_fee_cents + row.monthly_cents)} due)`,
       text: [
-        `${row.business_name} signed their agreement.`,
+        isTrial
+          ? `${row.business_name} signed their free trial agreement.`
+          : `${row.business_name} signed their agreement.`,
         ``,
         `Signed by:  ${typedName}${title ? `, ${title}` : ""}`,
         `Email:      ${signerEmail}`,
-        `Package:    ${row.package_name}`,
-        `Setup fee:  ${formatCents(row.setup_fee_cents)}`,
-        `Monthly:    ${formatCents(row.monthly_cents)}`,
+        ...(isTrial
+          ? [`Trial:      ${trialWindow || "dates not recorded"}`]
+          : [
+              `Package:    ${row.package_name}`,
+              `Setup fee:  ${formatCents(row.setup_fee_cents)}`,
+              `Monthly:    ${formatCents(row.monthly_cents)}`,
+            ]),
         ``,
         `--- Audit ---`,
         `Timestamp:  ${signed.signed_at}`,
@@ -176,7 +212,9 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
         `Doc hash:   ${signed.snapshot_sha256}`,
         `SMS consent: ${smsConsent ? "YES" : "no"}`,
         ``,
-        `Payment is NOT yet confirmed. Watch the dashboard.`,
+        isTrial
+          ? `No payment is involved. Build their agent and convert before the trial ends.`
+          : `Payment is NOT yet confirmed. Watch the dashboard.`,
       ].join("\n"),
       attachments: [{ filename, content: base64 }],
     });
@@ -184,5 +222,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/agreement/[
     if (clientMail) await markPdfEmailed(signed.id);
   });
 
-  return Response.json({ ok: true });
+  // kind tells the browser whether to go to checkout or straight to a
+  // confirmation. A trial has no checkout to go to.
+  return Response.json({ ok: true, kind: row.kind });
 }

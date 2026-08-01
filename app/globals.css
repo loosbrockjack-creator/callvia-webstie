@@ -8,6 +8,28 @@
 @theme {
   --color-accent: #7c5cfc;
   --color-accent-hover: #9b7ffd;
+
+  /* Surfaces. The admin reads as one ruled black surface, so panels sit at or
+     just above the page background and are separated by hairlines, not fills. */
+  --color-surface: #0d0d0d;
+  --color-surface-raised: #141414;
+  --color-surface-hover: #181818;
+
+  /* Hairlines. `line` is the default divider used everywhere in the bento
+     grid; `line-strong` is only for a focused or hovered edge. */
+  --color-line: #1f1f1f;
+  --color-line-strong: #2a2a2a;
+
+  /* Text ramp. Named by role, not by lightness, so a future contrast tweak is
+     one edit here instead of 69 hardcoded hexes. */
+  --color-muted: #999999;
+  --color-dim: #555555;
+  --color-faint: #444444;
+
+  /* Semantic only. These never decorate, they only report state. */
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
 }
 
 html,
@@ -21,6 +43,26 @@ body {
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Admin overlays. Real classes rather than arbitrary animate-[] values, so the
+   prefers-reduced-motion block below can actually switch them off. */
+@keyframes sheetIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sheet-in {
+  animation: sheetIn 200ms ease-out;
+}
+
+.toast-in {
+  animation: toastIn 180ms ease-out;
 }
 
 /* Wave animation for waveform bars */
@@ -185,5 +227,9 @@ body {
   .roi-slider::-webkit-slider-thumb,
   .roi-slider::-moz-range-thumb {
     transition: none;
+  }
+  .sheet-in,
+  .toast-in {
+    animation: none;
   }
 }

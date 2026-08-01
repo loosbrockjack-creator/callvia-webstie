@@ -1,47 +1,77 @@
 import { sha256Hex } from "../crypto";
 import { canonicalJson } from "./interpolate";
-import type { AgreementTemplate } from "./types";
+import type { AgreementKind, AgreementTemplate } from "./types";
 import { v1 } from "./templates/v1";
+import { trialV1 } from "./templates/trial-v1";
 
-const TEMPLATES: Record<number, AgreementTemplate> = { 1: v1 };
+// Two documents now live here: the paid service agreement and the free trial
+// agreement. They are separate template families, each with its own version
+// line, which is why the registry is keyed by template id first.
+//
+// agreements.template_id / template_version is a composite FK to
+// agreement_templates, so this shape matches the database rather than fighting
+// it.
 
 export const TEMPLATE_ID = "callvia-service-agreement";
-export const CURRENT_TEMPLATE_VERSION = 1;
+export const TRIAL_TEMPLATE_ID = "callvia-free-trial";
 
-export function getTemplate(version: number): AgreementTemplate {
-  const t = TEMPLATES[version];
-  if (!t) throw new Error(`No agreement template registered for version ${version}`);
+export const CURRENT_TEMPLATE_VERSION = 1;
+export const CURRENT_TRIAL_VERSION = 1;
+
+const TEMPLATES: Record<string, Record<number, AgreementTemplate>> = {
+  [TEMPLATE_ID]: { 1: v1 },
+  [TRIAL_TEMPLATE_ID]: { 1: trialV1 },
+};
+
+export function templateIdFor(kind: AgreementKind): string {
+  return kind === "trial" ? TRIAL_TEMPLATE_ID : TEMPLATE_ID;
+}
+
+export function currentVersionFor(kind: AgreementKind): number {
+  return kind === "trial" ? CURRENT_TRIAL_VERSION : CURRENT_TEMPLATE_VERSION;
+}
+
+export function getTemplate(templateId: string, version: number): AgreementTemplate {
+  const t = TEMPLATES[templateId]?.[version];
+  if (!t) {
+    throw new Error(`No agreement template registered for ${templateId} v${version}`);
+  }
   return t;
 }
 
-export function currentTemplate(): AgreementTemplate {
-  return getTemplate(CURRENT_TEMPLATE_VERSION);
+export function currentTemplate(kind: AgreementKind = "service"): AgreementTemplate {
+  return getTemplate(templateIdFor(kind), currentVersionFor(kind));
 }
 
-export function templateSourceHash(version: number): string {
-  return sha256Hex(canonicalJson(getTemplate(version)));
+export function templateSourceHash(templateId: string, version: number): string {
+  return sha256Hex(canonicalJson(getTemplate(templateId, version)));
 }
 
 // Freeze guard. Once a version has been signed by a client its text must never
 // change, so its hash is pinned here. If this assertion fails you edited a
 // frozen template: revert it and add a new version instead.
 //
-// To register a new version: add it to TEMPLATES, bump CURRENT_TEMPLATE_VERSION,
-// run `npx tsx scripts/template-hash.ts` (or log templateSourceHash) to get the
-// hash, add it below, and insert the matching row into agreement_templates.
-export const FROZEN_HASHES: Record<number, string> = {
-  // v1 is not pinned yet. Pin it the moment the first client signs against it.
-  // 1: "<paste templateSourceHash(1) here>",
+// To register a new version: add it to TEMPLATES, bump the matching CURRENT_*
+// constant, run `npx tsx scripts/template-hash.ts` to get the hash, add it
+// below, and insert the matching row into agreement_templates.
+export const FROZEN_HASHES: Record<string, Record<number, string>> = {
+  // Neither template is pinned yet. Pin each the moment a client first signs
+  // against it. The trial template especially: its text is still a
+  // reconstruction and is expected to change before first use.
+  // [TEMPLATE_ID]:       { 1: "<paste templateSourceHash(TEMPLATE_ID, 1) here>" },
+  // [TRIAL_TEMPLATE_ID]: { 1: "<paste templateSourceHash(TRIAL_TEMPLATE_ID, 1) here>" },
 };
 
 export function assertTemplatesUnchanged(): void {
-  for (const [version, expected] of Object.entries(FROZEN_HASHES)) {
-    const actual = templateSourceHash(Number(version));
-    if (actual !== expected) {
-      throw new Error(
-        `Agreement template v${version} has been modified after being frozen. ` +
-          `Expected ${expected}, got ${actual}. Revert the edit and create a new version instead.`,
-      );
+  for (const [templateId, versions] of Object.entries(FROZEN_HASHES)) {
+    for (const [version, expected] of Object.entries(versions)) {
+      const actual = templateSourceHash(templateId, Number(version));
+      if (actual !== expected) {
+        throw new Error(
+          `Agreement template ${templateId} v${version} has been modified after being frozen. ` +
+            `Expected ${expected}, got ${actual}. Revert the edit and create a new version instead.`,
+        );
+      }
     }
   }
 }

@@ -12,6 +12,7 @@
 
 import { PDFDocument } from "pdf-lib";
 import { formatCents } from "../money";
+import { formatTrialDate } from "../agreement/render";
 import { Cursor, GREY, drawFooters, loadFonts } from "./layout";
 import type { RenderedAgreement } from "../agreement/types";
 
@@ -90,13 +91,14 @@ export async function renderAgreementPdf(
 
   // Schedule A
   c.newPage();
+  const s = doc.schedule;
+  const trial = s.trial;
+
   c.text("SCHEDULE A", { size: 8, bold: true, color: GREY });
   c.space(6);
-  c.text("Scope of Services and Fees", { size: 16, bold: true });
+  c.text(trial ? "Trial Scope and Term" : "Scope of Services and Fees", { size: 16, bold: true });
   c.rule();
   c.space(4);
-
-  const s = doc.schedule;
   c.text(s.packageName, { size: 12, bold: true });
   c.space(3);
   if (s.packageSummary) {
@@ -124,18 +126,37 @@ export async function renderAgreementPdf(
     c.space(8);
   }
 
-  c.text("Fees", { size: 10, bold: true });
-  c.space(8);
-  if (s.setupFeeCents > 0) c.feeRow(s.setupFeeLabel, formatCents(s.setupFeeCents));
-  if (s.monthlyCents > 0) c.feeRow(s.monthlyLabel, `${formatCents(s.monthlyCents)} per month`);
-  c.thinRule();
-  c.feeRow("Due at signing", formatCents(s.dueTodayCents), { emphasize: true });
-  if (s.monthlyCents > 0) {
+  if (trial) {
+    // A trial exhibit states the term and the absence of any charge. It must
+    // never print a fee row, a "Due at signing" line, or a recurring-charge
+    // disclosure, because none of those are true of a trial and a document
+    // implying otherwise is the whole risk being avoided by keeping Stripe out.
+    c.text("Term", { size: 10, bold: true });
+    c.space(8);
+    c.feeRow("Trial begins", formatTrialDate(trial.startsOn));
+    c.feeRow("Trial ends", formatTrialDate(trial.endsOn));
+    c.feeRow("Length", `${trial.days} days`);
+    c.thinRule();
+    c.feeRow("Due at signing", "No charge", { emphasize: true });
     c.space(6);
     c.text(
-      `Recurring charge: ${formatCents(s.monthlyCents)} per month, beginning on the date of first payment, continuing automatically until cancelled.`,
+      "No payment method is collected and no charge arises from this Agreement. Continuing after the trial requires a separate signed agreement.",
       { size: 9, bold: true },
     );
+  } else {
+    c.text("Fees", { size: 10, bold: true });
+    c.space(8);
+    if (s.setupFeeCents > 0) c.feeRow(s.setupFeeLabel, formatCents(s.setupFeeCents));
+    if (s.monthlyCents > 0) c.feeRow(s.monthlyLabel, `${formatCents(s.monthlyCents)} per month`);
+    c.thinRule();
+    c.feeRow("Due at signing", formatCents(s.dueTodayCents), { emphasize: true });
+    if (s.monthlyCents > 0) {
+      c.space(6);
+      c.text(
+        `Recurring charge: ${formatCents(s.monthlyCents)} per month, beginning on the date of first payment, continuing automatically until cancelled.`,
+        { size: 9, bold: true },
+      );
+    }
   }
 
   // Signature block, kept whole on one page.

@@ -1,144 +1,169 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { formatCents } from "@/lib/money";
-import { statusLabel } from "@/lib/agreement/status";
+import { STATUSES, statusLabel } from "@/lib/agreement/status";
+import { DataTable, type Column } from "./ui/DataTable";
+import { StatusBadge } from "./ui/Badge";
+import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ui/overlays";
+import { useToast } from "./ui/Toast";
 import type { AdminAgreement } from "./types";
 
-const STATUS_COLOR: Record<string, string> = {
-  draft: "#555555",
-  sent: "#999999",
-  viewed: "#9b7ffd",
-  signed: "#fbbf24",
-  payment_pending: "#fbbf24",
-  active: "#4ade80",
-  void: "#555555",
-  expired: "#555555",
-};
-
 function shortDate(iso: string | null): string {
-  if (!iso) return "";
+  if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function AgreementTable({ agreements }: { agreements: AdminAgreement[] }) {
-  async function resend(id: string) {
-    const res = await fetch(`/api/admin/agreements/${id}/send`, { method: "POST" });
-    const data = await res.json().catch(() => ({}));
-    if (data.url) {
-      await navigator.clipboard.writeText(data.url).catch(() => {});
-      alert(data.emailed ? "Sent and copied to clipboard." : `Email not sent. Link copied:\n${data.url}`);
-    } else {
-      alert(data.error ?? "Could not send.");
+  const toast = useToast();
+  const [voiding, setVoiding] = useState<AdminAgreement | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function resend(a: AdminAgreement) {
+    setBusyId(a.id);
+    try {
+      const res = await fetch(`/api/admin/agreements/${a.id}/send`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data.url) {
+        // Best effort: clipboard access can be denied, and the link is shown in
+        // the toast either way so it is never lost.
+        await navigator.clipboard.writeText(data.url).catch(() => {});
+        if (data.emailed) toast.success("Sent, and the link is on your clipboard.", data.url);
+        else toast.error("Email did not send. Copy this link.", data.url);
+      } else {
+        toast.error(data.error ?? "Could not send.");
+      }
+    } finally {
+      setBusyId(null);
     }
   }
 
-  async function voidAgreement(id: string, name: string) {
-    const reason = prompt(`Void the agreement for ${name}? The record and any signed PDF are kept. Reason:`);
-    if (reason === null) return;
-    const res = await fetch(`/api/admin/agreements/${id}/void`, {
+  async function confirmVoid(reason: string) {
+    if (!voiding) return;
+    const res = await fetch(`/api/admin/agreements/${voiding.id}/void`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reason }),
     });
-    if (res.ok) window.location.reload();
-    else alert("Could not void.");
+    if (res.ok) {
+      toast.success(`Voided ${voiding.businessName}.`);
+      setVoiding(null);
+      window.location.reload();
+    } else {
+      toast.error("Could not void.");
+    }
   }
 
-  if (agreements.length === 0) {
-    return (
-      <p className="text-sm" style={{ color: "#555555" }}>
-        No agreements yet.
-      </p>
-    );
-  }
+  const columns: Column<AdminAgreement>[] = [
+    {
+      key: "client",
+      header: "Client",
+      mobile: "title",
+      sortValue: (a) => a.businessName.toLowerCase(),
+      cell: (a) => (
+        <Link href={`/admin/agreements/${a.id}`} className="group block min-w-0">
+          <span className="block truncate font-medium text-white group-hover:text-accent-hover">
+            {a.businessName}
+          </span>
+          <span className="block truncate text-xs text-dim">{a.email}</span>
+        </Link>
+      ),
+    },
+    {
+      key: "package",
+      header: "Package",
+      cell: (a) => <span className="truncate">{a.packageName}</span>,
+    },
+    {
+      key: "price",
+      header: "Price",
+      className: "tabular-nums",
+      sortValue: (a) => a.setupFeeCents + a.monthlyCents,
+      cell: (a) => (
+        <span className="whitespace-nowrap">
+          {a.monthlyCents > 0 ? `${formatCents(a.monthlyCents)}/mo` : formatCents(a.setupFeeCents)}
+          {a.monthlyCents > 0 && a.setupFeeCents > 0 && (
+            <span className="text-dim"> + {formatCents(a.setupFeeCents)}</span>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      mobile: "trailing",
+      sortValue: (a) => a.status,
+      cell: (a) => <StatusBadge status={a.status} />,
+    },
+    {
+      key: "views",
+      header: "Views",
+      className: "tabular-nums",
+      sortValue: (a) => a.viewCount,
+      cell: (a) => (a.viewCount === 0 ? <span className="text-faint">0</span> : a.viewCount),
+    },
+    {
+      key: "created",
+      header: "Created",
+      className: "whitespace-nowrap",
+      sortValue: (a) => a.createdAt,
+      cell: (a) => shortDate(a.createdAt),
+    },
+    {
+      key: "actions",
+      header: "",
+      mobile: "actions",
+      className: "text-right",
+      cell: (a) => (
+        <span className="flex flex-wrap items-center gap-2 md:justify-end">
+          <Button size="sm" onClick={() => resend(a)} loading={busyId === a.id}>
+            {a.sentAt ? "Resend" : "Send"}
+          </Button>
+          {a.status !== "void" && (
+            <Button size="sm" variant="ghost" onClick={() => setVoiding(a)}>
+              Void
+            </Button>
+          )}
+          <Link
+            href={`/admin/agreements/${a.id}`}
+            className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
+          >
+            Details
+          </Link>
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <section>
-      <h2 className="text-sm tracking-widest uppercase mb-6" style={{ color: "#555555" }}>
-        All agreements
-      </h2>
+    <>
+      <DataTable
+        rows={agreements}
+        columns={columns}
+        rowKey={(a) => a.id}
+        searchText={(a) => `${a.businessName} ${a.contactName} ${a.email} ${a.packageName}`}
+        searchPlaceholder="Search by business, contact, or email"
+        filter={{
+          label: "Status",
+          options: STATUSES.map((s) => ({ value: s, label: statusLabel(s) })),
+          match: (a, v) => a.status === v,
+        }}
+        emptyTitle="No agreements yet."
+        emptyHint="Create one to send a client their contract."
+      />
 
-      <div className="overflow-x-auto">
-        {/* min-width keeps the wrapper scrolling rather than letting seven
-            columns squeeze into a phone width and wrap. */}
-        <table className="w-full min-w-[760px] text-sm border-collapse">
-          <thead>
-            <tr className="text-left" style={{ color: "#555555" }}>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Client</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Package</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Price</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Status</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Views</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3 pr-4">Created</th>
-              <th className="font-normal text-xs tracking-widest uppercase py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {agreements.map((a) => (
-              <tr key={a.id} className="border-t align-top" style={{ borderColor: "#1f1f1f" }}>
-                <td className="py-4 pr-4">
-                  <p className="text-white">{a.businessName}</p>
-                  <p className="text-xs" style={{ color: "#555555" }}>
-                    {a.email}
-                  </p>
-                </td>
-                <td className="py-4 pr-4" style={{ color: "#999999" }}>
-                  {a.packageName}
-                </td>
-                <td className="py-4 pr-4 whitespace-nowrap" style={{ color: "#999999" }}>
-                  {a.setupFeeCents > 0 && <div>{formatCents(a.setupFeeCents)} setup</div>}
-                  {a.monthlyCents > 0 && <div>{formatCents(a.monthlyCents)}/mo</div>}
-                </td>
-                <td className="py-4 pr-4 whitespace-nowrap">
-                  <span style={{ color: STATUS_COLOR[a.status] ?? "#999999" }}>{statusLabel(a.status)}</span>
-                  {/* A signed agreement whose PDF never reached the client is a
-                      silent failure, so it is called out here. */}
-                  {a.hasPdf && !a.pdfEmailedAt && (
-                    <div className="text-xs mt-1" style={{ color: "#f87171" }}>
-                      PDF not emailed
-                    </div>
-                  )}
-                </td>
-                <td className="py-4 pr-4 tabular-nums" style={{ color: "#999999" }}>
-                  {a.viewCount}
-                </td>
-                <td className="py-4 pr-4 whitespace-nowrap" style={{ color: "#555555" }}>
-                  {shortDate(a.createdAt)}
-                </td>
-                <td className="py-4 whitespace-nowrap">
-                  <div className="flex gap-3 justify-end">
-                    <a
-                      href={`/admin/agreements/${a.id}`}
-                      className="text-xs transition-colors duration-200 hover:text-white"
-                      style={{ color: "#999999" }}
-                    >
-                      Details
-                    </a>
-                    {a.status !== "void" && (
-                      <>
-                        <button
-                          onClick={() => resend(a.id)}
-                          className="text-xs transition-colors duration-200 hover:text-white"
-                          style={{ color: "#999999" }}
-                        >
-                          {a.sentAt ? "Resend" : "Send"}
-                        </button>
-                        <button
-                          onClick={() => voidAgreement(a.id, a.businessName)}
-                          className="text-xs transition-colors duration-200 hover:text-white"
-                          style={{ color: "#555555" }}
-                        >
-                          Void
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <ConfirmDialog
+        open={voiding !== null}
+        onClose={() => setVoiding(null)}
+        onConfirm={confirmVoid}
+        title={`Void the agreement for ${voiding?.businessName ?? ""}?`}
+        description="The record and any signed PDF are kept. The link stops working."
+        confirmLabel="Void agreement"
+        destructive
+        reasonLabel="Reason"
+      />
+    </>
   );
 }

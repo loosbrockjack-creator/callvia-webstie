@@ -1,15 +1,20 @@
 import { formatCents } from "@/lib/money";
+import { formatTrialDate } from "@/lib/agreement/render";
 import type { Schedule } from "@/lib/agreement/types";
 
 // Schedule A, shown above the contract. The client should be able to answer
 // "what am I buying and what will I be charged" without reading a clause.
+//
+// On a trial the answer is "nothing", and the fee block is replaced by the
+// trial window. The branch is on schedule.trial rather than on a price being
+// zero, so a trial can never fall through to a fee table.
 export function OrderSummary({ schedule }: { schedule: Schedule }) {
-  const { setupFeeCents, monthlyCents, dueTodayCents, usageTerms } = schedule;
+  const { setupFeeCents, monthlyCents, dueTodayCents, usageTerms, trial } = schedule;
 
   return (
     <section className="rounded-xl border p-8 mb-16" style={{ borderColor: "#1f1f1f", background: "#0d0d0d" }}>
       <p className="text-xs tracking-widest uppercase mb-4" style={{ color: "#555555" }}>
-        Your plan
+        {trial ? "Your free trial" : "Your plan"}
       </p>
 
       <h2 className="text-2xl font-light tracking-tight text-white mb-2" style={{ letterSpacing: "-0.025em" }}>
@@ -44,6 +49,38 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
         </p>
       )}
 
+      {trial ? (
+        <div className="border-t pt-6" style={{ borderColor: "#1f1f1f" }}>
+          <div className="flex justify-between items-baseline mb-3">
+            <span className="text-base" style={{ color: "#999999" }}>
+              Trial begins
+            </span>
+            <span className="text-base text-white">{formatTrialDate(trial.startsOn)}</span>
+          </div>
+          <div className="flex justify-between items-baseline mb-3">
+            <span className="text-base" style={{ color: "#999999" }}>
+              Trial ends
+            </span>
+            <span className="text-base text-white">{formatTrialDate(trial.endsOn)}</span>
+          </div>
+          <div
+            className="flex justify-between items-baseline pt-4 mt-4 border-t"
+            style={{ borderColor: "#1f1f1f" }}
+          >
+            <span className="text-base text-white font-medium">Due today</span>
+            <span
+              className="text-2xl font-light text-white"
+              style={{ letterSpacing: "-0.025em" }}
+            >
+              No charge
+            </span>
+          </div>
+          <p className="text-sm mt-3" style={{ color: "#555555" }}>
+            No card is collected and nothing can be charged. {trial.days} days, then it simply ends
+            unless you decide to continue.
+          </p>
+        </div>
+      ) : (
       <div className="border-t pt-6" style={{ borderColor: "#1f1f1f" }}>
         {setupFeeCents > 0 && (
           <div className="flex justify-between items-baseline mb-3">
@@ -76,6 +113,7 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
           </p>
         )}
       </div>
+      )}
     </section>
   );
 }

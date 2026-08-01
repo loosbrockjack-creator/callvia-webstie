@@ -15,7 +15,7 @@ import { q } from "../db";
 import { generateToken, hashToken, sha256Hex, tokenLast4 } from "../crypto";
 import { canonicalJson } from "./interpolate";
 import type { AgreementStatus } from "./status";
-import type { RenderedAgreement, UsageTermsSnapshot } from "./types";
+import type { AgreementKind, RenderedAgreement, UsageTermsSnapshot } from "./types";
 
 export interface AgreementRow {
   id: string;
@@ -31,6 +31,14 @@ export interface AgreementRow {
 
   status: AgreementStatus;
   status_changed_at: Date;
+
+  // 'service' = paid agreement. 'trial' = free trial, which never touches
+  // Stripe and whose terminal status is 'signed'.
+  kind: AgreementKind;
+  trial_starts_on: string | null; // date, not timestamptz: a trial window is
+  trial_ends_on: string | null;   // calendar days, not an instant.
+  converted_to_agreement_id: string | null;
+  converted_at: Date | null;
 
   template_id: string;
   template_version: number;
@@ -95,6 +103,10 @@ const SELECT_AGREEMENT = `
   select a.id, a.client_id,
          c.business_name, c.contact_name, c.email, c.phone,
          a.token_last4, a.expires_at, a.status, a.status_changed_at,
+         a.kind,
+         to_char(a.trial_starts_on, 'YYYY-MM-DD') as trial_starts_on,
+         to_char(a.trial_ends_on,   'YYYY-MM-DD') as trial_ends_on,
+         a.converted_to_agreement_id, a.converted_at,
          a.template_id, a.template_version,
          a.currency, a.setup_fee_cents, a.monthly_cents, a.setup_fee_label, a.monthly_label,
          a.package_key, a.package_name, a.package_summary, a.included_items, a.usage_terms,
@@ -192,8 +204,15 @@ export interface CreateAgreementInput {
   monthlyCents: number;
   setupFeeLabel: string;
   monthlyLabel: string;
+  templateId: string;
   templateVersion: number;
   expiresInDays: number | null;
+
+  /** Defaults to 'service'. A trial carries no price and must carry dates. */
+  kind?: AgreementKind;
+  /** 'YYYY-MM-DD'. Required when kind is 'trial', enforced by a CHECK. */
+  trialStartsOn?: string | null;
+  trialEndsOn?: string | null;
 }
 
 // Returns the raw token exactly once. It is never stored and cannot be
@@ -235,20 +254,26 @@ export async function createAgreement(
   const rows = await q<{ id: string }>(
     `insert into agreements (
        client_id, token_hash, token_last4, expires_at,
+       kind, trial_starts_on, trial_ends_on,
        template_id, template_version,
        setup_fee_cents, monthly_cents, setup_fee_label, monthly_label,
        package_key, package_name, package_summary, included_items, usage_terms
      ) values (
        $1, $2, $3, $4,
-       'callvia-service-agreement', $5,
-       $6, $7, $8, $9,
-       $10, $11, $12, $13::jsonb, $14::jsonb
+       $5, $6::date, $7::date,
+       $8, $9,
+       $10, $11, $12, $13,
+       $14, $15, $16, $17::jsonb, $18::jsonb
      ) returning id`,
     [
       clientId,
       hashToken(rawToken),
       tokenLast4(rawToken),
       expiresAt,
+      input.kind ?? "service",
+      input.trialStartsOn ?? null,
+      input.trialEndsOn ?? null,
+      input.templateId,
       input.templateVersion,
       input.setupFeeCents,
       input.monthlyCents,
@@ -263,8 +288,103 @@ export async function createAgreement(
   );
 
   const id = rows[0].id;
-  await logEvent(id, "created", { actor: "admin", data: { packageKey: input.packageKey } });
+  await logEvent(id, "created", {
+    actor: "admin",
+    data: { packageKey: input.packageKey, kind: input.kind ?? "service" },
+  });
   return { id, rawToken };
+}
+
+// Marks a trial as converted and points it at the service agreement created
+// from it. Compare-and-swap on converted_to_agreement_id being null, so two
+// clicks cannot produce two agreements both claiming to be the conversion.
+export async function markTrialConverted(
+  trialId: string,
+  newAgreementId: string,
+): Promise<boolean> {
+  const rows = await q<{ id: string }>(
+    `update agreements
+        set converted_to_agreement_id = $2, converted_at = now()
+      where id = $1 and kind = 'trial' and converted_to_agreement_id is null
+      returning id`,
+    [trialId, newAgreementId],
+  );
+  if (rows.length === 0) return false;
+  await logEvent(trialId, "converted", { actor: "admin", data: { newAgreementId } });
+  return true;
+}
+
+export interface RecentEvent {
+  id: string;
+  agreement_id: string;
+  kind: AgreementKind;
+  type: string;
+  at: Date;
+  actor: string;
+  business_name: string;
+}
+
+// The dashboard activity feed. agreement_events has been written since day one
+// but was only ever read on a single agreement's detail page.
+export async function listRecentEvents(limit = 12): Promise<RecentEvent[]> {
+  return q<RecentEvent>(
+    `select e.id::text as id, e.agreement_id::text as agreement_id,
+            a.kind, e.type, e.at, e.actor, c.business_name
+       from agreement_events e
+       join agreements a on a.id = e.agreement_id
+       join clients c    on c.id = a.client_id
+      order by e.at desc
+      limit $1`,
+    [limit],
+  );
+}
+
+export interface ClientListRow {
+  id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string | null;
+  created_at: Date;
+  agreement_count: number;
+  trial_count: number;
+  has_active: boolean;
+}
+
+export async function listClients(): Promise<ClientListRow[]> {
+  return q<ClientListRow>(
+    `select c.id::text as id, c.business_name, c.contact_name, c.email, c.phone, c.created_at,
+            count(*) filter (where a.kind = 'service')::int as agreement_count,
+            count(*) filter (where a.kind = 'trial')::int   as trial_count,
+            bool_or(a.status = 'active')                    as has_active
+       from clients c
+       left join agreements a on a.client_id = c.id
+      group by c.id
+      order by c.created_at desc
+      limit 200`,
+    [],
+  );
+}
+
+export interface ClientRow {
+  id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string | null;
+  stripe_customer_id: string | null;
+  notes: string | null;
+  created_at: Date;
+}
+
+export async function findClientById(id: string): Promise<ClientRow | null> {
+  const rows = await q<ClientRow>(
+    `select id::text as id, business_name, contact_name, email, phone,
+            stripe_customer_id, notes, created_at
+       from clients where id = $1`,
+    [id],
+  );
+  return rows[0] ?? null;
 }
 
 // Because only the hash of a token is stored, an existing link cannot be

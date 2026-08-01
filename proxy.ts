@@ -22,15 +22,20 @@ export async function proxy(request: NextRequest) {
 
   const isAccountPage = pathname === "/account" || pathname.startsWith("/account/");
 
-  // Agreement links and the client dashboard are private: keep them out of
-  // search engines, out of caches, and out of referrer headers sent to third
-  // parties.
-  if (pathname.startsWith("/agreement/") || isAccountPage) {
+  // Agreement links, onboarding forms, and the client dashboard are private:
+  // keep them out of search engines, out of caches, and out of referrer headers
+  // sent to third parties.
+  if (
+    pathname.startsWith("/agreement/") ||
+    pathname.startsWith("/onboarding/") ||
+    isAccountPage
+  ) {
     const res = NextResponse.next();
     res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
     res.headers.set("Referrer-Policy", "no-referrer");
     res.headers.set("Cache-Control", "private, no-store, max-age=0");
-    // Agreement pages carry their own token; only /account needs a session.
+    // Agreement and onboarding pages carry their own token; only /account needs
+    // a session.
     if (!isAccountPage) return res;
     return gateClient(request, res);
   }
@@ -106,6 +111,7 @@ export const config = {
     "/admin/:path*",
     "/api/admin/:path*",
     "/agreement/:path*",
+    "/onboarding/:path*",
     "/account/:path*",
     "/api/account/:path*",
   ],

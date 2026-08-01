@@ -1,49 +1,50 @@
 "use client";
 
 import { useState } from "react";
+import { LogOut } from "lucide-react";
+import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ui/overlays";
+import { useToast } from "./ui/Toast";
 
 // Admin force-logout for one client. Confirms first because it invalidates
 // every device the client is currently logged in on.
 export function RevokeSessionsButton({ clientId }: { clientId: string }) {
-  const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle");
-  const [message, setMessage] = useState<string | null>(null);
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
 
   async function revoke() {
-    if (!confirm("Log this client out of all devices? They can log back in with a fresh link.")) return;
-    setStatus("working");
-    setMessage(null);
     try {
-      const res = await fetch(`/api/admin/clients/${clientId}/revoke-sessions`, { method: "POST" });
+      const res = await fetch(`/api/admin/clients/${clientId}/revoke-sessions`, {
+        method: "POST",
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMessage(data.error ?? "Failed.");
-        setStatus("error");
+        toast.error(data.error ?? "Could not log them out.");
         return;
       }
-      setMessage(`Logged out of ${data.revoked} session${data.revoked === 1 ? "" : "s"}.`);
-      setStatus("done");
+      toast.success(
+        `Logged out of ${data.revoked} session${data.revoked === 1 ? "" : "s"}.`,
+      );
+      setOpen(false);
     } catch {
-      setMessage("Network error.");
-      setStatus("error");
+      toast.error("Network error.");
     }
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <button
-        type="button"
-        onClick={revoke}
-        disabled={status === "working"}
-        className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-full border transition-colors duration-200 hover:bg-white/5 disabled:opacity-50"
-        style={{ borderColor: "#1f1f1f", color: "#cccccc" }}
-      >
-        {status === "working" ? "Working…" : "Force log out"}
-      </button>
-      {message && (
-        <span className="text-sm" style={{ color: status === "error" ? "#f87171" : "#a48bff" }}>
-          {message}
-        </span>
-      )}
-    </div>
+    <>
+      <Button size="sm" icon={<LogOut size={14} />} onClick={() => setOpen(true)}>
+        Force log out
+      </Button>
+      <ConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={revoke}
+        title="Log this client out of all devices?"
+        description="Every session they have open is ended immediately. They can log back in any time with a fresh link."
+        confirmLabel="Log them out"
+        destructive
+      />
+    </>
   );
 }

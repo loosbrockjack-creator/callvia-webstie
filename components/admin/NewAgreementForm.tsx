@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "./ui/Button";
+import { Modal } from "./ui/overlays";
+import { Checkbox, Input, Select, Textarea } from "./ui/form";
+import { useToast } from "./ui/Toast";
 import type { AdminPackage } from "./types";
-
-const inputClass =
-  "w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent";
-const inputStyle = { background: "#0d0d0d", borderColor: "#1f1f1f" } as const;
-const labelClass = "block text-xs tracking-widest uppercase mb-3";
-const labelStyle = { color: "#555555" } as const;
 
 function dollars(cents: number): string {
   return (cents / 100).toFixed(2);
 }
 
 export function NewAgreementForm({ packages }: { packages: AdminPackage[] }) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [packageKey, setPackageKey] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -30,7 +30,6 @@ export function NewAgreementForm({ packages }: { packages: AdminPackage[] }) {
   const [sendNow, setSendNow] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<string | null>(null);
 
   // Selecting a package only prefills. Every field below stays editable, so a
   // custom deal is a package with edits and a bespoke one is no package at all.
@@ -50,7 +49,6 @@ export function NewAgreementForm({ packages }: { packages: AdminPackage[] }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setResult(null);
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/agreements", {
@@ -83,59 +81,44 @@ export function NewAgreementForm({ packages }: { packages: AdminPackage[] }) {
         const sendData = await sendRes.json().catch(() => ({}));
         // Sending rotates the token, so the link from the send response is the
         // live one. The link from create is already dead at this point.
-        setResult(
-          sendData.emailed
-            ? `Sent to ${email}. Link: ${sendData.url}`
-            : `Created, but the email did not send. Copy this link: ${sendData.url ?? data.url}`,
-        );
+        if (sendData.emailed) {
+          toast.success(`Sent to ${email}.`, sendData.url);
+        } else {
+          toast.error(
+            "Created, but the email did not send. Copy this link now.",
+            sendData.url ?? data.url,
+          );
+        }
       } else {
-        setResult(`Created. Copy this link now, it cannot be shown again: ${data.url}`);
+        toast.info("Created. Copy this link now, it cannot be shown again.", data.url);
       }
+
+      setOpen(false);
       setSubmitting(false);
+      window.location.reload();
     } catch {
       setError("Network error. Try again.");
       setSubmitting(false);
     }
   }
 
-  if (!open) {
-    return (
-      <div className="mb-16">
-        <button
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200"
-        >
-          New agreement
-        </button>
-        {result && (
-          <p className="mt-5 text-sm break-all" style={{ color: "#999999" }}>
-            {result}
-          </p>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <section className="mb-16 rounded-xl border p-8" style={{ borderColor: "#1f1f1f", background: "#0d0d0d" }}>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-lg font-medium">New agreement</h2>
-        <button onClick={() => setOpen(false)} className="text-xs tracking-widest uppercase" style={labelStyle}>
-          Close
-        </button>
-      </div>
+    <>
+      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setOpen(true)}>
+        New agreement
+      </Button>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-7" noValidate>
-        <div>
-          <label htmlFor="pkg" className={labelClass} style={labelStyle}>
-            Package
-          </label>
-          <select
-            id="pkg"
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="New agreement"
+        description="Selecting a package prefills the fields. All of them stay editable."
+      >
+        <form id="new-agreement" onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+          <Select
+            label="Package"
             value={packageKey}
             onChange={(e) => applyPackage(e.target.value)}
-            className={inputClass}
-            style={inputStyle}
           >
             <option value="">Custom (no package)</option>
             {packages.map((p) => (
@@ -143,110 +126,100 @@ export function NewAgreementForm({ packages }: { packages: AdminPackage[] }) {
                 {p.name}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
 
-        <div className="grid gap-7 sm:grid-cols-2">
-          <div>
-            <label htmlFor="biz" className={labelClass} style={labelStyle}>
-              Business name *
-            </label>
-            <input id="biz" value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} style={inputStyle} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Input
+              label="Business name"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              autoComplete="organization"
+            />
+            <Input
+              label="Contact name"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              autoComplete="name"
+            />
+            <Input
+              label="Email"
+              type="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+            <Input
+              label="Phone"
+              type="tel"
+              inputMode="tel"
+              optional
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              autoComplete="tel"
+            />
           </div>
-          <div>
-            <label htmlFor="contact" className={labelClass} style={labelStyle}>
-              Contact name *
-            </label>
-            <input id="contact" value={contactName} onChange={(e) => setContactName(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-          <div>
-            <label htmlFor="email" className={labelClass} style={labelStyle}>
-              Email *
-            </label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-          <div>
-            <label htmlFor="phone" className={labelClass} style={labelStyle}>
-              Phone
-            </label>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-        </div>
 
-        <div>
-          <label htmlFor="pkgname" className={labelClass} style={labelStyle}>
-            Package name shown to client
-          </label>
-          <input id="pkgname" value={packageName} onChange={(e) => setPackageName(e.target.value)} className={inputClass} style={inputStyle} />
-        </div>
+          <Input
+            label="Package name shown to client"
+            value={packageName}
+            onChange={(e) => setPackageName(e.target.value)}
+          />
+          <Input
+            label="One-line summary"
+            value={packageSummary}
+            onChange={(e) => setPackageSummary(e.target.value)}
+          />
+          <Textarea
+            label="What is included"
+            hint="One per line."
+            rows={6}
+            value={includedText}
+            onChange={(e) => setIncludedText(e.target.value)}
+          />
 
-        <div>
-          <label htmlFor="pkgsum" className={labelClass} style={labelStyle}>
-            One-line summary
-          </label>
-          <input id="pkgsum" value={packageSummary} onChange={(e) => setPackageSummary(e.target.value)} className={inputClass} style={inputStyle} />
-        </div>
-
-        <div>
-          <label htmlFor="incl" className={labelClass} style={labelStyle}>
-            What is included (one per line)
-          </label>
-          <textarea id="incl" rows={6} value={includedText} onChange={(e) => setIncludedText(e.target.value)} className={inputClass} style={inputStyle} />
-        </div>
-
-        <div className="grid gap-7 sm:grid-cols-2">
-          <div>
-            <label htmlFor="setup" className={labelClass} style={labelStyle}>
-              One-time setup fee ($)
-            </label>
-            <input id="setup" inputMode="decimal" value={setupFee} onChange={(e) => setSetupFee(e.target.value)} className={inputClass} style={inputStyle} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Input
+              label="Setup fee ($)"
+              inputMode="decimal"
+              value={setupFee}
+              onChange={(e) => setSetupFee(e.target.value)}
+            />
+            <Input
+              label="Monthly ($)"
+              inputMode="decimal"
+              value={monthly}
+              onChange={(e) => setMonthly(e.target.value)}
+            />
+            <Input
+              label="Included minutes"
+              optional
+              inputMode="numeric"
+              value={includedMinutes}
+              onChange={(e) => setIncludedMinutes(e.target.value)}
+            />
+            <Input
+              label="Overage per minute ($)"
+              optional
+              inputMode="decimal"
+              value={overageRate}
+              onChange={(e) => setOverageRate(e.target.value)}
+            />
           </div>
-          <div>
-            <label htmlFor="monthly" className={labelClass} style={labelStyle}>
-              Monthly ($)
-            </label>
-            <input id="monthly" inputMode="decimal" value={monthly} onChange={(e) => setMonthly(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-          <div>
-            <label htmlFor="mins" className={labelClass} style={labelStyle}>
-              Included minutes (optional)
-            </label>
-            <input id="mins" inputMode="numeric" value={includedMinutes} onChange={(e) => setIncludedMinutes(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-          <div>
-            <label htmlFor="over" className={labelClass} style={labelStyle}>
-              Overage per minute ($, optional)
-            </label>
-            <input id="over" inputMode="decimal" value={overageRate} onChange={(e) => setOverageRate(e.target.value)} className={inputClass} style={inputStyle} />
-          </div>
-        </div>
 
-        <label className="flex items-start gap-3.5 cursor-pointer">
-          <input type="checkbox" checked={sendNow} onChange={(e) => setSendNow(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#7c5cfc]" />
-          <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
-            Email the agreement link to the client now.
-          </span>
-        </label>
+          <Checkbox
+            checked={sendNow}
+            onChange={(e) => setSendNow(e.target.checked)}
+            label="Email the agreement link to the client now."
+          />
 
-        {error && (
-          <p className="text-sm" style={{ color: "#f87171" }}>
-            {error}
-          </p>
-        )}
-        {result && (
-          <p className="text-sm break-all" style={{ color: "#999999" }}>
-            {result}
-          </p>
-        )}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="self-start inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none"
-        >
-          {submitting ? "Creating…" : sendNow ? "Create and send" : "Create"}
-        </button>
-      </form>
-    </section>
+          <Button type="submit" variant="primary" loading={submitting} className="sm:self-start">
+            {sendNow ? "Create and send" : "Create"}
+          </Button>
+        </form>
+      </Modal>
+    </>
   );
 }
