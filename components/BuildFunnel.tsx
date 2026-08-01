@@ -99,10 +99,10 @@ const QUESTIONS: Question[] = [
   },
   {
     id: "summaryTo",
-    kind: "single",
+    kind: "multi",
     label: "Where should the call summaries be sent?",
-    sublabel: "They land within a minute of the call ending.",
-    options: ["Phone number", "Email", "Both"],
+    sublabel: "They land within a minute of the call ending. Pick everything that applies.",
+    options: ["Phone number", "Email"],
     otherOption: true,
   },
   {
