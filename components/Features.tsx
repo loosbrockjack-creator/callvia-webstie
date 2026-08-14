@@ -1,6 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import {
+  CalendarCheck,
+  FileText,
+  IdentificationCard,
+  PhoneOutgoing,
+  Siren,
+  SlidersHorizontal,
+} from "@phosphor-icons/react";
 import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 
 // Named as capabilities, not as story beats: the How It Works section already
@@ -8,70 +16,37 @@ import { CursorCard, CursorCardsContainer } from "@/components/ui/cursor-cards";
 // restates it is dead weight.
 const features = [
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M3 8h14M7 2.5v3M13 2.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M7.5 12.2l1.4 1.4 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
+    icon: <CalendarCheck size={20} weight="light" />,
     title: "Appointment booking",
     description:
       "Turn it on and your receptionist offers your open times, puts the job on your calendar, and confirms it with the caller before hanging up.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <IdentificationCard size={20} weight="light" />,
     title: "Lead capture",
     description:
       "Names, phone numbers, addresses, and job details, collected and confirmed while the caller is still on the line. Nothing written on the back of a receipt.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 3.5l7.5 13H2.5l7.5-13z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-        <path d="M10 8.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="10" cy="14" r="0.75" fill="currentColor" />
-      </svg>
-    ),
+    icon: <Siren size={20} weight="light" />,
     title: "Urgency detection",
     description:
       "Your receptionist works out what the caller needs and how urgent it is in the first few seconds, so a burst pipe never gets handled like a routine quote.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 8c0 5.523 4.477 10 10 10h.5a1.5 1.5 0 001.5-1.5v-1.378a1.5 1.5 0 00-1.168-1.467l-2.2-.489a1.5 1.5 0 00-1.617.738l-.21.378a8.016 8.016 0 01-3.587-3.587l.378-.21a1.5 1.5 0 00.738-1.617l-.489-2.2A1.5 1.5 0 006.378 5H5A1.5 1.5 0 003.5 6.5V7C3.5 7.28 3.66 8 4 8z" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M13 3l2 2-2 2M13 5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
+    icon: <PhoneOutgoing size={20} weight="light" />,
     title: "Urgent call routing",
     description:
       "When a call needs a real decision, Callvia connects the customer straight to you. Can't pick up? It texts you the details instantly, flagged urgent. Your customers never get stuck with a robot that can't help.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <FileText size={20} weight="light" />,
     title: "Call summaries",
     description:
       "The moment a call ends you get a summary by text and email: who called, what they need, and their number. No more digging through voicemail.",
   },
   {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 6h8.5M15.5 6H17M3 14h1.5M8.5 14H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="13.5" cy="6" r="1.9" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="6.5" cy="14" r="1.9" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-    ),
+    icon: <SlidersHorizontal size={20} weight="light" />,
     title: "Custom call handling",
     description:
       "Your greeting, your hours, your instructions. We build the receptionist around how you already run the business, so callers hear what you would have told them.",
