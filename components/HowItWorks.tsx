@@ -11,7 +11,7 @@ const steps = [
         <path d="M11 7v4l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     ),
-    title: "We Get You Set Up",
+    title: "We get you set up",
     description:
       "A real person walks you through the whole thing. We connect your existing business number, build out your receptionist, and test it before you ever go live. No software to figure out on your own.",
   },
@@ -23,7 +23,7 @@ const steps = [
         <path d="M14.5 4.5l2 2-2 2M14.5 6.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "AI Answers Every Call You Want It To",
+    title: "It answers every call you want it to",
     description:
       "You choose what it answers: every call that comes in, only the ones you miss, or just nights and weekends. Switch it on or off whenever you want, in a couple of taps, and change your mind as often as you like. You can always pick up yourself. Callvia covers the calls you don't.",
   },
@@ -35,7 +35,7 @@ const steps = [
         <path d="M7 8h8M7 11h8M7 14h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     ),
-    title: "You Get the Lead, You Close the Job",
+    title: "You get the lead, you close the job",
     description:
       "However you set it, the lead still ends up with you. If a call needs you right then, Callvia transfers it straight to your cell. If you're busy, you get a text and an email with who called, what they need, and their number. No middleman, no lost job.",
   },
@@ -51,10 +51,9 @@ export function HowItWorks() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5"
-          style={{ color: "#7c5cfc" }}
+          className="text-xs tracking-widest uppercase mb-5 text-dim"
         >
-          How It Works
+          How it works
         </motion.p>
 
         {/* Heading */}
@@ -84,14 +83,16 @@ export function HowItWorks() {
               style={{ background: "#000" }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono tracking-widest" style={{ color: "#333333" }}>
+                <span className="text-xs font-mono tracking-widest text-faint tabular-nums">
                   {step.number}
                 </span>
-                <div style={{ color: "#7c5cfc" }}>{step.icon}</div>
+                <div className="text-dim">{step.icon}</div>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-white mb-2.5">{step.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#666666" }}>
+                <h3 className="text-base font-semibold leading-snug text-white mb-2.5 text-balance">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted text-pretty">
                   {step.description}
                 </p>
               </div>

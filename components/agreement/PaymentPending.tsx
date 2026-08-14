@@ -43,7 +43,7 @@ export function PaymentPending({
       <h2 className="text-2xl font-light tracking-tight text-white mb-3" style={{ letterSpacing: "-0.025em" }}>
         Thanks, {signedName.split(" ")[0]}.
       </h2>
-      <p className="text-base leading-relaxed mb-8" style={{ color: "#999999" }}>
+      <p className="text-base leading-relaxed mb-8 text-muted">
         You signed this agreement on {signedAt}. A signed copy has been emailed to you, and you can
         download it again below. The last step is payment, and your service starts once it goes through.
       </p>
@@ -58,14 +58,13 @@ export function PaymentPending({
         <button
           onClick={pay}
           disabled={submitting}
-          className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] disabled:opacity-40 disabled:pointer-events-none"
+          className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
         >
           {submitting ? "Opening checkout…" : "Complete payment"}
         </button>
         <a
           href={`/api/agreement/${token}/pdf`}
-          className="text-sm transition-colors duration-200 hover:text-white underline underline-offset-4"
-          style={{ color: "#999999" }}
+          className="text-sm transition-colors duration-200 hover:text-white underline underline-offset-4 text-muted"
         >
           Download your signed copy
         </a>

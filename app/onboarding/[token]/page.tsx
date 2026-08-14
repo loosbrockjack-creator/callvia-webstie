@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-[100dvh] bg-black text-white">
       <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
         <p className="mb-12 text-xs uppercase tracking-widest" style={{ color: "#555555" }}>
           Callvia
@@ -32,7 +32,7 @@ function Notice({ title, body }: { title: string; body: string }) {
       >
         {title}
       </h1>
-      <p className="text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="text-base leading-relaxed text-muted">
         {body}
       </p>
     </Shell>
@@ -83,7 +83,7 @@ export default async function OnboardingPage(props: PageProps<"/onboarding/[toke
       >
         Let&#39;s build your receptionist.
       </h1>
-      <p className="mb-14 text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="mb-14 text-base leading-relaxed text-muted">
         A few questions about how you want your calls handled. Takes about three minutes, and
         there are no wrong answers.
       </p>

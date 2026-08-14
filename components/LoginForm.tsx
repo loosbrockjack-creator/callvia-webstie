@@ -52,7 +52,7 @@ export function LoginForm() {
           </svg>
         </div>
         <h3 className="text-white text-xl font-light">Check your inbox.</h3>
-        <p className="mt-2 text-sm leading-relaxed max-w-xs mx-auto" style={{ color: "#888888" }}>
+        <p className="mt-2 text-sm leading-relaxed max-w-xs mx-auto text-muted">
           If that email is tied to a Callvia account, we just sent a secure link to log in. It expires in 15 minutes.
         </p>
       </motion.div>
@@ -91,7 +91,7 @@ export function LoginForm() {
         type="button"
         onClick={submit}
         disabled={status === "sending"}
-        className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-60"
+        className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-60"
       >
         {status === "sending" ? "Sending…" : "Email Me a Login Link"}
       </button>

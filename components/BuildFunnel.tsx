@@ -633,7 +633,7 @@ export function BuildFunnel() {
                       <span className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                         Share that are repeat customers
                       </span>
-                      <span className="text-sm font-semibold tabular-nums" style={{ color: "#9b7ffd" }}>
+                      <span className="text-sm font-semibold tabular-nums text-accent-hover">
                         {repeatShare}%
                       </span>
                     </div>
@@ -709,8 +709,8 @@ export function BuildFunnel() {
         {/* ------------------------------------------------- INSIGHTS ---- */}
         {phase === "insights" && (
           <motion.div key="insights" initial={{ y: 48, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 32 }}>
-            <p className="text-xs tracking-widest uppercase mb-5" style={{ color: "#7c5cfc" }}>
-              Your Phone Line, Diagnosed
+            <p className="text-xs tracking-widest uppercase mb-5 text-dim">
+              Your phone line, diagnosed
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>
               Here&#39;s what your receptionist fixes.
@@ -725,7 +725,7 @@ export function BuildFunnel() {
                   className="rounded-2xl p-6 md:p-7"
                 >
                   <h3 className="text-base font-semibold text-white mb-2">{card.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+                  <p className="text-sm leading-relaxed text-muted">
                     {card.body}
                   </p>
                 </CursorCard>
@@ -763,7 +763,7 @@ export function BuildFunnel() {
             <button
               type="button"
               onClick={() => setPhase("options")}
-              className="mt-10 inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
+              className="mt-10 inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
             >
               Get My Demo
             </button>
@@ -773,8 +773,8 @@ export function BuildFunnel() {
         {/* -------------------------------------------------- OPTIONS ---- */}
         {phase === "options" && (
           <motion.div key="options" initial={{ y: 48, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 32 }}>
-            <p className="text-xs tracking-widest uppercase mb-5" style={{ color: "#7c5cfc" }}>
-              One Last Choice
+            <p className="text-xs tracking-widest uppercase mb-5 text-dim">
+              One last choice
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>
               How do you want your demo?
@@ -784,7 +784,7 @@ export function BuildFunnel() {
               <CursorCard className="rounded-2xl p-7">
                 <div className="flex h-full flex-col">
                   <h3 className="text-base font-semibold text-white mb-2">Watch it live</h3>
-                  <p className="text-sm leading-relaxed flex-1" style={{ color: "#888888" }}>
+                  <p className="text-sm leading-relaxed flex-1 text-muted">
                     A short call where we walk you through your receptionist handling real scenarios, and you can ask anything.
                   </p>
                   <button
@@ -800,7 +800,7 @@ export function BuildFunnel() {
               <CursorCard className="rounded-2xl p-7">
                 <div className="flex h-full flex-col">
                   <h3 className="text-base font-semibold text-white mb-2">Send it to me</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+                  <p className="text-sm leading-relaxed text-muted">
                     No calls, no meetings. We build your receptionist and email you a recording of it handling a real call.
                   </p>
                   <input
@@ -849,7 +849,7 @@ export function BuildFunnel() {
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>
               {phase === "doneLive" ? "See you there." : "It's on the way."}
             </h2>
-            <p className="mt-5 text-base leading-relaxed max-w-md mx-auto" style={{ color: "#888888" }}>
+            <p className="mt-5 text-base leading-relaxed max-w-md mx-auto text-muted">
               {phase === "doneLive"
                 ? "Finish picking a time in the tab we just opened. We'll show up with your receptionist already drafted from what you told us."
                 : "We're building your receptionist from what you told us. A recording of it handling a real call will land in your inbox soon."}

@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-[100dvh] bg-black text-white">
       <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <p className="text-xs tracking-widest uppercase mb-12" style={{ color: "#555555" }}>
           Callvia
@@ -35,7 +35,7 @@ function Notice({ title, body }: { title: string; body: string }) {
       <h1 className="text-3xl font-light tracking-tight mb-4" style={{ letterSpacing: "-0.025em" }}>
         {title}
       </h1>
-      <p className="text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="text-base leading-relaxed text-muted">
         {body}
       </p>
     </Shell>
@@ -76,7 +76,7 @@ function TrialSigned({
       <h1 className="mb-4 text-3xl font-light tracking-tight" style={{ letterSpacing: "-0.025em" }}>
         Your trial is set.
       </h1>
-      <p className="text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="text-base leading-relaxed text-muted">
         Signed {signedAt}. A copy has been emailed to you.
         {startsOn && endsOn && (
           <>
@@ -85,15 +85,14 @@ function TrialSigned({
           </>
         )}
       </p>
-      <p className="mt-4 text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="mt-4 text-base leading-relaxed text-muted">
         There is nothing to pay and no card on file. We will be in touch shortly to get your
         receptionist built and your calls forwarded.
       </p>
 
       <a
         href={`/api/agreement/${token}/pdf`}
-        className="mt-10 inline-block text-sm underline underline-offset-4 transition-colors duration-200 hover:text-white"
-        style={{ color: "#999999" }}
+        className="mt-10 inline-block text-sm underline underline-offset-4 transition-colors duration-200 hover:text-white text-muted"
       >
         Download your signed copy
       </a>

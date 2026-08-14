@@ -30,7 +30,7 @@ export default function ServiceAgreementPage() {
   });
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-[100dvh] bg-black text-white">
       <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <a
           href="/"

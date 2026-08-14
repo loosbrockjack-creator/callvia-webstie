@@ -21,7 +21,7 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
         {schedule.packageName}
       </h2>
       {schedule.packageSummary && (
-        <p className="text-base mb-8" style={{ color: "#999999" }}>
+        <p className="text-base mb-8 text-muted">
           {schedule.packageSummary}
         </p>
       )}
@@ -33,7 +33,7 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
           </p>
           <ul className="space-y-2.5 mb-8">
             {schedule.includedItems.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-base" style={{ color: "#999999" }}>
+              <li key={i} className="flex items-start gap-3 text-base text-muted">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full" style={{ background: "#7c5cfc" }} />
                 <span>{item}</span>
               </li>
@@ -52,13 +52,13 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
       {trial ? (
         <div className="border-t pt-6" style={{ borderColor: "#1f1f1f" }}>
           <div className="flex justify-between items-baseline mb-3">
-            <span className="text-base" style={{ color: "#999999" }}>
+            <span className="text-base text-muted">
               Trial begins
             </span>
             <span className="text-base text-white">{formatTrialDate(trial.startsOn)}</span>
           </div>
           <div className="flex justify-between items-baseline mb-3">
-            <span className="text-base" style={{ color: "#999999" }}>
+            <span className="text-base text-muted">
               Trial ends
             </span>
             <span className="text-base text-white">{formatTrialDate(trial.endsOn)}</span>
@@ -84,7 +84,7 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
       <div className="border-t pt-6" style={{ borderColor: "#1f1f1f" }}>
         {setupFeeCents > 0 && (
           <div className="flex justify-between items-baseline mb-3">
-            <span className="text-base" style={{ color: "#999999" }}>
+            <span className="text-base text-muted">
               {schedule.setupFeeLabel}
             </span>
             <span className="text-base text-white tabular-nums">{formatCents(setupFeeCents)}</span>
@@ -92,7 +92,7 @@ export function OrderSummary({ schedule }: { schedule: Schedule }) {
         )}
         {monthlyCents > 0 && (
           <div className="flex justify-between items-baseline mb-3">
-            <span className="text-base" style={{ color: "#999999" }}>
+            <span className="text-base text-muted">
               {schedule.monthlyLabel}
             </span>
             <span className="text-base text-white tabular-nums">

@@ -46,8 +46,7 @@ export function AboutContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-6"
-            style={{ color: "#7c5cfc" }}
+            className="text-xs tracking-widest uppercase mb-6 text-dim"
           >
             About Callvia
           </motion.p>
@@ -64,8 +63,7 @@ export function AboutContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.12 }}
-            className="mt-7 text-lg leading-relaxed max-w-xl mx-auto"
-            style={{ color: "#888888" }}
+            className="mt-7 text-lg leading-relaxed max-w-xl mx-auto text-muted"
           >
             Callvia is an AI receptionist for the businesses that live and die by the phone. I built it to answer all the calls you need, capturing every lead, making sure you aren't the one that dies by the phone.
           </motion.p>
@@ -80,8 +78,7 @@ export function AboutContent() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-4 text-center"
-            style={{ color: "#7c5cfc" }}
+            className="text-xs tracking-widest uppercase mb-4 text-center text-dim"
           >
             From the founder
           </motion.p>
@@ -117,7 +114,7 @@ export function AboutContent() {
 
           {/* Letter */}
           <div className="mt-10">
-            <div className="space-y-6 text-lg leading-relaxed" style={{ color: "#999999" }}>
+            <div className="space-y-6 text-lg leading-relaxed text-muted">
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -194,7 +191,7 @@ export function AboutContent() {
                 style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
               >
                 <h3 className="text-white text-lg font-medium mb-3">{p.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+                <p className="text-sm leading-relaxed text-muted">
                   {p.body}
                 </p>
               </motion.div>
@@ -220,8 +217,7 @@ export function AboutContent() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.06 }}
-          className="mt-4 text-base max-w-md mx-auto"
-          style={{ color: "#888888" }}
+          className="mt-4 text-base max-w-md mx-auto text-muted"
         >
           Build your receptionist in a few minutes and put it to work.
         </motion.p>

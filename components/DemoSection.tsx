@@ -28,7 +28,7 @@ export function DemoSection() {
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
           </span>
           <span className="text-xs text-white/60 tracking-widest uppercase font-medium">
-            Live Demo
+            Live demo
           </span>
         </motion.div>
 
@@ -41,7 +41,7 @@ export function DemoSection() {
           className="text-4xl md:text-5xl font-light text-white tracking-tight"
           style={{ letterSpacing: "-0.02em" }}
         >
-          Call It and Try to Break It
+          Call it and try to break it
         </motion.h2>
 
         {/* Subtext */}
@@ -50,8 +50,7 @@ export function DemoSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.12 }}
-          className="mt-5 max-w-lg text-base leading-relaxed"
-          style={{ color: "#888888" }}
+          className="mt-5 max-w-lg text-base leading-relaxed text-muted"
         >
           This is a live Callvia receptionist set up for a home services contractor. Call it right now and see exactly what your customers experience. Ask it anything. Try to confuse it. See how it performs before you commit to a single thing.
         </motion.p>

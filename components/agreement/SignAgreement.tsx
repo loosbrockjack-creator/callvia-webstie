@@ -113,7 +113,7 @@ export function SignAgreement({
           className="rounded-xl border p-6"
           style={{ borderColor: "#7c5cfc", background: "rgba(124,92,252,0.06)" }}
         >
-          <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "#9b7ffd" }}>
+          <p className="text-xs tracking-widest uppercase mb-3 text-accent-hover">
             Before you sign
           </p>
           <p className="text-base leading-relaxed text-white">{disclosure}</p>
@@ -173,7 +173,7 @@ export function SignAgreement({
           onChange={(e) => setEsignConsent(e.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
         />
-        <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
+        <span className="text-sm leading-relaxed text-muted">
           {ESIGN_CONSENT_TEXT}
         </span>
       </label>
@@ -185,7 +185,7 @@ export function SignAgreement({
           onChange={(e) => setAuthorityAck(e.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
         />
-        <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
+        <span className="text-sm leading-relaxed text-muted">
           {AUTHORITY_ACK_TEXT.replace("the business named above", businessName)}
         </span>
       </label>
@@ -200,7 +200,7 @@ export function SignAgreement({
             onChange={(e) => setSmsConsent(e.target.checked)}
             className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#7c5cfc]"
           />
-          <span className="text-sm leading-relaxed" style={{ color: "#999999" }}>
+          <span className="text-sm leading-relaxed text-muted">
             {SMS_CONSENT_TEXT} (Optional) View our{" "}
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/70 transition-colors duration-200 underline underline-offset-4">
               Privacy Policy
@@ -227,7 +227,7 @@ export function SignAgreement({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="mt-2 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+        className="mt-2 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
       >
         {submitting ? "Signing…" : isTrial ? "Sign and start my trial" : "Sign and continue to payment"}
       </button>

@@ -48,7 +48,7 @@ export default async function CompletePage(props: PageProps<"/agreement/[token]/
   const active = row.status === "active";
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-[100dvh] bg-black text-white">
       <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <p className="text-xs tracking-widest uppercase mb-12" style={{ color: "#555555" }}>
           Callvia
@@ -59,7 +59,7 @@ export default async function CompletePage(props: PageProps<"/agreement/[token]/
             <h1 className="text-4xl font-light tracking-tight mb-4" style={{ letterSpacing: "-0.025em" }}>
               You are all set.
             </h1>
-            <p className="text-base leading-relaxed mb-10" style={{ color: "#999999" }}>
+            <p className="text-base leading-relaxed mb-10 text-muted">
               Payment received and your Callvia service is active. Your signed agreement is in your
               inbox, and we will be in touch shortly to go over the next steps.
             </p>
@@ -71,8 +71,7 @@ export default async function CompletePage(props: PageProps<"/agreement/[token]/
             )}
             <a
               href={`/api/agreement/${token}/pdf`}
-              className="text-sm transition-colors duration-200 hover:text-white underline underline-offset-4"
-              style={{ color: "#999999" }}
+              className="text-sm transition-colors duration-200 hover:text-white underline underline-offset-4 text-muted"
             >
               Download your signed agreement
             </a>

@@ -71,7 +71,7 @@ export default async function AccountPage() {
   }));
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-black min-h-[100dvh] text-white">
       <Nav />
       <AccountDashboard
         profile={{

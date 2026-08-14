@@ -87,10 +87,9 @@ export function MissedCallTool() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5 text-center"
-          style={{ color: "#7c5cfc" }}
+          className="text-xs tracking-widest uppercase mb-5 text-center text-dim"
         >
-          Run Your Numbers
+          Run your numbers
         </motion.p>
 
         <motion.h2
@@ -109,8 +108,7 @@ export function MissedCallTool() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-5 text-base leading-relaxed max-w-xl mx-auto text-center"
-          style={{ color: "#888888" }}
+          className="mt-5 text-base leading-relaxed max-w-xl mx-auto text-center text-muted"
         >
           A few quick questions and your business number. We run a live carrier lookup, then apply the research above to estimate what those missed calls are costing you every month.
         </motion.p>
@@ -144,11 +142,12 @@ export function MissedCallTool() {
                         key={t.id}
                         type="button"
                         onClick={() => setTrade(t)}
-                        className="px-4 py-2 text-sm rounded-full border transition-all duration-200"
-                        style={
-                          trade?.id === t.id
-                            ? { borderColor: "#7c5cfc", color: "#ffffff", background: "rgba(124,92,252,0.12)" }
-                            : { borderColor: "#1f1f1f", color: "#888888" }
+                        aria-pressed={trade?.id === t.id}
+                        className={
+                          "px-4 py-2 text-sm rounded-full border transition-all duration-200 active:scale-[0.98] " +
+                          (trade?.id === t.id
+                            ? "border-accent text-white bg-accent/12"
+                            : "border-line text-muted hover:border-line-strong hover:text-white")
                         }
                       >
                         {t.label}
@@ -180,7 +179,7 @@ export function MissedCallTool() {
                     <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                       Share that are repeat customers
                     </label>
-                    <span className="text-sm font-semibold tabular-nums" style={{ color: "#9b7ffd" }}>
+                    <span className="text-sm font-semibold tabular-nums text-accent-hover">
                       {repeatSharePct}%
                     </span>
                   </div>
@@ -231,7 +230,7 @@ export function MissedCallTool() {
                 <button
                   type="button"
                   onClick={runAnalysis}
-                  className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
+                  className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
                 >
                   Analyze My Line
                 </button>
@@ -248,7 +247,7 @@ export function MissedCallTool() {
                 className="flex flex-col items-center py-10"
               >
                 <WaveformMark size={140} animated opacity={0.85} />
-                <p className="mt-8 text-sm tracking-wide" style={{ color: "#888888" }}>
+                <p className="mt-8 text-sm tracking-wide text-muted">
                   {SCAN_STATUSES[statusIdx]}
                   <span className="animate-pulse">…</span>
                 </p>

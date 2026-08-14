@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FloatingBookCall } from "@/components/FloatingBookCall";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,14 +14,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const TITLE = "Callvia | AI Receptionists for Small Businesses";
+const DESCRIPTION =
+  "Callvia answers your calls 24/7, captures leads, and sends you a clear summary. Never miss a customer again.";
+
 export const metadata: Metadata = {
-  title: "Callvia | AI Receptionists for Small Businesses",
-  description:
-    "Callvia answers your calls 24/7, captures leads, and sends you a clear summary. Never miss a customer again.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
   openGraph: {
-    title: "Callvia | AI Receptionists for Small Businesses",
-    description:
-      "Callvia answers your calls 24/7, captures leads, and sends you a clear summary.",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Callvia",
+    type: "website",
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Callvia" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
     images: ["/logo.png"],
   },
 };

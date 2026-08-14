@@ -68,7 +68,7 @@ export function AccountDashboard({ profile, hasStripeCustomer, plan, agreements,
           className="flex items-start justify-between gap-4 mb-12"
         >
           <div>
-            <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "#7c5cfc" }}>
+            <p className="text-xs tracking-widest uppercase mb-3 text-dim">
               Your account
             </p>
             <h1 className="text-3xl md:text-4xl font-light tracking-tight" style={{ letterSpacing: "-0.03em" }}>
@@ -109,7 +109,7 @@ function PlanCard({ plan, hasStripeCustomer }: { plan: Plan | null; hasStripeCus
             <div>
               <p className="text-xl font-light text-white">{plan.packageName}</p>
               {plan.packageSummary && (
-                <p className="mt-1 text-sm leading-relaxed" style={{ color: "#888888" }}>
+                <p className="mt-1 text-sm leading-relaxed text-muted">
                   {plan.packageSummary}
                 </p>
               )}
@@ -144,7 +144,7 @@ function PlanCard({ plan, hasStripeCustomer }: { plan: Plan | null; hasStripeCus
           {plan.includedItems.length > 0 && (
             <ul className="flex flex-col gap-2">
               {plan.includedItems.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm" style={{ color: "#aaaaaa" }}>
+                <li key={i} className="flex items-start gap-2 text-sm text-muted">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-accent mt-0.5 shrink-0">
                     <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -159,8 +159,7 @@ function PlanCard({ plan, hasStripeCustomer }: { plan: Plan | null; hasStripeCus
             {plan.hasPdf && (
               <a
                 href={`/api/account/agreements/${plan.id}/pdf`}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-full border transition-colors duration-200 hover:bg-white/5"
-                style={{ borderColor: "#1f1f1f", color: "#cccccc" }}
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-full border border-line text-white/80 transition-colors duration-200 hover:bg-white/5 hover:text-white"
               >
                 Download signed agreement
               </a>
@@ -174,7 +173,7 @@ function PlanCard({ plan, hasStripeCustomer }: { plan: Plan | null; hasStripeCus
           )}
         </div>
       ) : (
-        <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+        <p className="text-sm leading-relaxed text-muted">
           You do not have an agreement yet. Once we send one and you sign it, your plan details will show up here.
         </p>
       )}
@@ -260,7 +259,7 @@ function ProfileCard({
           <label className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
             Login email
           </label>
-          <p className="text-base" style={{ color: "#888888" }}>{profile.email}</p>
+          <p className="text-base text-muted">{profile.email}</p>
           <p className="mt-2 text-xs leading-relaxed" style={{ color: "#555555" }}>
             This is your login identity. To change it, email team@callvia.io.
           </p>
@@ -282,7 +281,7 @@ function ProfileCard({
             {status === "saving" ? "Saving…" : "Save changes"}
           </button>
           {status === "saved" && (
-            <span className="text-sm" style={{ color: "#a48bff" }}>Saved.</span>
+            <span className="text-sm text-accent-hover">Saved.</span>
           )}
         </div>
       </div>
@@ -321,7 +320,7 @@ function InvoicesCard({ invoices, hasStripeCustomer }: { invoices: InvoiceRow[];
           ))}
         </div>
       ) : (
-        <p className="text-sm leading-relaxed" style={{ color: "#888888" }}>
+        <p className="text-sm leading-relaxed text-muted">
           {hasStripeCustomer
             ? "No invoices yet. They will appear here after your first billing cycle."
             : "Invoices appear here once billing is set up."}
@@ -414,8 +413,7 @@ function LogoutButton() {
       type="button"
       onClick={logout}
       disabled={loading}
-      className="text-sm transition-colors duration-200 shrink-0"
-      style={{ color: "#888888" }}
+      className="text-sm transition-colors duration-200 shrink-0 text-muted"
     >
       {loading ? "…" : "Log out"}
     </button>

@@ -31,10 +31,9 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-6"
-          style={{ color: "#7c5cfc" }}
+          className="text-xs tracking-widest uppercase mb-6 text-dim"
         >
-          Get Started
+          Get started
         </motion.p>
 
         <motion.h2
@@ -55,10 +54,9 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.12 }}
-          className="mt-6 text-base leading-relaxed max-w-lg"
-          style={{ color: "#888888" }}
+          className="mt-6 text-base leading-relaxed max-w-lg text-muted text-pretty"
         >
-          Stop losing opportunities. Start capturing every call, every lead, every time.
+          We set it up, connect your existing number, and test it before you go live.
         </motion.p>
 
         <motion.div
@@ -70,7 +68,7 @@ export function CTASection() {
         >
           <a
             href="/build"
-            className="btn-shine inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
+            className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
           >
             Build My Receptionist
           </a>
@@ -100,7 +98,7 @@ export function CTASection() {
             <circle cx="7" cy="7" r="6" stroke="#4ade80" strokeWidth="1.2" />
             <path d="M4.5 7l2 2 3-3" stroke="#4ade80" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-sm font-medium" style={{ color: "#e5e5e5" }}>
+          <span className="text-sm font-medium text-white/90">
             Free demo. No credit card, no commitment
           </span>
         </motion.div>

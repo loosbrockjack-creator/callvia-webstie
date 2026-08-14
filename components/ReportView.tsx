@@ -37,7 +37,7 @@ export function ReportView() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <p className="text-xs tracking-widest uppercase mb-5" style={{ color: "#7c5cfc" }}>
+      <p className="text-xs tracking-widest uppercase mb-5 text-dim">
         Your Missed-Call Report
       </p>
       <h1 className="text-3xl md:text-5xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.025em" }}>
@@ -57,7 +57,7 @@ export function ReportView() {
             style={{ borderColor: "rgba(255,255,255,0.06)" }}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block" />
-            <span className="text-sm" style={{ color: "#999999" }}>
+            <span className="text-sm text-muted">
               Line identified:{" "}
               <span className="text-white">{[carrier, lt].filter(Boolean).join(", ")}</span>
             </span>
@@ -83,7 +83,7 @@ export function ReportView() {
             { label: `Average ${trade?.label ?? "trade"} job value`, value: `$${jobValue.toLocaleString()}` },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between text-sm">
-              <span style={{ color: "#888888" }}>{row.label}</span>
+              <span className="text-muted">{row.label}</span>
               <span className="text-white font-medium">{row.value}</span>
             </div>
           ))}
@@ -91,7 +91,7 @@ export function ReportView() {
 
         <a
           href={`/build?trade=${trade?.id ?? ""}&missed=${missed}&repeat=${repeat}`}
-          className="btn-shine mt-10 inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
+          className="mt-10 inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
         >
           Build My Receptionist
         </a>

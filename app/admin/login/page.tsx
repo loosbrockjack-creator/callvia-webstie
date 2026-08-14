@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+    <main className="min-h-[100dvh] bg-black text-white flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "#555555" }}>
           Callvia

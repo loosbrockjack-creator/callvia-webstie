@@ -184,8 +184,7 @@ export function OnboardingFlow({ token, businessName, contactName }: Props) {
           That&#39;s everything.
         </h2>
         <p
-          className="mx-auto mt-5 max-w-md text-base leading-relaxed"
-          style={{ color: "#888888" }}
+          className="mx-auto mt-5 max-w-md text-base leading-relaxed text-muted"
         >
           We have what we need to start building your receptionist. We will be in touch shortly
           with the next step.
@@ -227,7 +226,7 @@ export function OnboardingFlow({ token, businessName, contactName }: Props) {
           </div>
 
           {step === 0 && firstName && (
-            <p className="mb-5 text-xs uppercase tracking-widest" style={{ color: "#7c5cfc" }}>
+            <p className="mb-5 text-xs uppercase tracking-widest text-dim">
               Welcome, {firstName}
             </p>
           )}

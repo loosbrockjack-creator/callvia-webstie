@@ -4,7 +4,7 @@ import type { Section } from "@/lib/agreement/types";
 // JSX, quotes and apostrophes pass through as-is with no entity escaping.
 export function AgreementBody({ sections }: { sections: Section[] }) {
   return (
-    <div className="space-y-10 text-base leading-relaxed" style={{ color: "#999999" }}>
+    <div className="space-y-10 text-base leading-relaxed text-muted">
       {sections.map((section, si) => (
         <section key={si}>
           {section.heading && (

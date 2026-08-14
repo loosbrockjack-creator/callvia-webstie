@@ -5,7 +5,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-[100dvh] bg-black text-white">
       <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <a href="/" className="text-xs tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors duration-200 mb-12 inline-block">
           ← Back to Callvia
@@ -16,7 +16,7 @@ export default function TermsPage() {
         </h1>
         <p className="text-sm text-white/30 mb-12">Last updated: June 10, 2026</p>
 
-        <div className="space-y-10 text-base leading-relaxed" style={{ color: "#999999" }}>
+        <div className="space-y-10 text-base leading-relaxed text-muted">
 
           <section>
             <h2 className="text-white text-lg font-medium mb-3">1. Acceptance of Terms</h2>

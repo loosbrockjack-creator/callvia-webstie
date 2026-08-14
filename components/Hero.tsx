@@ -6,7 +6,7 @@ import { GradientButton } from "./ui/gradient-button";
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-black">
       {/* Radial background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -67,8 +67,8 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.65 }}
-          className="mt-7 text-xl md:text-2xl font-light tracking-tight"
-          style={{ color: "#cccccc", letterSpacing: "-0.01em" }}
+          className="mt-7 text-xl md:text-2xl font-light tracking-tight text-white/80"
+          style={{ letterSpacing: "-0.01em" }}
         >
           Every call matters. Answer every one.
         </motion.p>
@@ -83,7 +83,7 @@ export function Hero() {
           <GradientButton href="#demo">Experience It</GradientButton>
           <a
             href="#how-it-works"
-            className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white bg-[#1a1a1a] border border-white/15 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:bg-[#242424] hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.09)] transition-all duration-200"
+            className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white bg-[#1a1a1a] border border-white/15 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:bg-[#242424] hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.09)] transition-all duration-200"
           >
             See How It Works
           </a>

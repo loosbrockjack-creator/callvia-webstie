@@ -3,6 +3,13 @@ interface WaveformMarkProps {
   animated?: boolean;
   className?: string;
   opacity?: number;
+  /**
+   * Five thick bars instead of thirteen thin ones. The full mark relies on
+   * 5-unit-wide bars in a 400-unit viewBox, which is under half a pixel once
+   * the mark is drawn at rail or favicon size, so it silts up into a smear.
+   * Use this anywhere the mark renders below roughly 32px.
+   */
+  compact?: boolean;
 }
 
 export function WaveformMark({
@@ -10,27 +17,36 @@ export function WaveformMark({
   animated = false,
   className = "",
   opacity = 1,
+  compact = false,
 }: WaveformMarkProps) {
   // Larger viewBox gives more room, bars stay thin even at big display sizes
   const viewW = 400;
   const viewH = 400;
-  const barW = 5;
-  const gap = 10;
+  const barW = compact ? 34 : 5;
+  const gap = compact ? 30 : 10;
 
-  // 13 bars: more spread, thinner silhouette, symmetric diamond
-  const barHeights = [22, 44, 72, 104, 138, 176, 210, 176, 138, 104, 72, 44, 22];
+  // Symmetric diamond either way; the compact set keeps the silhouette but
+  // drops the intermediate steps that cannot survive downscaling.
+  const barHeights = compact
+    ? [96, 168, 232, 168, 96]
+    : [22, 44, 72, 104, 138, 176, 210, 176, 138, 104, 72, 44, 22];
 
   const totalW = barHeights.length * barW + (barHeights.length - 1) * gap;
   const xOffset = (viewW - totalW) / 2;
   const centerY = viewH / 2;
 
+  // Distance from the centre bar, normalised, so one rule covers both bar
+  // counts: edges take the darkest gradient, the middle takes the brightest.
   const getGradient = (i: number, uid: string) => {
-    if (i <= 1 || i >= 11) return `url(#grad-outer-${uid})`;
-    if (i <= 3 || i >= 9)  return `url(#grad-mid-${uid})`;
+    const mid = (barHeights.length - 1) / 2;
+    const t = Math.abs(i - mid) / mid;
+    if (t > 0.66) return `url(#grad-outer-${uid})`;
+    if (t > 0.25) return `url(#grad-mid-${uid})`;
     return `url(#grad-inner-${uid})`;
   };
 
-  const uid = animated ? "a" : "s";
+  // Gradient ids must not collide when several marks share a page.
+  const uid = `${animated ? "a" : "s"}${compact ? "c" : ""}`;
 
   return (
     <svg
@@ -75,8 +91,8 @@ export function WaveformMark({
             y={y}
             width={barW}
             height={h}
-            rx={3}
-            ry={3}
+            rx={barW / 2}
+            ry={barW / 2}
             fill={getGradient(i, uid)}
             className={animated ? "waveform-bar" : undefined}
             style={

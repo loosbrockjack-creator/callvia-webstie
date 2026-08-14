@@ -15,7 +15,7 @@ const features = [
         <path d="M7.5 12.2l1.4 1.4 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "Appointment Booking",
+    title: "Appointment booking",
     description:
       "Turn it on and your receptionist offers your open times, puts the job on your calendar, and confirms it with the caller before hanging up.",
   },
@@ -26,7 +26,7 @@ const features = [
         <path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     ),
-    title: "Lead Capture",
+    title: "Lead capture",
     description:
       "Names, phone numbers, addresses, and job details, collected and confirmed while the caller is still on the line. Nothing written on the back of a receipt.",
   },
@@ -38,7 +38,7 @@ const features = [
         <circle cx="10" cy="14" r="0.75" fill="currentColor" />
       </svg>
     ),
-    title: "Urgency Detection",
+    title: "Urgency detection",
     description:
       "Your receptionist works out what the caller needs and how urgent it is in the first few seconds, so a burst pipe never gets handled like a routine quote.",
   },
@@ -49,7 +49,7 @@ const features = [
         <path d="M13 3l2 2-2 2M13 5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "Urgent Call Routing",
+    title: "Urgent call routing",
     description:
       "When a call needs a real decision, Callvia connects the customer straight to you. Can't pick up? It texts you the details instantly, flagged urgent. Your customers never get stuck with a robot that can't help.",
   },
@@ -60,7 +60,7 @@ const features = [
         <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     ),
-    title: "Call Summaries",
+    title: "Call summaries",
     description:
       "The moment a call ends you get a summary by text and email: who called, what they need, and their number. No more digging through voicemail.",
   },
@@ -72,7 +72,7 @@ const features = [
         <circle cx="6.5" cy="14" r="1.9" stroke="currentColor" strokeWidth="1.5" />
       </svg>
     ),
-    title: "Custom Call Handling",
+    title: "Custom call handling",
     description:
       "Your greeting, your hours, your instructions. We build the receptionist around how you already run the business, so callers hear what you would have told them.",
   },
@@ -88,8 +88,7 @@ export function Features() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-xs tracking-widest uppercase mb-5"
-          style={{ color: "#7c5cfc" }}
+          className="text-xs tracking-widest uppercase mb-5 text-dim"
         >
           Features
         </motion.p>
@@ -113,8 +112,7 @@ export function Features() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-          className="mt-5 text-base max-w-xl leading-relaxed"
-          style={{ color: "#888888" }}
+          className="mt-5 text-base max-w-xl leading-relaxed text-muted text-pretty"
         >
           Callvia handles your phones so you never have to lose a customer because you were too busy to answer every call. Sounds professional. Every job comes back to you.
         </motion.p>
@@ -128,14 +126,18 @@ export function Features() {
               revealDelay={i * 0.1}
               className="p-7 rounded-2xl"
             >
-              <div
-                className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-5"
-                style={{ background: "rgba(124,92,252,0.12)", color: "#9b7ffd" }}
-              >
-                {f.icon}
+              {/* Icon sits on the title's own baseline rather than in a tinted
+                  chip above it: the chip read as decoration, this reads as a
+                  bullet. It stays dim until the card is hovered. */}
+              <div className="flex items-start gap-3">
+                <span className="mt-px shrink-0 text-dim transition-colors duration-300 group-hover:text-muted">
+                  {f.icon}
+                </span>
+                <h3 className="text-base font-semibold leading-snug text-white text-balance">
+                  {f.title}
+                </h3>
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#666666" }}>
+              <p className="mt-3 pl-8 text-sm leading-relaxed text-muted text-pretty">
                 {f.description}
               </p>
             </CursorCard>

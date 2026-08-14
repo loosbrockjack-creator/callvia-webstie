@@ -13,7 +13,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ token: 
   const { token } = await params;
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-black min-h-[100dvh] text-white">
       <Nav />
 
       <main className="relative pt-28 md:pt-40 pb-16 md:pb-28 px-6 overflow-hidden">
@@ -26,7 +26,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ token: 
         />
 
         <div className="relative z-10 max-w-md mx-auto text-center">
-          <p className="text-xs tracking-widest uppercase mb-6" style={{ color: "#7c5cfc" }}>
+          <p className="text-xs tracking-widest uppercase mb-6 text-dim">
             Client Login
           </p>
           <h1
@@ -35,7 +35,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ token: 
           >
             One more tap.
           </h1>
-          <p className="mt-5 mb-10 text-base leading-relaxed" style={{ color: "#888888" }}>
+          <p className="mt-5 mb-10 text-base leading-relaxed text-muted">
             Confirm it is you to finish logging in to your Callvia account.
           </p>
 

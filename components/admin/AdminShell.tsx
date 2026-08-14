@@ -3,43 +3,35 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ClipboardList,
-  Clock,
-  ExternalLink,
-  FileText,
-  LayoutGrid,
-  LogOut,
-  Menu,
-  PanelLeft,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { ExternalLink, Menu, PanelLeft } from "lucide-react";
 import { Sheet } from "./ui/overlays";
 import { IconButton } from "./ui/Button";
 import { ToastProvider } from "./ui/Toast";
+import { WaveformMark } from "@/components/WaveformMark";
 import { cn } from "@/lib/utils";
 
+// The rail is typographic. A stock icon next to every destination added no
+// information (five glyphs that all mean "a list of things") and read as
+// decoration; the active row is marked with an accent rule instead.
 interface NavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
 }
 
 const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: "Workspace",
     items: [
-      { href: "/admin", label: "Overview", icon: LayoutGrid },
-      { href: "/admin/clients", label: "Clients", icon: Users },
+      { href: "/admin", label: "Overview" },
+      { href: "/admin/clients", label: "Clients" },
     ],
   },
   {
     group: "Pipeline",
     items: [
-      { href: "/admin/agreements", label: "Agreements", icon: FileText },
-      { href: "/admin/trials", label: "Trials", icon: Clock },
-      { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardList },
+      { href: "/admin/agreements", label: "Agreements" },
+      { href: "/admin/trials", label: "Trials" },
+      { href: "/admin/onboarding", label: "Onboarding" },
     ],
   },
 ];
@@ -53,11 +45,11 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function currentTitle(pathname: string): { label: string; icon: LucideIcon } {
+function currentTitle(pathname: string): string {
   const match = [...ALL_ITEMS]
     .sort((a, b) => b.href.length - a.href.length)
     .find((i) => isActive(pathname, i.href));
-  return match ?? { label: "Admin", icon: LayoutGrid };
+  return match?.label ?? "Admin";
 }
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
@@ -71,25 +63,27 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           <ul className="flex flex-col gap-0.5">
             {group.items.map((item) => {
               const active = isActive(pathname, item.href);
-              const Icon = item.icon;
               return (
-                <li key={item.href}>
+                <li key={item.href} className="relative">
+                  {/* Sits at the rail's own left edge, outside the pill, so the
+                      accent reads as a margin marker rather than as a fill. */}
+                  {active && (
+                    <span
+                      className="absolute -left-3 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-accent"
+                      aria-hidden
+                    />
+                  )}
                   <Link
                     href={item.href}
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-[15px] transition-colors duration-200",
+                      "flex min-h-[44px] items-center rounded-lg px-3 text-[15px] transition-colors duration-200",
                       active
                         ? "bg-surface-raised font-medium text-white"
                         : "text-muted hover:bg-surface hover:text-white"
                     )}
                   >
-                    <Icon
-                      size={17}
-                      className={active ? "text-accent" : "text-dim"}
-                      aria-hidden
-                    />
                     {item.label}
                   </Link>
                 </li>
@@ -111,7 +105,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-line px-6">
-        <LayoutGrid size={18} className="text-accent" aria-hidden />
+        <WaveformMark size={18} compact />
         <span className="text-lg font-semibold tracking-tight text-white">Callvia</span>
       </div>
 
@@ -124,16 +118,17 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
           href="https://callvia.io"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-sm text-muted transition-colors hover:bg-surface hover:text-white"
+          className="flex min-h-[44px] items-center justify-between gap-3 rounded-lg px-3 text-sm text-muted transition-colors hover:bg-surface hover:text-white"
         >
-          <ExternalLink size={16} className="text-dim" aria-hidden />
           View site
+          <span className="text-dim" aria-hidden>
+            &#8599;
+          </span>
         </a>
         <button
           onClick={signOut}
-          className="flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-sm text-muted transition-colors hover:bg-surface hover:text-white"
+          className="flex min-h-[44px] w-full items-center rounded-lg px-3 text-sm text-muted transition-colors hover:bg-surface hover:text-white"
         >
-          <LogOut size={16} className="text-dim" aria-hidden />
           Sign out
         </button>
         <p className="px-3 pt-3 text-xs text-faint">&copy; {new Date().getFullYear()} Callvia</p>
@@ -167,11 +162,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
     setDrawerOpen(false);
   }, [pathname]);
 
-  const { label, icon: TitleIcon } = currentTitle(pathname);
+  const label = currentTitle(pathname);
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen bg-black text-white">
+      <div className="flex min-h-[100dvh] bg-black text-white">
         {/* Persistent rail from md up. */}
         <aside
           className={cn(
@@ -204,8 +199,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <PanelLeft size={18} />
             </button>
 
-            <div className="flex min-w-0 items-center gap-2.5">
-              <TitleIcon size={17} className="hidden shrink-0 text-dim sm:block" aria-hidden />
+            <div className="flex min-w-0 items-center">
               <h1 className="truncate text-[15px] font-medium text-white">{label}</h1>
             </div>
 

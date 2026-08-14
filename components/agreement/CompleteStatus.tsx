@@ -44,7 +44,7 @@ export function CompleteStatus({ token }: { token: string }) {
       <h1 className="text-4xl font-light tracking-tight mb-4" style={{ letterSpacing: "-0.025em" }}>
         {gaveUp ? "Still finalizing." : "Finalizing your account…"}
       </h1>
-      <p className="text-base leading-relaxed" style={{ color: "#999999" }}>
+      <p className="text-base leading-relaxed text-muted">
         {gaveUp
           ? "Your payment may still be processing. If you were charged, you are all set and we will confirm by email shortly. If you are unsure, email team@callvia.io and we will check for you."
           : "Payment received. Give us a moment to confirm it with our payment processor."}

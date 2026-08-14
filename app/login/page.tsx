@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-black min-h-[100dvh] text-white">
       <Nav />
 
       <main className="relative pt-28 md:pt-40 pb-16 md:pb-28 px-6 overflow-hidden">
@@ -23,7 +23,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-md mx-auto">
           <div className="text-center mb-10">
-            <p className="text-xs tracking-widest uppercase mb-6" style={{ color: "#7c5cfc" }}>
+            <p className="text-xs tracking-widest uppercase mb-6 text-dim">
               Client Login
             </p>
             <h1
@@ -32,7 +32,7 @@ export default function LoginPage() {
             >
               Log in to your account.
             </h1>
-            <p className="mt-5 text-base leading-relaxed" style={{ color: "#888888" }}>
+            <p className="mt-5 text-base leading-relaxed text-muted">
               View your plan, manage billing, and update your payment method. Enter your account email and we will send you a secure login link.
             </p>
           </div>

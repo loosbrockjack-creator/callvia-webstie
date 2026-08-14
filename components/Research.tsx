@@ -40,10 +40,9 @@ export function Research() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5"
-          style={{ color: "#7c5cfc" }}
+          className="text-xs tracking-widest uppercase mb-5 text-dim"
         >
-          The Research
+          The research
         </motion.p>
 
         {/* Heading */}
@@ -65,8 +64,7 @@ export function Research() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-5 text-base max-w-xl leading-relaxed"
-          style={{ color: "#888888" }}
+          className="mt-5 text-base max-w-xl leading-relaxed text-muted text-pretty"
         >
           These aren&#39;t guesses. Across the trades, the data on unanswered calls tells the same story, and it&#39;s more expensive than most owners think.
         </motion.p>
@@ -86,18 +84,18 @@ export function Research() {
               >
                 {s.value}
               </div>
-              <p className="mt-4 text-base leading-relaxed" style={{ color: "#999999" }}>
+              <p className="mt-4 text-base leading-relaxed text-muted text-pretty">
                 {s.label}
               </p>
-              <div className="mt-6 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="mt-6 pt-4 border-t border-white/[0.06]">
+                {/* Hover handled in CSS. This previously mutated
+                    currentTarget.style on mouse events, which left keyboard
+                    focus with no affordance at all. */}
                 <a
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs tracking-wide inline-flex items-center gap-1.5 transition-colors duration-200"
-                  style={{ color: "#555555" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#9b7ffd")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#555555")}
+                  className="text-xs tracking-wide inline-flex items-center gap-1.5 text-dim transition-colors duration-200 hover:text-white focus-visible:text-white"
                 >
                   {s.source}
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -115,8 +113,8 @@ export function Research() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="mt-12 text-lg md:text-xl font-light leading-relaxed max-w-3xl"
-          style={{ color: "#cccccc", letterSpacing: "-0.01em" }}
+          className="mt-12 text-lg md:text-xl font-light leading-relaxed max-w-3xl text-white/80 text-pretty"
+          style={{ letterSpacing: "-0.01em" }}
         >
           The pattern is simple: when your phone goes unanswered, the customer doesn&#39;t wait. They dial the next name on Google. A single HVAC or plumbing job is worth{" "}
           <span className="text-white font-normal">$650&ndash;$2,400</span> on average, and the ones you miss add up fast. Callvia answers every one, so the job stays yours.
