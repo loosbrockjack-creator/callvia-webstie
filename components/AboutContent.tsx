@@ -236,7 +236,7 @@ export function AboutContent() {
         >
           <GradientButton href="/build">Build My Receptionist</GradientButton>
         </motion.div>
-        <p className="mt-4 text-xs text-white/35">Free trial. If it doesn&#39;t pay for itself, you walk away.</p>
+        <p className="mt-4 text-xs text-white/35">Everyone gets a free trial. If it doesn&#39;t pay for itself, you walk away.</p>
       </section>
     </main>
   );

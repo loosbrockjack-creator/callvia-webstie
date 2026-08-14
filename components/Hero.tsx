@@ -96,7 +96,7 @@ export function Hero() {
           transition={{ duration: 0.7, ease: "easeOut", delay: 1.1 }}
           className="mt-6 text-xs tracking-wide text-white/35"
         >
-          Free trial. If it doesn&#39;t pay for itself, you walk away.
+          Everyone gets a free trial. If it doesn&#39;t pay for itself, you walk away.
         </motion.p>
 
       </div>
