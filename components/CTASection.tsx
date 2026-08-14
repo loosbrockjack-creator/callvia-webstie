@@ -57,7 +57,7 @@ export function CTASection() {
           transition={{ duration: 0.7, delay: 0.12 }}
           className="mt-6 text-base leading-relaxed max-w-lg text-muted text-pretty"
         >
-          We set it up, connect your existing number, and test it before you go live.
+          We think Callvia pays for itself. Try it free, and if it doesn&#39;t save you more than it costs, walk away. No charge, no hard feelings, no pressure.
         </motion.p>
 
         <motion.div

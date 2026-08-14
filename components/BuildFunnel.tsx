@@ -779,6 +779,9 @@ export function BuildFunnel() {
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>
               How do you want your demo?
             </h2>
+            <p className="mt-3 text-sm text-muted max-w-md">
+              Either way, you're not committing to anything. Try the free trial after, and if it doesn&#39;t pay for itself, walk away.
+            </p>
 
             <CursorCardsContainer className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <CursorCard className="rounded-2xl p-7">

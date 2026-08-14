@@ -284,6 +284,9 @@ export function Nav() {
                 >
                   Build My Receptionist
                 </FlowButton>
+                <p className="mt-1 text-center text-xs text-white/30">
+                  Free trial. If it doesn&#39;t pay for itself, you walk away.
+                </p>
               </div>
             </div>
           </motion.div>

@@ -96,6 +96,8 @@ export function ReportView() {
           Build My Receptionist
         </a>
 
+        <p className="mt-4 text-xs text-white/35">Free trial. If it doesn&#39;t pay for itself, you walk away.</p>
+
         <p className="mt-8 text-xs leading-relaxed" style={{ color: "#444444" }}>
           How we get this number: research shows about 85% of first-time callers who can&#39;t reach you never call back (Forbes / BIA Kelsey). Your regular customers are more patient, so we assume only 10% to 35% of them give up. That&#39;s why you see a range instead of one exact number. This is an estimate built from industry research, not a reading of your call records. Those stay private to you and your carrier.
         </p>

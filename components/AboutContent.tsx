@@ -18,6 +18,10 @@ const PRINCIPLES = [
     title: "Simple beats clever",
     body: "No dashboards to babysit, no scripts to maintain. You tell me how you work, and your receptionist just handles the calls the way you would.",
   },
+  {
+    title: "Prove it before you pay for it",
+    body: "You get a free trial before any money changes hands. If Callvia does not pay for itself, you walk away. No charge, no hard feelings, no pressure to keep something that is not working for you.",
+  },
 ];
 
 export function AboutContent() {
@@ -181,7 +185,7 @@ export function AboutContent() {
           >
             What I build around.
           </motion.h2>
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 gap-5">
             {PRINCIPLES.map((p, i) => (
               <motion.div
                 key={p.title}
@@ -232,6 +236,7 @@ export function AboutContent() {
         >
           <GradientButton href="/build">Build My Receptionist</GradientButton>
         </motion.div>
+        <p className="mt-4 text-xs text-white/35">Free trial. If it doesn&#39;t pay for itself, you walk away.</p>
       </section>
     </main>
   );
