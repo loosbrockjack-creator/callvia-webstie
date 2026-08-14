@@ -5,36 +5,18 @@ import { motion } from "framer-motion";
 const steps = [
   {
     number: "01",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M11 7v4l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    ),
     title: "We get you set up",
     description:
       "A real person walks you through the whole thing. We connect your existing business number, build out your receptionist, and test it before you ever go live. No software to figure out on your own.",
   },
   {
     number: "02",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 8c0 5.523 4.477 10 10 10h.5a1.5 1.5 0 001.5-1.5v-1.378a1.5 1.5 0 00-1.168-1.467l-2.2-.489a1.5 1.5 0 00-1.617.738l-.21.378a8.016 8.016 0 01-3.587-3.587l.378-.21a1.5 1.5 0 00.738-1.617l-.489-2.2A1.5 1.5 0 006.378 4H5A1.5 1.5 0 003.5 5.5v.5C3.5 6.552 3.72 7.32 4 8z" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M14.5 4.5l2 2-2 2M14.5 6.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
     title: "It answers every call you want it to",
     description:
       "You choose what it answers: every call that comes in, only the ones you miss, or just nights and weekends. Switch it on or off whenever you want, in a couple of taps, and change your mind as often as you like. You can always pick up yourself. Callvia covers the calls you don't.",
   },
   {
     number: "03",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M7 8h8M7 11h8M7 14h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    ),
     title: "You get the lead, you close the job",
     description:
       "However you set it, the lead still ends up with you. If a call needs you right then, Callvia transfers it straight to your cell. If you're busy, you get a text and an email with who called, what they need, and their number. No middleman, no lost job.",
@@ -51,7 +33,8 @@ export function HowItWorks() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5 text-dim"
+          className="text-xs tracking-widest uppercase mb-5"
+          style={{ color: "#7c5cfc" }}
         >
           How it works
         </motion.p>
@@ -82,12 +65,9 @@ export function HowItWorks() {
               className="relative p-8 flex flex-col gap-6"
               style={{ background: "#000" }}
             >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono tracking-widest text-faint tabular-nums">
-                  {step.number}
-                </span>
-                <div className="text-dim">{step.icon}</div>
-              </div>
+              <span className="text-xs font-mono tracking-widest text-faint tabular-nums">
+                {step.number}
+              </span>
               <div>
                 <h3 className="text-base font-semibold leading-snug text-white mb-2.5 text-balance">
                   {step.title}

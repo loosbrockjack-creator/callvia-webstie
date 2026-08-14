@@ -98,20 +98,46 @@ body {
   }
 }
 
-/* The rim stays inside the purple family. The previous stop list ran through
-   pure #ffffff, and that white blowout at the leading edge is what made the
-   button read as a generic landing-page flourish rather than a brand detail. */
 .rotatingGradient {
   --r: 0deg;
   background: conic-gradient(
     from var(--r),
-    #5b3fd4,
     #7c5cfc,
     #b79cff,
-    #7c5cfc,
-    #5b3fd4
+    #ffffff,
+    #b79cff,
+    #7c5cfc
   );
   animation: rotating-gradient 5s linear infinite;
+}
+
+/* Shine sweep on hover, for the recurring primary CTAs. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -160%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  transition: left 0.65s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shine:hover::after {
+  left: 160%;
 }
 
 /* ROI slider (MissedCallTool + build funnel). Black track, purple fill, flat thumb.
@@ -182,6 +208,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .rotatingGradient {
     animation: none;
+  }
+  .btn-shine::after {
+    transition: none;
   }
   .roi-slider::-webkit-slider-thumb,
   .roi-slider::-moz-range-thumb {

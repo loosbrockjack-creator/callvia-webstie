@@ -87,7 +87,8 @@ export function MissedCallTool() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5 text-center text-dim"
+          className="text-xs tracking-widest uppercase mb-5 text-center"
+          style={{ color: "#7c5cfc" }}
         >
           Run your numbers
         </motion.p>
@@ -230,7 +231,7 @@ export function MissedCallTool() {
                 <button
                   type="button"
                   onClick={runAnalysis}
-                  className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
+                  className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
                 >
                   Analyze My Line
                 </button>

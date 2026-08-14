@@ -227,7 +227,7 @@ export function SignAgreement({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="mt-2 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
+        className="mt-2 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
       >
         {submitting ? "Signing…" : isTrial ? "Sign and start my trial" : "Sign and continue to payment"}
       </button>

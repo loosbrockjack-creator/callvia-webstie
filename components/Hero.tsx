@@ -83,7 +83,7 @@ export function Hero() {
           <GradientButton href="#demo">Experience It</GradientButton>
           <a
             href="#how-it-works"
-            className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white bg-[#1a1a1a] border border-white/15 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:bg-[#242424] hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.09)] transition-all duration-200"
+            className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-medium text-white bg-[#1a1a1a] border border-white/15 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:bg-[#242424] hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.09)] transition-all duration-200"
           >
             See How It Works
           </a>

@@ -40,7 +40,8 @@ export function Research() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5 text-dim"
+          className="text-xs tracking-widest uppercase mb-5"
+          style={{ color: "#7c5cfc" }}
         >
           The research
         </motion.p>

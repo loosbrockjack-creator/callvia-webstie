@@ -26,7 +26,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ token: 
         />
 
         <div className="relative z-10 max-w-md mx-auto text-center">
-          <p className="text-xs tracking-widest uppercase mb-6 text-dim">
+          <p className="text-xs tracking-widest uppercase mb-6" style={{ color: "#7c5cfc" }}>
             Client Login
           </p>
           <h1

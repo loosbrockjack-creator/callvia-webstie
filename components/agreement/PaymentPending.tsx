@@ -58,7 +58,7 @@ export function PaymentPending({
         <button
           onClick={pay}
           disabled={submitting}
-          className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
+          className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] disabled:opacity-40 disabled:pointer-events-none"
         >
           {submitting ? "Opening checkout…" : "Complete payment"}
         </button>

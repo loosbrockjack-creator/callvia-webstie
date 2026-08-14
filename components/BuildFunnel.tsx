@@ -709,7 +709,7 @@ export function BuildFunnel() {
         {/* ------------------------------------------------- INSIGHTS ---- */}
         {phase === "insights" && (
           <motion.div key="insights" initial={{ y: 48, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 32 }}>
-            <p className="text-xs tracking-widest uppercase mb-5 text-dim">
+            <p className="text-xs tracking-widest uppercase mb-5" style={{ color: "#7c5cfc" }}>
               Your phone line, diagnosed
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>
@@ -763,7 +763,7 @@ export function BuildFunnel() {
             <button
               type="button"
               onClick={() => setPhase("options")}
-              className="mt-10 inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
+              className="mt-10 inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
             >
               Get My Demo
             </button>
@@ -773,7 +773,7 @@ export function BuildFunnel() {
         {/* -------------------------------------------------- OPTIONS ---- */}
         {phase === "options" && (
           <motion.div key="options" initial={{ y: 48, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 32 }}>
-            <p className="text-xs tracking-widest uppercase mb-5 text-dim">
+            <p className="text-xs tracking-widest uppercase mb-5" style={{ color: "#7c5cfc" }}>
               One last choice
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-white tracking-tight leading-tight" style={{ letterSpacing: "-0.02em" }}>

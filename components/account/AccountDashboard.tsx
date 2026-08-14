@@ -68,7 +68,7 @@ export function AccountDashboard({ profile, hasStripeCustomer, plan, agreements,
           className="flex items-start justify-between gap-4 mb-12"
         >
           <div>
-            <p className="text-xs tracking-widest uppercase mb-3 text-dim">
+            <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "#7c5cfc" }}>
               Your account
             </p>
             <h1 className="text-3xl md:text-4xl font-light tracking-tight" style={{ letterSpacing: "-0.03em" }}>

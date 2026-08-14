@@ -46,7 +46,8 @@ export function AboutContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-6 text-dim"
+            className="text-xs tracking-widest uppercase mb-6"
+            style={{ color: "#7c5cfc" }}
           >
             About Callvia
           </motion.p>
@@ -78,7 +79,8 @@ export function AboutContent() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-4 text-center text-dim"
+            className="text-xs tracking-widest uppercase mb-4 text-center"
+            style={{ color: "#7c5cfc" }}
           >
             From the founder
           </motion.p>

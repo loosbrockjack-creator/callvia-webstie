@@ -226,7 +226,7 @@ export function OnboardingFlow({ token, businessName, contactName }: Props) {
           </div>
 
           {step === 0 && firstName && (
-            <p className="mb-5 text-xs uppercase tracking-widest text-dim">
+            <p className="mb-5 text-xs uppercase tracking-widest" style={{ color: "#7c5cfc" }}>
               Welcome, {firstName}
             </p>
           )}

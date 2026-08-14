@@ -9,14 +9,10 @@ const industries = [
   { name: "General Contractors" },
 ];
 
-// Only claims the site can actually stand behind. "< 2s answer time" and
-// "100% calls captured" were invented performance numbers with nothing
-// measuring them; the trade count is the list rendered beside this block and
-// the price is the free demo offered in the closing section.
 const stats = [
-  { value: "24/7", label: "Nights, weekends, holidays" },
-  { value: String(industries.length), label: "Trades we build for" },
-  { value: "$0", label: "To try it" },
+  { value: "24/7", label: "Availability" },
+  { value: "< 2s", label: "Answer time" },
+  { value: "100%", label: "Calls captured" },
 ];
 
 export function WhoItsFor() {
@@ -31,9 +27,10 @@ export function WhoItsFor() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
-              className="text-xs tracking-widest uppercase mb-5 text-dim"
+              className="text-xs tracking-widest uppercase mb-5"
+              style={{ color: "#7c5cfc" }}
             >
-              Who it&#39;s for
+              Who It&#39;s For
             </motion.p>
 
             <motion.h2
@@ -54,7 +51,8 @@ export function WhoItsFor() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="mt-6 text-base leading-relaxed max-w-md text-muted text-pretty"
+              className="mt-6 text-base leading-relaxed max-w-md"
+              style={{ color: "#888888" }}
             >
               A missed call is a missed job. Callvia answers every call you want it to, and texts you the lead the moment something needs your attention. You stay in control of every customer.
             </motion.p>
@@ -69,8 +67,10 @@ export function WhoItsFor() {
             >
               {stats.map((s) => (
                 <div key={s.label}>
-                  <div className="text-2xl font-bold text-white tabular-nums">{s.value}</div>
-                  <div className="text-xs mt-0.5 text-dim">{s.label}</div>
+                  <div className="text-2xl font-bold text-white">{s.value}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "#555555" }}>
+                    {s.label}
+                  </div>
                 </div>
               ))}
             </motion.div>
@@ -96,7 +96,10 @@ export function WhoItsFor() {
                   style={{ borderColor: "rgba(255,255,255,0.05)" }}
                 >
                   <div className="flex items-center gap-6">
-                    <span className="text-xs font-mono w-5 shrink-0 text-faint tabular-nums">
+                    <span
+                      className="text-xs font-mono w-5 shrink-0"
+                      style={{ color: "#333333" }}
+                    >
                       0{i + 1}
                     </span>
                     <span

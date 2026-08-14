@@ -31,7 +31,8 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-6 text-dim"
+          className="text-xs tracking-widest uppercase mb-6"
+          style={{ color: "#7c5cfc" }}
         >
           Get started
         </motion.p>
@@ -68,7 +69,7 @@ export function CTASection() {
         >
           <a
             href="/build"
-            className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 active:scale-[0.98]"
+            className="btn-shine inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
           >
             Build My Receptionist
           </a>
@@ -99,7 +100,7 @@ export function CTASection() {
             <path d="M4.5 7l2 2 3-3" stroke="#4ade80" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-sm font-medium text-white/90">
-            Free demo. No credit card, no commitment
+            <span className="text-white">$0</span> to try it. No credit card, no commitment
           </span>
         </motion.div>
       </div>

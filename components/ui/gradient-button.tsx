@@ -17,14 +17,13 @@ interface GradientButtonProps {
   className?: string;
 }
 
-// No ambient glow: the rotating rim is already the emphasis, and a halo on top
-// of it was the same purple bloom every other CTA on the site was wearing.
 const OUTER =
   "rotatingGradient group relative inline-flex items-center justify-center rounded-full " +
-  "transition-transform duration-300 active:scale-[0.98] " +
+  "transition-shadow duration-300 shadow-[0_0_30px_rgba(124,92,252,0.4)] " +
+  "hover:shadow-[0_0_48px_rgba(124,92,252,0.6)] " +
   "after:content-[''] after:absolute after:inset-[2px] after:rounded-full " +
-  "after:bg-accent after:z-[1] after:transition-colors after:duration-300 " +
-  "hover:after:bg-accent-hover";
+  "after:bg-[#7c5cfc] after:z-[1] after:transition-colors after:duration-300 " +
+  "hover:after:bg-[#8f6ffd]";
 
 const INNER =
   "relative z-[2] inline-flex items-center justify-center px-7 py-3.5 " +
