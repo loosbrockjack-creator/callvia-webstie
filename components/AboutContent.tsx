@@ -20,7 +20,7 @@ const PRINCIPLES = [
   },
   {
     title: "Prove it before you pay for it",
-    body: "You get a free trial before any money changes hands. If Callvia does not pay for itself, you walk away. No charge, no hard feelings, no pressure to keep something that is not working for you.",
+    body: "You start with a free trial before any money changes hands. If Callvia does not pay for itself within the trial, you walk away. No charge, no hard feelings, no pressure to keep something that is not working for you.",
   },
 ];
 
@@ -236,7 +236,7 @@ export function AboutContent() {
         >
           <GradientButton href="/build">Build My Receptionist</GradientButton>
         </motion.div>
-        <p className="mt-4 text-xs text-white/35">Everyone gets a free trial. If it doesn&#39;t pay for itself, you walk away.</p>
+        <p className="mt-4 text-xs text-white/35">Start with the free trial. If it doesn&#39;t pay for itself within the trial, you walk away.</p>
       </section>
     </main>
   );

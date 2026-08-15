@@ -285,7 +285,7 @@ export function Nav() {
                   Build My Receptionist
                 </FlowButton>
                 <p className="mt-1 text-center text-xs text-white/30">
-                  Everyone gets a free trial. If it doesn&#39;t pay for itself, you walk away.
+                  Start with the free trial. If it doesn&#39;t pay for itself within the trial, you walk away.
                 </p>
               </div>
             </div>

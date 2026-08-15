@@ -19,7 +19,7 @@ export default function BuildPage() {
             Callvia
           </a>
           <span className="text-xs text-white/30">
-            Everyone gets a free trial. If it doesn&#39;t pay for itself, you walk away.
+            Start with the free trial. If it doesn&#39;t pay for itself within the trial, you walk away.
           </span>
         </div>
 

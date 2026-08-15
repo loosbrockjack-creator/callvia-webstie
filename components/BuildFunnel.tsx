@@ -780,7 +780,7 @@ export function BuildFunnel() {
               How do you want your demo?
             </h2>
             <p className="mt-3 text-sm text-muted max-w-md">
-              Either way, you're not committing to anything. Try the free trial after, and if it doesn&#39;t pay for itself, walk away.
+              Either way, you're not committing to anything. Start with the free trial, and if it doesn&#39;t pay for itself within the trial, walk away.
             </p>
 
             <CursorCardsContainer className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
