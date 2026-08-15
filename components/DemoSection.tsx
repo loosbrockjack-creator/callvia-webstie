@@ -57,7 +57,7 @@ export function DemoSection() {
 
         {/* Phone number */}
         <motion.a
-          href="tel:6127123298"
+          href="tel:6124710303"
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
@@ -90,7 +90,7 @@ export function DemoSection() {
             className="text-4xl md:text-6xl font-light text-white tracking-tight"
             style={{ letterSpacing: "-0.02em" }}
           >
-            (612) 712-3298
+            (612) 471-0303
           </div>
 
           <span className="text-xs tracking-widest uppercase text-white/25 group-hover:text-white/50 transition-colors duration-300">
