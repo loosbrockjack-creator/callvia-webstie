@@ -10,8 +10,8 @@ const industries = [
 ];
 
 const stats = [
-  { value: "24/7", label: "Availability" },
-  { value: "< 2s", label: "Answer time" },
+  { value: "$0", label: "To start" },
+  { value: "No", label: "Contract" },
   { value: "100%", label: "Calls captured" },
 ];
 
@@ -92,12 +92,12 @@ export function WhoItsFor() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 + i * 0.08 }}
-                  className="group flex items-center justify-between py-7 border-b cursor-default transition-all duration-200"
+                  className="group flex items-center py-7 px-5 -mx-5 border-b cursor-default rounded-xl transition-all duration-300 hover:bg-white/[0.03] hover:px-6"
                   style={{ borderColor: "rgba(255,255,255,0.05)" }}
                 >
                   <div className="flex items-center gap-6">
                     <span
-                      className="text-xs font-mono w-5 shrink-0"
+                      className="text-xs font-mono w-5 shrink-0 transition-colors duration-300 group-hover:text-[#7c5cfc]"
                       style={{ color: "#333333" }}
                     >
                       0{i + 1}
