@@ -86,16 +86,6 @@ export function Hero() {
           </a>
         </motion.div>
 
-        {/* Free-trial reassurance, first thing anyone reads after the CTAs */}
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut", delay: 1.1 }}
-          className="mt-6 text-xs tracking-wide text-white/35"
-        >
-          Start with the free trial. If it doesn&#39;t pay for itself within the trial, you walk away.
-        </motion.p>
-
       </div>
     </section>
   );
