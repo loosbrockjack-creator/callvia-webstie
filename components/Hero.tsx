@@ -38,19 +38,6 @@ export function Hero() {
 
       {/* Hero content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut", delay: 0.4 }}
-          className="mb-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block" />
-          <span className="text-xs text-white/60 tracking-widest uppercase font-medium">
-            AI Receptionist
-          </span>
-        </motion.div>
-
         {/* Main headline, font-light matches all section headings */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
@@ -71,6 +58,16 @@ export function Hero() {
           style={{ letterSpacing: "-0.01em" }}
         >
           Every call matters. Answer every one.
+        </motion.p>
+
+        {/* Subheading */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.78 }}
+          className="mt-4 text-sm md:text-base font-normal text-white/45 max-w-xl"
+        >
+          The AI receptionist built for the trades, so you never leave a job on the table.
         </motion.p>
 
         {/* CTA buttons */}

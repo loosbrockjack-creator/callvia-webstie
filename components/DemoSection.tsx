@@ -15,22 +15,17 @@ export function DemoSection() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center text-center">
-        {/* Live badge */}
-        <motion.div
+        {/* Section label */}
+        <motion.p
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-xs tracking-widest uppercase mb-5"
+          style={{ color: "#7c5cfc" }}
         >
-          <span className="relative flex items-center justify-center w-2 h-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
-          </span>
-          <span className="text-xs text-white/60 tracking-widest uppercase font-medium">
-            Live demo
-          </span>
-        </motion.div>
+          Demo
+        </motion.p>
 
         {/* Heading */}
         <motion.h2
