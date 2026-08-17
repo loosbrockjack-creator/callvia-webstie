@@ -55,11 +55,8 @@ export function templateSourceHash(templateId: string, version: number): string 
 // constant, run `npx tsx scripts/template-hash.ts` to get the hash, add it
 // below, and insert the matching row into agreement_templates.
 export const FROZEN_HASHES: Record<string, Record<number, string>> = {
-  // Neither template is pinned yet. Pin each the moment a client first signs
-  // against it. The trial template especially: its text is still a
-  // reconstruction and is expected to change before first use.
-  // [TEMPLATE_ID]:       { 1: "<paste templateSourceHash(TEMPLATE_ID, 1) here>" },
-  // [TRIAL_TEMPLATE_ID]: { 1: "<paste templateSourceHash(TRIAL_TEMPLATE_ID, 1) here>" },
+  [TEMPLATE_ID]: { 1: "5447f389002e41a62aedc78db6f6fcecbf79a6444a6035b07cbc7b31fce72652" },
+  [TRIAL_TEMPLATE_ID]: { 1: "502be1bd53130e018ead6f749a47a9ea91434cde5b9c0464c86b9c7aa078ac94" },
 };
 
 export function assertTemplatesUnchanged(): void {

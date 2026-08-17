@@ -10,7 +10,27 @@
 // full payload is logged (recoverable in Vercel function logs) and the route
 // still returns ok.
 
+import { sameOrigin } from "@/lib/parse";
+
 const NOTIFY_TO = "team@callvia.io";
+
+const DAILY_LIMIT_PER_IP = 20;
+
+// Best-effort rate limiting, matching the pattern in /api/lookup. In-memory,
+// so it only persists per warm serverless instance on Vercel: a cost/spam
+// guard, not a security boundary.
+const hits = new Map<string, { day: string; count: number }>();
+
+function rateLimited(ip: string): boolean {
+  const day = new Date().toISOString().slice(0, 10);
+  const entry = hits.get(ip);
+  if (!entry || entry.day !== day) {
+    hits.set(ip, { day, count: 1 });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > DAILY_LIMIT_PER_IP;
+}
 
 function str(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
@@ -52,6 +72,10 @@ async function sendEmail(subject: string, text: string, record: unknown) {
 }
 
 export async function POST(request: Request) {
+  if (!sameOrigin(request)) {
+    return Response.json({ ok: false, error: "Invalid origin." }, { status: 403 });
+  }
+
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
   if (!body) {
     return Response.json({ ok: false, error: "Invalid payload." }, { status: 400 });
@@ -62,6 +86,10 @@ export async function POST(request: Request) {
   const repeatShare = typeof body.repeatShare === "number" ? body.repeatShare : null;
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const timestamp = new Date().toISOString();
+
+  if (ip !== "unknown" && rateLimited(ip)) {
+    return Response.json({ ok: true });
+  }
 
   const businessName = str(answers.businessName);
   const businessPhone = str(answers.businessPhone);
