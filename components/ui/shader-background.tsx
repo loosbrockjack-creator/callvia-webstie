@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 /**
  * Flowing plasma-line field, adapted from the 21st.dev "Shader Background".
@@ -165,7 +165,20 @@ function compile(
   return shader;
 }
 
-export function ShaderBackground({ className }: { className?: string }) {
+/**
+ * `timeRef` swaps the field's own clock for a value someone else owns, which is
+ * how the backdrop drives it from scroll position instead of wall time. The
+ * render loop still runs, it just reads the number rather than accumulating
+ * one, and skips the GL draw entirely on frames where it has not moved. Leave
+ * the prop off and the field animates on its own as before.
+ */
+export function ShaderBackground({
+  className,
+  timeRef,
+}: {
+  className?: string;
+  timeRef?: RefObject<number>;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -265,13 +278,21 @@ export function ShaderBackground({ className }: { className?: string }) {
     let visible = true;
     let contextLost = false;
 
+    // Only ever moves when the externally owned value does, so a still page
+    // costs one comparison per frame rather than a full-screen fragment pass.
+    let lastDrawn = Number.NaN;
+
     const loop = (ts: number) => {
       if (lastTs === 0) lastTs = ts;
       elapsed += (ts - lastTs) / 1000;
       lastTs = ts;
 
-      resize();
-      draw(elapsed);
+      const resized = resize();
+      const t = timeRef ? timeRef.current : elapsed;
+      if (resized || t !== lastDrawn) {
+        draw(t);
+        lastDrawn = t;
+      }
       frameId = requestAnimationFrame(loop);
     };
 
@@ -299,6 +320,10 @@ export function ShaderBackground({ className }: { className?: string }) {
       // One frame, then nothing. No loop is ever scheduled.
       draw(STATIC_FRAME_TIME);
     } else {
+      // Paint the resting frame immediately. Under a timeRef the loop would
+      // otherwise sit on an unchanged value and never draw at all.
+      draw(timeRef ? timeRef.current : 0);
+      lastDrawn = timeRef ? timeRef.current : 0;
       start();
     }
 
@@ -343,7 +368,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       gl.deleteShader(fragShader);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, []);
+  }, [timeRef]);
 
   return (
     <canvas
