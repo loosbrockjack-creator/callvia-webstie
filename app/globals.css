@@ -40,6 +40,10 @@ body {
 }
 
 body {
+  /* Containing block for the document-height strand braid in SiteBackdrop, so
+     its inset-0 resolves to the full page rather than the viewport. Safe for
+     the fixed Nav, CTA and footer panel: only transform/filter break those. */
+  position: relative;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

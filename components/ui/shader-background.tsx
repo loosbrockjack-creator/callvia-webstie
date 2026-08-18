@@ -47,12 +47,13 @@ precision highp float;
 
 uniform vec2 iResolution;
 uniform float iTime;
+// Half-extent of visible shader space, set from JS. See spanFor().
+uniform vec2 uSpan;
 
 #define LINES_PER_GROUP ${linesPerGroup}
 
 const float overallSpeed = 0.2;
 const float gridSmoothWidth = 0.015;
-const float scale = 5.0;
 const float minLineWidth = 0.01;
 const float maxLineWidth = 0.2;
 const float lineSpeed = 1.0 * overallSpeed;
@@ -86,15 +87,12 @@ void main() {
   vec2 fragCoord = gl_FragCoord.xy;
   vec2 uv = fragCoord.xy / iResolution.xy;
 
-  // Vertical extent is normalised on its own. The source divided both axes by
-  // width, so a tall phone viewport covered more than three times the shader
-  // space vertically that a laptop did, and the strands collapsed into a thin
-  // band across the middle of the screen. Capping the vertical span reproduces
-  // the landscape framing exactly and fills a portrait screen properly.
-  float vSpan = min(iResolution.y / iResolution.x, 0.75);
-  vec2 space;
-  space.x = (fragCoord.x - iResolution.x / 2.0) / iResolution.x * 2.0 * scale;
-  space.y = (fragCoord.y - iResolution.y / 2.0) / iResolution.y * 2.0 * scale * vSpan;
+  // Both axes are framed from JS rather than derived from width alone. The
+  // source divided x and y by width, so a phone showed the same width of field
+  // as a laptop crushed into a third of the pixels, which read as cramped, and
+  // covered three times as much of it vertically, which left the strands in a
+  // thin band. uSpan fixes the framing on each axis independently.
+  vec2 space = (uv - 0.5) * 2.0 * uSpan;
 
   float horizontalFade = 1.0 - (cos(uv.x * 6.28) * 0.5 + 0.5);
   float verticalFade = 1.0 - (cos(uv.y * 6.28) * 0.5 + 0.5);
@@ -130,6 +128,22 @@ void main() {
   gl_FragColor = fragColor;
 }
 `;
+
+// The field was tuned at this width. Narrower viewports show a zoomed-in slice
+// of it at the same visual scale, rather than the whole thing squeezed down.
+const REFERENCE_WIDTH = 1440;
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+
+function spanFor(w: number, h: number): [number, number] {
+  // Hold roughly the reference shader-units-per-pixel horizontally. Floored so
+  // a very narrow screen still shows more than a couple of strands.
+  const x = clamp((5 * w) / REFERENCE_WIDTH, 2.4, 5.5);
+  // Strands live within about +/- 3 units vertically, so keeping the vertical
+  // half-extent near that fills the frame at any aspect ratio.
+  const y = clamp(x * (h / w), 2.6, 3.4);
+  return [x, y];
+}
 
 function compile(
   gl: WebGLRenderingContext,
@@ -209,9 +223,11 @@ export function ShaderBackground({ className }: { className?: string }) {
     const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
     const uResolution = gl.getUniformLocation(program, "iResolution");
     const uTime = gl.getUniformLocation(program, "iTime");
+    const uSpan = gl.getUniformLocation(program, "uSpan");
 
     let lastW = 0;
     let lastH = 0;
+    let span = spanFor(window.innerWidth, window.innerHeight);
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
@@ -224,6 +240,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
+      span = spanFor(canvas.clientWidth, canvas.clientHeight);
       return true;
     };
 
@@ -231,6 +248,7 @@ export function ShaderBackground({ className }: { className?: string }) {
       gl.useProgram(program);
       gl.uniform2f(uResolution, canvas.width, canvas.height);
       gl.uniform1f(uTime, time);
+      gl.uniform2f(uSpan, span[0], span[1]);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.enableVertexAttribArray(aVertexPosition);

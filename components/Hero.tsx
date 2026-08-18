@@ -3,20 +3,21 @@
 import { motion } from "framer-motion";
 import { GradientButton } from "./ui/gradient-button";
 
-// The moving strand field behind this lives in SiteBackdrop, pinned at z-0 for
-// the whole site. The hero is transparent so it shows through at full strength;
-// the backdrop fades itself down past the first viewport.
+// The flow lines behind this live in SiteBackdrop, pinned at z-0 for the whole
+// site. The hero is transparent so the arch that crosses this section shows
+// through at full strength before it dives off toward the rest of the page.
 export function Hero() {
   return (
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
-      {/* Legibility scrim, not decoration. The strands are brightest through the
-          middle of the viewport, which is exactly where the headline sits.
-          Black rather than purple so it darkens without adding more accent. */}
+      {/* Legibility scrim, not decoration. The arch crosses the upper middle of
+          the viewport, which is exactly where the headline sits. Lighter than it
+          needed to be against the old shader field: the lines are thin enough
+          that this only has to take the edge off them. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 48%, transparent 80%)",
+            "radial-gradient(ellipse 58% 42% at 50% 50%, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.34) 52%, transparent 80%)",
         }}
       />
 
