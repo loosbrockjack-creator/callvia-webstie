@@ -1,40 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { WaveformMark } from "./WaveformMark";
 import { GradientButton } from "./ui/gradient-button";
 
+// The moving strand field behind this lives in SiteBackdrop, pinned at z-0 for
+// the whole site. The hero is transparent so it shows through at full strength;
+// the backdrop fades itself down past the first viewport.
 export function Hero() {
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-black">
-      {/* Radial background glow */}
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
+      {/* Legibility scrim, not decoration. The strands are brightest through the
+          middle of the viewport, which is exactly where the headline sits.
+          Black rather than purple so it darkens without adding more accent. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,92,252,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 48%, transparent 80%)",
         }}
       />
-
-      {/* Waveform glow layer, blurred for glow effect */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.4, ease: "easeOut" }}
-      >
-        <WaveformMark size={860} animated opacity={0.06} className="blur-[32px]" />
-      </motion.div>
-
-      {/* Waveform sharp layer */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        initial={{ opacity: 0, scale: 0.88 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
-      >
-        <WaveformMark size={800} animated opacity={0.18} />
-      </motion.div>
 
       {/* Hero content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto">

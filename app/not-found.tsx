@@ -18,7 +18,7 @@ const ELSEWHERE = [
 
 export default function NotFound() {
   return (
-    <main className="bg-black min-h-[100dvh] flex flex-col">
+    <main className="relative z-10 min-h-[100dvh] flex flex-col">
       <Nav />
 
       <section className="flex flex-1 items-center px-6 pt-32 pb-24">

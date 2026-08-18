@@ -26,14 +26,14 @@ const PRINCIPLES = [
 
 export function AboutContent() {
   return (
-    <main className="bg-black text-white">
+    <main className="text-white">
       {/* Hero */}
       <section className="relative pt-28 md:pt-40 pb-8 md:pb-10 px-6 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,252,0.08) 0%, transparent 65%)",
+              "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,252,0.04) 0%, transparent 65%)",
           }}
         />
         <motion.div

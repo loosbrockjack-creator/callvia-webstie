@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="bg-black min-h-[100dvh]">
+    <div className="relative z-10 min-h-[100dvh]">
       <Nav />
       <AboutContent />
       <Footer />

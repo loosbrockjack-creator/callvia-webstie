@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FloatingBookCall } from "@/components/FloatingBookCall";
+import { SiteBackdrop } from "@/components/SiteBackdrop";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -57,6 +58,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="bg-black text-white antialiased">
+        <SiteBackdrop />
         {children}
         <FloatingBookCall />
       </body>

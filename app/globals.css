@@ -220,4 +220,15 @@ body {
   .toast-in {
     animation: none;
   }
+  /* The waveform bars were missing here, so they kept animating for anyone who
+     had asked motion to stop. The bars are laid out at scaleY(1), so switching
+     the animation off leaves the mark at its full resting shape. */
+  .waveform-bar {
+    animation: none !important;
+  }
 }
+
+/* The backdrop shader and the scroll-following stroke handle reduced motion in
+   JS rather than here: the canvas paints one static frame instead of starting a
+   render loop, and the stroke renders fully drawn with no scroll travel. See
+   components/ui/shader-background.tsx and components/ui/scroll-follow-line.tsx. */

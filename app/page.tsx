@@ -11,7 +11,9 @@ import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-black min-h-[100dvh]">
+    // Transparent, not bg-black: SiteBackdrop is pinned at z-0 behind this and
+    // an opaque main would hide it completely.
+    <main className="relative z-10 min-h-[100dvh]">
       <Nav />
       <Hero />
       <Research />

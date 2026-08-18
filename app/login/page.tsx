@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="bg-black min-h-[100dvh] text-white">
+    <div className="relative z-10 min-h-[100dvh] text-white">
       <Nav />
 
       <main className="relative pt-28 md:pt-40 pb-16 md:pb-28 px-6 overflow-hidden">
@@ -17,7 +17,7 @@ export default function LoginPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 50% 40% at 50% 0%, rgba(124,92,252,0.07) 0%, transparent 60%)",
+              "radial-gradient(ellipse 50% 40% at 50% 0%, rgba(124,92,252,0.04) 0%, transparent 60%)",
           }}
         />
 
