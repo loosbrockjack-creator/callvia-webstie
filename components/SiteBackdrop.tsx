@@ -2,22 +2,22 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useScroll, useSpring, useTransform } from "framer-motion";
 import { ShaderBackground } from "./ui/shader-background";
 import { FlowLines } from "./ui/flow-lines";
 
 /**
  * The moving background for the marketing surfaces. Mounted once in the root
- * layout and pinned behind every page, which is what lets the streak run
- * continuously from the hero to the footer instead of restarting per section.
+ * layout and pinned behind every page.
  *
  * Sits at z-0. Page content is z-10, Nav and the floating CTA are z-50.
  *
- * Two layers, both always moving. The shader canvas draws the field over the
- * first screen; FlowLines draws the streak that crosses the hero and waves down
- * the rest of the page. Neither one stops when the page does: they flow on
- * their own clock, and scroll position pushes both further along and unwinds
- * them when you scroll back up.
+ * Two layers, both always moving, and they never overlap. The shader field is
+ * one screen tall and anchored to the top of the document, so it scrolls up and
+ * out of frame like anything else on the page rather than fading out underneath
+ * you. The streak starts below it and waves down the rest of the page. Neither
+ * stops when the page does: they flow on their own clock, and scroll position
+ * pushes them further along and unwinds them on the way back up.
  */
 
 // Same reasoning as FloatingBookCall's HIDDEN_PREFIXES: this is a marketing
@@ -41,14 +41,9 @@ const HIDDEN_PREFIXES = [
 // whipping past on a fast flick.
 const PX_PER_SECOND = 260;
 
-// Past here the canvas has faded out, so there is nothing to draw.
-const FADE_OUT_PX = 900;
-
 export function SiteBackdrop() {
   const pathname = usePathname();
   const { scrollY } = useScroll();
-
-  const shaderOpacity = useTransform(scrollY, [0, FADE_OUT_PX], [1, 0]);
 
   // Sprung so the field eases into its new position on a flick rather than
   // tracking the scrollbar frame for frame.
@@ -60,7 +55,8 @@ export function SiteBackdrop() {
   });
 
   // The canvas render loop reads this rather than subscribing, so scrolling
-  // never triggers a React render on a full-screen WebGL component.
+  // never triggers a React render on a full-screen WebGL component. `paused` is
+  // belt and braces alongside the field's own intersection observer.
   const drive = useRef({ offset: 0, paused: false });
 
   useEffect(() => {
@@ -68,7 +64,7 @@ export function SiteBackdrop() {
       drive.current.offset = v;
     });
     const stopScroll = scrollY.on("change", (v) => {
-      drive.current.paused = v > FADE_OUT_PX;
+      drive.current.paused = v > window.innerHeight * 1.2;
     });
     return () => {
       stopOffset();
@@ -81,10 +77,11 @@ export function SiteBackdrop() {
 
   return (
     <>
-      {/* The field itself stays locked to the viewport. */}
+      {/* One screen tall at the top of the document, so it scrolls away with
+          the hero. No opacity animation anywhere: it leaves by going up. */}
       <div
         aria-hidden
-        className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
+        className="absolute inset-x-0 top-0 z-0 h-[100lvh] overflow-hidden pointer-events-none"
       >
         {/* Stands in when WebGL is unavailable, and keeps the page from being
             flat black for the frame before the canvas paints. */}
@@ -96,14 +93,12 @@ export function SiteBackdrop() {
           }}
         />
 
-        <motion.div className="absolute inset-0" style={{ opacity: shaderOpacity }}>
-          <ShaderBackground driveRef={drive} />
-        </motion.div>
+        <ShaderBackground className="absolute inset-0" driveRef={drive} />
       </div>
 
       {/* The streak is drawn in document space but rasterised one viewport at a
-          time, so it runs hero to footer at the rate you actually scroll while
-          only ever painting visible pixels. */}
+          time, so it runs from below the hero to the footer at the rate you
+          actually scroll while only ever painting visible pixels. */}
       <div
         aria-hidden
         className="fixed inset-0 z-0 overflow-hidden pointer-events-none"

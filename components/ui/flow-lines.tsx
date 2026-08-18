@@ -3,21 +3,24 @@
 import { useEffect, useRef } from "react";
 
 /**
- * One connected streak of lines that leaves the hero, waves back and forth
- * across the page, and runs to the footer.
+ * One connected streak of lines that comes in from the left below the hero,
+ * waves back and forth across the page, and runs to the footer.
  *
- * Every line is a single unbroken curve from the top of the document to the
- * bottom. There is no per-section piece and no seam: the same curve that
- * crosses the hero is the one switchbacking past the footer, so nothing can
- * read as a disconnected fragment.
+ * It starts below the first screen. The hero is the shader field and nothing
+ * else; the streak enters off the left edge once the hero has scrolled by, so
+ * there is never a second set of lines sitting on top of the headline.
+ *
+ * Every line is a single unbroken curve from where it enters to the bottom of
+ * the document. There is no per-section piece and no seam, so nothing can read
+ * as a disconnected fragment.
  *
  * Canvas rather than svg, for two reasons. The lines have to keep flowing while
  * the page sits still, which means regenerating their shape every frame, and a
  * document-height svg would have to rewrite tens of thousands of path segments
- * to do it. And the field's look comes from additive blending at the crossings,
- * which canvas gives directly. The element is one viewport, fixed, with scroll
- * applied as an offset, so only visible pixels are ever rasterised no matter how
- * long the page gets.
+ * to do it. And the look comes from additive blending at the crossings, which
+ * canvas gives directly. The element is one viewport, fixed, with scroll
+ * applied as an offset, so only visible pixels are ever rasterised no matter
+ * how long the page gets.
  *
  * Geometry is in viewport-relative units: 100 across is one viewport width, 100
  * down is one viewport height, against the measured document height.
@@ -26,13 +29,14 @@ import { useEffect, useRef } from "react";
 /** Units in one viewport. */
 const SCREEN = 100;
 
-// The spine of the hero pass. Lines hang off it by their own offset.
-const HERO_TOP = 42;
-const HERO_BOTTOM = 58;
-const HERO_ARCH = 8;
+// Where the streak begins, in units from the top of the document. Has to clear
+// one screen by more than a line's furthest reach above the spine (its offset
+// plus its wobble), or the topmost line grazes the bottom of the hero.
+const STREAK_TOP = 118;
 
 // Turnarounds sit outside the viewport, so the streak leaves frame at the edges
-// rather than visibly bouncing off them.
+// rather than visibly bouncing off them. Also what puts its start point off the
+// left edge, so it slides into frame instead of beginning in open space.
 const DESKTOP_AMP = 62;
 const MOBILE_AMP = 56;
 
@@ -46,52 +50,34 @@ const MOBILE_SWEEP = 1.8;
 // ever evaluated, so this buys smoothness cheaply.
 const STEP = 0.012;
 
-// How far below the fold the leading tip sits, in screens. Just past the edge:
-// the streak is already there when you arrive, and a hard flick pulls the tip
-// far enough behind that you catch it drawing in.
-const LEAD = 1.12;
-
-// Vertical spread of the streak over the hero, then once it has gathered. Both
-// stay tight enough to read as one band. The hero is wider only so the lines
-// arrive looking like the field they came out of.
-const HERO_SPREAD = 34;
-const RIBBON_SPREAD = 21;
-
-// Excursion of each line's own wobble, over the hero and once gathered.
-const WOBBLE_HERO = 9;
-const WOBBLE_RIBBON = 4.5;
-
-// Where the streak tightens, in half-cycles. Finishes during the first sweep so
-// the gathering happens on the way out of the first screen, not at a seam.
-const GATHER_FROM = 0.5;
-const GATHER_TO = 1.8;
-
-// Radians per second the wave travels along the lines while the page is still.
-// The shader field runs at 0.2; a little faster here because these are fewer
-// lines with nothing else moving against them.
-const IDLE_RATE = 0.42;
-
-// Radians of extra travel per screen scrolled. This is what makes the streak
-// run with you and unwind when you scroll back up.
-const SCROLL_RATE = 0.9;
-
-// Alpha the streak sits at over the hero, where the shader canvas is still at
-// full strength, and what it reaches once the canvas has gone. Not a fade to
-// nothing: the lines stay clearly present across the hero so they read as the
-// field's own lines carrying on.
-const HERO_ALPHA = 0.55;
-const FULL_ALPHA_AT = 170;
+// Where the leading tip sits, in screens from the top of the viewport. Just
+// inside the bottom edge rather than past it, so the streak visibly arrives
+// into the lower part of the frame as you scroll instead of being there
+// already. Below 1.0 or you never see it come in.
+const LEAD = 0.92;
 
 // Length of the softened tail behind the leading tip, in units.
-const TIP_FADE = 55;
+const TIP_FADE = 30;
+
+// Vertical spread of the streak, and the excursion of each line's own wobble.
+// Both stay tight enough that it reads as one band.
+const SPREAD = 21;
+const WOBBLE = 4.5;
+
+// Radians per second the wave travels along the lines while the page is still.
+const IDLE_RATE = 0.34;
+
+// Radians of extra travel per screen scrolled. This is what makes the streak
+// run with you and unwind when you scroll back up. Kept under the point where
+// the waves visibly race the page.
+const SCROLL_RATE = 0.6;
 
 const ACCENT = "124, 92, 252";
 const ACCENT_HOT = "154, 129, 255";
 
 type Line = {
   seed: number;
-  hero: number;
-  ribbon: number;
+  offset: number;
   width: number;
   alpha: number;
   rate: number;
@@ -106,13 +92,12 @@ const smoothstep = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-function makeLines(count: number, heroSpread: number, ribbonSpread: number, scale: number): Line[] {
+function makeLines(count: number, spread: number, scale: number): Line[] {
   return Array.from({ length: count }, (_, i) => {
     const t = count === 1 ? 0.5 : i / (count - 1);
     return {
       seed: i * 1.37,
-      hero: -heroSpread * 0.45 + heroSpread * t + 3 * Math.cos(i * 2.1),
-      ribbon: -ribbonSpread * 0.45 + ribbonSpread * t,
+      offset: -spread * 0.45 + spread * t,
       width: (0.55 + 1.2 * Math.abs(Math.cos(i * 1.7))) * scale,
       alpha: 0.32 + 0.5 * Math.abs(Math.sin(i * 1.23 + 0.4)),
       // Slightly different flow rates, so the lines slide against each other
@@ -123,55 +108,51 @@ function makeLines(count: number, heroSpread: number, ribbonSpread: number, scal
 }
 
 type Geometry = {
-  halfCycles: number;
-  restSpan: number;
+  sweeps: number;
+  span: number;
   amp: number;
   lines: Line[];
 };
 
 function geometryFor(screens: number, mobile: boolean): Geometry {
   const sweepScreens = mobile ? MOBILE_SWEEP : DESKTOP_SWEEP;
-  const sweeps = Math.max(2, Math.round((screens - HERO_BOTTOM / SCREEN) / sweepScreens));
+  const sweeps = Math.max(2, Math.round((screens - STREAK_TOP / SCREEN) / sweepScreens));
+  // Overshoot the bottom a little so the last sweep is still travelling when it
+  // leaves the frame, rather than parking on the footer.
   const endY = screens * SCREEN + 0.16 * SCREEN;
 
   return {
-    halfCycles: 1 + sweeps,
-    restSpan: (endY - HERO_BOTTOM) / sweeps,
+    sweeps,
+    span: (endY - STREAK_TOP) / sweeps,
     amp: mobile ? MOBILE_AMP : DESKTOP_AMP,
-    lines: mobile
-      ? makeLines(7, HERO_SPREAD * 0.9, RIBBON_SPREAD * 0.8, 0.85)
-      : makeLines(12, HERO_SPREAD, RIBBON_SPREAD, 1),
+    lines: mobile ? makeLines(7, SPREAD * 0.8, 0.85) : makeLines(12, SPREAD, 1),
   };
 }
 
 /**
- * Vertical position of the spine. `p` counts half-cycles: 0 to 1 crosses the
- * hero, every unit after that is one sweep across the page.
+ * Vertical position of the spine. `p` counts sweeps across the page.
  *
  * Within a sweep the descent is fast at the two ends and slow through the
  * middle, which is the whole look: the streak runs flat across the page, then
  * dives where it turns.
  */
 function spineY(p: number, geo: Geometry): number {
-  const k = Math.min(geo.halfCycles - 1, Math.floor(p));
+  const k = Math.min(geo.sweeps - 1, Math.floor(p));
   const u = Math.min(1, p - k);
   const eased = u + (0.75 / (2 * Math.PI)) * Math.sin(2 * Math.PI * u);
-
-  const from = k === 0 ? HERO_TOP : HERO_BOTTOM + (k - 1) * geo.restSpan;
-  const to = k === 0 ? HERO_BOTTOM : HERO_BOTTOM + k * geo.restSpan;
-
-  let y = from + (to - from) * eased;
-  if (k === 0) y -= HERO_ARCH * Math.sin(Math.PI * u);
-  return y;
+  return STREAK_TOP + (k + eased) * geo.span;
 }
 
 /**
- * Horizontal position. Smoothstep rather than linear, so the streak eases into
- * each turn instead of arriving at the edge still travelling sideways. Paired
- * with spineY's fast ends, that reads as a hook over the edge.
+ * Horizontal position. The first sweep runs left to right, so the streak comes
+ * into frame off the left edge and swings across, then alternates.
+ *
+ * Smoothstep rather than linear, so it eases into each turn instead of arriving
+ * at the edge still travelling sideways. Paired with spineY's fast ends, that
+ * reads as a hook over the edge.
  */
 function spineX(p: number, geo: Geometry): number {
-  const k = Math.min(geo.halfCycles - 1, Math.floor(p));
+  const k = Math.min(geo.sweeps - 1, Math.floor(p));
   const u = Math.min(1, p - k);
   const s = u * u * (3 - 2 * u);
   const left = 50 - geo.amp;
@@ -222,7 +203,7 @@ export function FlowLines() {
     };
 
     // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
-    // behind the fold and it eases back up instead of snapping.
+    // behind and it eases back up instead of snapping.
     let tip = Number.NaN;
 
     const render = (t: number) => {
@@ -239,7 +220,7 @@ export function FlowLines() {
       // Only the span crossing the viewport, plus a margin. It has to clear the
       // furthest a line sits from the spine (offset plus wobble), or a line
       // would pop in at the top of the frame instead of arriving already drawn.
-      const margin = HERO_SPREAD * 0.5 + WOBBLE_HERO + 12;
+      const margin = SPREAD * 0.5 + WOBBLE + 12;
       const top = screenY * SCREEN - margin;
       const bottom = (screenY + 1) * SCREEN + margin;
 
@@ -254,8 +235,8 @@ export function FlowLines() {
       // padded by a step of its own. y is monotonic in p, so this is exact.
       const SCAN = 0.05;
       let pFrom = 0;
-      let pTo = geo.halfCycles;
-      for (let p = 0; p <= geo.halfCycles; p += SCAN) {
+      let pTo = geo.sweeps;
+      for (let p = 0; p <= geo.sweeps; p += SCAN) {
         const y = spineY(p, geo);
         if (y < top) pFrom = p;
         if (y > bottom) {
@@ -264,7 +245,7 @@ export function FlowLines() {
         }
       }
       pFrom = Math.max(0, pFrom - SCAN);
-      pTo = Math.min(geo.halfCycles, pTo + SCAN);
+      pTo = Math.min(geo.sweeps, pTo + SCAN);
 
       for (const line of geo.lines) {
         const pts: Array<[number, number, number]> = [];
@@ -273,21 +254,15 @@ export function FlowLines() {
           const y0 = spineY(p, geo);
           if (y0 > drawTip) break;
 
-          const gathered = smoothstep(GATHER_FROM, GATHER_TO, p);
-          const off = line.hero + (line.ribbon - line.hero) * gathered;
-          const wob = WOBBLE_HERO + (WOBBLE_RIBBON - WOBBLE_HERO) * gathered;
           const flow = phase * line.rate;
-
           const x = spineX(p, geo) + 3.5 * wave(p * 4.2 + line.seed * 1.7 + flow * 0.7);
-          const y = y0 + off + wob * wave(p * 6.5 + line.seed + flow);
+          const y = y0 + line.offset + WOBBLE * wave(p * 6.5 + line.seed + flow);
 
-          // Depth fade, then the softened tail behind the leading tip.
-          const depth = HERO_ALPHA + (1 - HERO_ALPHA) * smoothstep(SCREEN * 0.6, FULL_ALPHA_AT, y0);
           const tail = Number.isFinite(drawTip)
             ? smoothstep(drawTip, drawTip - TIP_FADE, y0)
             : 1;
 
-          pts.push([(x * vw) / SCREEN, (y * vh) / SCREEN - scrollY, depth * tail]);
+          pts.push([(x * vw) / SCREEN, (y * vh) / SCREEN - scrollY, tail]);
         }
 
         if (pts.length < 3) continue;

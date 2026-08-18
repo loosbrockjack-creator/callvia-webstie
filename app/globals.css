@@ -40,6 +40,11 @@ body {
 }
 
 body {
+  /* Containing block for the hero-height shader panel in SiteBackdrop, so its
+     absolute positioning resolves against the document rather than the
+     viewport. Safe for the fixed Nav, CTA and footer panel: only transform and
+     filter break those. */
+  position: relative;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
