@@ -1,51 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  motion,
-  useScroll,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from "framer-motion";
-import { usePrefersReducedMotion } from "./use-reduced-motion";
+import { useEffect, useRef } from "react";
 
 /**
- * The hero field, continued down the page as one motion.
+ * One connected streak of lines that leaves the hero, waves back and forth
+ * across the page, and runs to the footer.
  *
- * These are the same lines the shader draws behind the headline, picked up as
- * real geometry: they fan across the first screen the way the field does, then
- * gather into a ribbon and switchback down the length of the document, drawing
- * forward as you scroll and un-drawing as you scroll back.
+ * Every line is a single unbroken curve from the top of the document to the
+ * bottom. There is no per-section piece and no seam: the same curve that
+ * crosses the hero is the one switchbacking past the footer, so nothing can
+ * read as a disconnected fragment.
  *
- * The handoff is a crossfade, not a cut. Across the first screen and a half the
- * shader canvas fades out while these brighten (see the gradient stops), so the
- * field appears to resolve into the ribbon rather than being replaced by it.
+ * Canvas rather than svg, for two reasons. The lines have to keep flowing while
+ * the page sits still, which means regenerating their shape every frame, and a
+ * document-height svg would have to rewrite tens of thousands of path segments
+ * to do it. And the field's look comes from additive blending at the crossings,
+ * which canvas gives directly. The element is one viewport, fixed, with scroll
+ * applied as an offset, so only visible pixels are ever rasterised no matter how
+ * long the page gets.
  *
- * Geometry is in viewport-relative units against a measured document height:
- * 100 units across is one viewport width, 100 units down is one viewport
- * height, whatever the page grows to. That is what keeps the hero fan sitting
- * on the hero instead of drifting every time a section changes size.
+ * Geometry is in viewport-relative units: 100 across is one viewport width, 100
+ * down is one viewport height, against the measured document height.
  */
 
-/** viewBox units in one viewport. */
+/** Units in one viewport. */
 const SCREEN = 100;
 
-// The spine of the hero pass. Individual lines hang off this by their fan
-// offset, which is what spreads them over the whole first screen.
+// The spine of the hero pass. Lines hang off it by their own offset.
 const HERO_TOP = 42;
 const HERO_BOTTOM = 58;
 const HERO_ARCH = 8;
 
-// How far below the fold the leading tip aims for, in screens. Leading rather
-// than tracking exactly, so the ribbon arrives into view slightly ahead of the
-// content it belongs to instead of chasing it.
-const LEAD = 1.35;
-
-// Sampling resolution along the path, in half-cycles.
-const STEP = 0.03;
-
-// Turnarounds sit outside the viewport, so the ribbon leaves frame at the edges
+// Turnarounds sit outside the viewport, so the streak leaves frame at the edges
 // rather than visibly bouncing off them.
 const DESKTOP_AMP = 62;
 const MOBILE_AMP = 56;
@@ -56,86 +42,123 @@ const MOBILE_AMP = 56;
 const DESKTOP_SWEEP = 1.3;
 const MOBILE_SWEEP = 1.8;
 
-// Where the fan becomes a ribbon, in half-cycles. Starts partway through the
-// hero pass and finishes during the first sweep, so the gathering happens on
-// the way out of the first screen rather than at a seam.
-const GATHER_FROM = 0.55;
-const GATHER_TO = 1.9;
+// Sampling resolution along the curve, in half-cycles. Only the visible span is
+// ever evaluated, so this buys smoothness cheaply.
+const STEP = 0.012;
 
-// Vertical excursion of a line's own wobble, fanned then gathered. The large
-// value is what makes the lines cross each other over the hero the way the
-// field does; the small one is what keeps the ribbon reading as a ribbon.
-const WOBBLE_FAN = 15;
+// How far below the fold the leading tip sits, in screens. Just past the edge:
+// the streak is already there when you arrive, and a hard flick pulls the tip
+// far enough behind that you catch it drawing in.
+const LEAD = 1.12;
+
+// Vertical spread of the streak over the hero, then once it has gathered. Both
+// stay tight enough to read as one band. The hero is wider only so the lines
+// arrive looking like the field they came out of.
+const HERO_SPREAD = 34;
+const RIBBON_SPREAD = 21;
+
+// Excursion of each line's own wobble, over the hero and once gathered.
+const WOBBLE_HERO = 9;
 const WOBBLE_RIBBON = 4.5;
+
+// Where the streak tightens, in half-cycles. Finishes during the first sweep so
+// the gathering happens on the way out of the first screen, not at a seam.
+const GATHER_FROM = 0.5;
+const GATHER_TO = 1.8;
+
+// Radians per second the wave travels along the lines while the page is still.
+// The shader field runs at 0.2; a little faster here because these are fewer
+// lines with nothing else moving against them.
+const IDLE_RATE = 0.42;
+
+// Radians of extra travel per screen scrolled. This is what makes the streak
+// run with you and unwind when you scroll back up.
+const SCROLL_RATE = 0.9;
+
+// Alpha the streak sits at over the hero, where the shader canvas is still at
+// full strength, and what it reaches once the canvas has gone. Not a fade to
+// nothing: the lines stay clearly present across the hero so they read as the
+// field's own lines carrying on.
+const HERO_ALPHA = 0.55;
+const FULL_ALPHA_AT = 170;
+
+// Length of the softened tail behind the leading tip, in units.
+const TIP_FADE = 55;
+
+const ACCENT = "124, 92, 252";
+const ACCENT_HOT = "154, 129, 255";
 
 type Line = {
   seed: number;
-  /** Offset from the spine over the hero, before gathering. */
-  fan: number;
-  /** Offset from the spine once gathered into the ribbon. */
+  hero: number;
   ribbon: number;
   width: number;
-  opacity: number;
-  halo: boolean;
+  alpha: number;
+  rate: number;
 };
 
-/**
- * The same sum of cosines the shader uses for its strand offsets, so these
- * carry the field's rhythm rather than an unrelated wobble.
- */
+/** The same sum of cosines the shader uses, so these carry the field's rhythm. */
 const wave = (t: number) =>
   (Math.cos(t) + Math.cos(t * 1.3 + 1.3) + Math.cos(t * 1.4 + 1.4)) / 3;
-
-/**
- * Deterministic rather than a literal table: at this count a hand-written list
- * is just noise, and the trig keeps widths and brightness varying line to line
- * instead of banding.
- */
-function makeLines(count: number, fanSpan: number, ribbonSpan: number, scale: number): Line[] {
-  return Array.from({ length: count }, (_, i) => {
-    const t = count === 1 ? 0.5 : i / (count - 1);
-    return {
-      seed: i * 1.37,
-      fan: -fanSpan * 0.42 + fanSpan * t + 6 * Math.cos(i * 2.1),
-      ribbon: -ribbonSpan * 0.42 + ribbonSpan * t,
-      width: (0.5 + 1.25 * Math.abs(Math.cos(i * 1.7))) * scale,
-      opacity: 0.3 + 0.55 * Math.abs(Math.sin(i * 1.23 + 0.4)),
-      // Every other line gets the bloom pass. Doing all of them doubles the
-      // path count for glow nobody can pick apart at these opacities.
-      halo: i % 2 === 0,
-    };
-  });
-}
-
-const DESKTOP_LINES = makeLines(12, 74, 21, 1);
-const MOBILE_LINES = makeLines(7, 66, 17, 0.85);
-
-type Geometry = {
-  halfCycles: number;
-  restSpan: number;
-  amp: number;
-};
 
 const smoothstep = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };
 
+function makeLines(count: number, heroSpread: number, ribbonSpread: number, scale: number): Line[] {
+  return Array.from({ length: count }, (_, i) => {
+    const t = count === 1 ? 0.5 : i / (count - 1);
+    return {
+      seed: i * 1.37,
+      hero: -heroSpread * 0.45 + heroSpread * t + 3 * Math.cos(i * 2.1),
+      ribbon: -ribbonSpread * 0.45 + ribbonSpread * t,
+      width: (0.55 + 1.2 * Math.abs(Math.cos(i * 1.7))) * scale,
+      alpha: 0.32 + 0.5 * Math.abs(Math.sin(i * 1.23 + 0.4)),
+      // Slightly different flow rates, so the lines slide against each other
+      // instead of undulating in lockstep like a single rigid sheet.
+      rate: 1 + 0.28 * Math.sin(i * 1.9),
+    };
+  });
+}
+
+type Geometry = {
+  halfCycles: number;
+  restSpan: number;
+  amp: number;
+  lines: Line[];
+};
+
+function geometryFor(screens: number, mobile: boolean): Geometry {
+  const sweepScreens = mobile ? MOBILE_SWEEP : DESKTOP_SWEEP;
+  const sweeps = Math.max(2, Math.round((screens - HERO_BOTTOM / SCREEN) / sweepScreens));
+  const endY = screens * SCREEN + 0.16 * SCREEN;
+
+  return {
+    halfCycles: 1 + sweeps,
+    restSpan: (endY - HERO_BOTTOM) / sweeps,
+    amp: mobile ? MOBILE_AMP : DESKTOP_AMP,
+    lines: mobile
+      ? makeLines(7, HERO_SPREAD * 0.9, RIBBON_SPREAD * 0.8, 0.85)
+      : makeLines(12, HERO_SPREAD, RIBBON_SPREAD, 1),
+  };
+}
+
 /**
- * Vertical position of the spine. `p` counts half-cycles: 0 to 1 is the pass
- * across the hero, every unit after that is one sweep across the page.
+ * Vertical position of the spine. `p` counts half-cycles: 0 to 1 crosses the
+ * hero, every unit after that is one sweep across the page.
  *
  * Within a sweep the descent is fast at the two ends and slow through the
- * middle, which is the whole look: the ribbon runs flat across the page, then
+ * middle, which is the whole look: the streak runs flat across the page, then
  * dives where it turns.
  */
-function baseY(p: number, { halfCycles, restSpan }: Geometry): number {
-  const k = Math.min(halfCycles - 1, Math.floor(p));
+function spineY(p: number, geo: Geometry): number {
+  const k = Math.min(geo.halfCycles - 1, Math.floor(p));
   const u = Math.min(1, p - k);
   const eased = u + (0.75 / (2 * Math.PI)) * Math.sin(2 * Math.PI * u);
 
-  const from = k === 0 ? HERO_TOP : HERO_BOTTOM + (k - 1) * restSpan;
-  const to = k === 0 ? HERO_BOTTOM : HERO_BOTTOM + k * restSpan;
+  const from = k === 0 ? HERO_TOP : HERO_BOTTOM + (k - 1) * geo.restSpan;
+  const to = k === 0 ? HERO_BOTTOM : HERO_BOTTOM + k * geo.restSpan;
 
   let y = from + (to - from) * eased;
   if (k === 0) y -= HERO_ARCH * Math.sin(Math.PI * u);
@@ -143,257 +166,229 @@ function baseY(p: number, { halfCycles, restSpan }: Geometry): number {
 }
 
 /**
- * Horizontal position. Smoothstep rather than linear, so the line eases into
+ * Horizontal position. Smoothstep rather than linear, so the streak eases into
  * each turn instead of arriving at the edge still travelling sideways. Paired
- * with baseY's fast ends, that reads as a hook over the edge.
+ * with spineY's fast ends, that reads as a hook over the edge.
  */
-function baseX(p: number, { halfCycles, amp }: Geometry): number {
-  const k = Math.min(halfCycles - 1, Math.floor(p));
+function spineX(p: number, geo: Geometry): number {
+  const k = Math.min(geo.halfCycles - 1, Math.floor(p));
   const u = Math.min(1, p - k);
   const s = u * u * (3 - 2 * u);
-  const left = 50 - amp;
-  const right = 50 + amp;
+  const left = 50 - geo.amp;
+  const right = 50 + geo.amp;
   return k % 2 === 0 ? left + (right - left) * s : right + (left - right) * s;
 }
 
-type Built = {
-  paths: string[];
-  /** Scroll progress at each sweep boundary, ascending. */
-  qs: number[];
-  /** Arc fraction of the path at the same boundaries. */
-  arcs: number[];
-  height: number;
-};
-
-function build(lines: Line[], screens: number, ampFor: number, sweepScreens: number): Built {
-  const height = screens * SCREEN;
-
-  // One hero pass plus at least two sweeps, then a sweep per `sweepScreens`.
-  const sweeps = Math.max(2, Math.round((screens - HERO_BOTTOM / SCREEN) / sweepScreens));
-  const halfCycles = 1 + sweeps;
-
-  // Overshoot the bottom a little so the last sweep is still travelling when it
-  // leaves the frame, rather than parking on the footer.
-  const endY = height + 0.16 * SCREEN;
-  const geo: Geometry = {
-    halfCycles,
-    restSpan: (endY - HERO_BOTTOM) / sweeps,
-    amp: ampFor,
-  };
-
-  const f = (n: number) => n.toFixed(2);
-
-  const paths = lines.map((line) => {
-    const pts: Array<[number, number]> = [];
-
-    for (let p = 0; p <= halfCycles; p += STEP) {
-      const gathered = smoothstep(GATHER_FROM, GATHER_TO, p);
-      const off = line.fan + (line.ribbon - line.fan) * gathered;
-      const wob = WOBBLE_FAN + (WOBBLE_RIBBON - WOBBLE_FAN) * gathered;
-
-      const x = baseX(p, geo) + 3.5 * wave(p * 4.2 + line.seed * 1.7);
-      const y = baseY(p, geo) + off + wob * wave(p * 6.5 + line.seed);
-      pts.push([x, y]);
-    }
-
-    // Quadratics through the midpoints: smooth joins without fitting a spline.
-    let d = `M ${f(pts[0][0])} ${f(pts[0][1])}`;
-    for (let i = 1; i < pts.length - 1; i++) {
-      const [cx, cy] = pts[i];
-      const [nx, ny] = pts[i + 1];
-      d += ` Q ${f(cx)} ${f(cy)} ${f((cx + nx) / 2)} ${f((cy + ny) / 2)}`;
-    }
-    const last = pts[pts.length - 1];
-    return `${d} L ${f(last[0])} ${f(last[1])}`;
-  });
-
-  // Arc fraction at each boundary, measured on the spine. The hero pass and the
-  // sweeps are not the same length, so assuming an even split would make the
-  // drawn tip drift ahead of the scroll by the bottom of the page.
-  const lengths: number[] = [];
-  let total = 0;
-  let prev: [number, number] = [baseX(0, geo), baseY(0, geo)];
-  for (let k = 1; k <= halfCycles; k++) {
-    for (let p = k - 1 + STEP; p <= k + 1e-9; p += STEP) {
-      const cur: [number, number] = [baseX(p, geo), baseY(p, geo)];
-      total += Math.hypot(cur[0] - prev[0], cur[1] - prev[1]);
-      prev = cur;
-    }
-    lengths.push(total);
-  }
-  const arcs = lengths.map((l) => l / total);
-
-  // Scroll progress at which the leading tip should reach each boundary.
-  // scrollYProgress 1 puts the document bottom at the viewport bottom, so the
-  // visible bottom edge sits at (q * (screens - 1) + 1) screens.
-  const travel = Math.max(0.35, screens - 1);
-  const qs: number[] = [];
-  for (let k = 1; k <= halfCycles; k++) {
-    const y = k === 1 ? HERO_BOTTOM : HERO_BOTTOM + (k - 1) * geo.restSpan;
-    qs.push((y / SCREEN - LEAD) / travel);
-  }
-
-  return { paths, qs, arcs, height };
-}
-
-function sample(qs: number[], arcs: number[], q: number): number {
-  if (q <= qs[0]) return arcs[0];
-  for (let i = 1; i < qs.length; i++) {
-    if (q <= qs[i]) {
-      const span = qs[i] - qs[i - 1];
-      const t = span > 0 ? (q - qs[i - 1]) / span : 1;
-      return arcs[i - 1] + (arcs[i] - arcs[i - 1]) * t;
-    }
-  }
-  return arcs[arcs.length - 1];
-}
-
-const GRADIENT_ID = "callvia-flow-gradient";
-
-function Stroke({
-  line,
-  d,
-  index,
-  arc,
-  reduceMotion,
-}: {
-  line: Line;
-  d: string;
-  index: number;
-  arc: MotionValue<number>;
-  reduceMotion: boolean;
-}) {
-  // Each line runs a hair ahead of the one behind it, so the ribbon arrives as
-  // a ripple rather than snapping into place as one rigid shape.
-  const pathLength = useTransform(arc, (v) => Math.min(1, v + index * 0.006));
-
-  // An explicit 1 rather than an omitted prop: the media query resolves after
-  // first render, by which point a strokeDasharray is already on the element,
-  // and dropping the style would not clear it.
-  const drawn = reduceMotion ? { pathLength: 1 } : { pathLength };
-  const stroke = `url(#${GRADIENT_ID})`;
-
-  return (
-    <>
-      {line.halo && (
-        // Wide faint twin for bloom. A stroke halo rather than a blur filter,
-        // because a filter region the height of the document is expensive.
-        <motion.path
-          d={d}
-          stroke={stroke}
-          strokeWidth={line.width * 7}
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-          opacity={line.opacity * 0.16}
-          style={drawn}
-        />
-      )}
-      <motion.path
-        d={d}
-        stroke={stroke}
-        strokeWidth={line.width}
-        strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
-        opacity={line.opacity}
-        style={drawn}
-      />
-    </>
-  );
-}
-
 export function FlowLines() {
-  const reduceMotion = usePrefersReducedMotion();
-  const [screens, setScreens] = useState(7);
-  const [mobile, setMobile] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Document height in viewports, quantised so a one-pixel reflow does not
-  // rebuild every path. The svg is absolutely positioned and adds no height, so
-  // observing the root cannot feed back into itself.
   useEffect(() => {
-    const measure = () => {
-      const vh = window.innerHeight || 1;
-      const raw = document.documentElement.scrollHeight / vh;
-      setScreens(Math.max(1.6, Math.round(raw * 4) / 4));
-      setMobile(window.matchMedia("(max-width: 639px)").matches);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const narrow = window.matchMedia("(max-width: 639px)");
+
+    let mobile = narrow.matches;
+    let screens = 7;
+    let geo = geometryFor(screens, mobile);
+
+    let vw = 1;
+    let vh = 1;
+    let dpr = 1;
+
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+      vw = canvas.clientWidth;
+      vh = canvas.clientHeight;
+      canvas.width = Math.max(1, Math.round(vw * dpr));
+      canvas.height = Math.max(1, Math.round(vh * dpr));
     };
 
-    measure();
-    const observer = new ResizeObserver(measure);
+    const remeasure = () => {
+      const nextMobile = narrow.matches;
+      const raw = document.documentElement.scrollHeight / Math.max(1, canvas.clientHeight);
+      // Quantised so a one-pixel reflow does not rebuild the geometry. The
+      // canvas is fixed and adds no height, so this cannot feed back.
+      const next = Math.max(1.6, Math.round(raw * 4) / 4);
+      if (next !== screens || nextMobile !== mobile) {
+        screens = next;
+        mobile = nextMobile;
+        geo = geometryFor(screens, mobile);
+      }
+    };
+
+    // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
+    // behind the fold and it eases back up instead of snapping.
+    let tip = Number.NaN;
+
+    const render = (t: number) => {
+      const scrollY = window.scrollY;
+      const screenY = scrollY / vh; // scroll position in screens
+
+      const tipTarget = (screenY + LEAD) * SCREEN;
+      if (Number.isNaN(tip)) tip = tipTarget;
+      tip += (tipTarget - tip) * 0.1;
+
+      const drawTip = reduceMotion ? Number.POSITIVE_INFINITY : tip;
+      const phase = (reduceMotion ? 0 : t * IDLE_RATE) + screenY * SCROLL_RATE;
+
+      // Only the span crossing the viewport, plus a margin. It has to clear the
+      // furthest a line sits from the spine (offset plus wobble), or a line
+      // would pop in at the top of the frame instead of arriving already drawn.
+      const margin = HERO_SPREAD * 0.5 + WOBBLE_HERO + 12;
+      const top = screenY * SCREEN - margin;
+      const bottom = (screenY + 1) * SCREEN + margin;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, vw, vh);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      // The spine is shared, so the visible span is found once rather than per
+      // line, and coarsely: it only has to bracket the range, and each end is
+      // padded by a step of its own. y is monotonic in p, so this is exact.
+      const SCAN = 0.05;
+      let pFrom = 0;
+      let pTo = geo.halfCycles;
+      for (let p = 0; p <= geo.halfCycles; p += SCAN) {
+        const y = spineY(p, geo);
+        if (y < top) pFrom = p;
+        if (y > bottom) {
+          pTo = p;
+          break;
+        }
+      }
+      pFrom = Math.max(0, pFrom - SCAN);
+      pTo = Math.min(geo.halfCycles, pTo + SCAN);
+
+      for (const line of geo.lines) {
+        const pts: Array<[number, number, number]> = [];
+
+        for (let p = pFrom; p <= pTo; p += STEP) {
+          const y0 = spineY(p, geo);
+          if (y0 > drawTip) break;
+
+          const gathered = smoothstep(GATHER_FROM, GATHER_TO, p);
+          const off = line.hero + (line.ribbon - line.hero) * gathered;
+          const wob = WOBBLE_HERO + (WOBBLE_RIBBON - WOBBLE_HERO) * gathered;
+          const flow = phase * line.rate;
+
+          const x = spineX(p, geo) + 3.5 * wave(p * 4.2 + line.seed * 1.7 + flow * 0.7);
+          const y = y0 + off + wob * wave(p * 6.5 + line.seed + flow);
+
+          // Depth fade, then the softened tail behind the leading tip.
+          const depth = HERO_ALPHA + (1 - HERO_ALPHA) * smoothstep(SCREEN * 0.6, FULL_ALPHA_AT, y0);
+          const tail = Number.isFinite(drawTip)
+            ? smoothstep(drawTip, drawTip - TIP_FADE, y0)
+            : 1;
+
+          pts.push([(x * vw) / SCREEN, (y * vh) / SCREEN - scrollY, depth * tail]);
+        }
+
+        if (pts.length < 3) continue;
+
+        // Two passes: a wide faint twin for bloom, then the core. Chunked so
+        // alpha can vary along the length, overlapping by a point so the joins
+        // do not show.
+        for (const pass of [0, 1] as const) {
+          const width = pass === 0 ? line.width * 8 : line.width;
+          const tint = pass === 0 ? ACCENT : ACCENT_HOT;
+          const scale = pass === 0 ? 0.09 : 1;
+          ctx.lineWidth = width;
+
+          const chunk = 8;
+          for (let i = 0; i < pts.length - 1; i += chunk) {
+            const end = Math.min(pts.length - 1, i + chunk);
+            const alpha = line.alpha * scale * pts[Math.floor((i + end) / 2)][2];
+            if (alpha < 0.004) continue;
+
+            ctx.strokeStyle = `rgba(${tint}, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(pts[i][0], pts[i][1]);
+            // Quadratics through the midpoints: smooth joins without a spline.
+            for (let j = i + 1; j < end; j++) {
+              const [cx, cy] = pts[j];
+              const [nx, ny] = pts[j + 1];
+              ctx.quadraticCurveTo(cx, cy, (cx + nx) / 2, (cy + ny) / 2);
+            }
+            ctx.lineTo(pts[end][0], pts[end][1]);
+            ctx.stroke();
+          }
+        }
+      }
+    };
+
+    let frameId = 0;
+    let running = false;
+    let start = 0;
+
+    const loop = (ts: number) => {
+      if (start === 0) start = ts;
+      render((ts - start) / 1000);
+      frameId = requestAnimationFrame(loop);
+    };
+
+    const play = () => {
+      if (running || reduceMotion) return;
+      running = true;
+      frameId = requestAnimationFrame(loop);
+    };
+
+    const pause = () => {
+      running = false;
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = 0;
+    };
+
+    resize();
+    remeasure();
+
+    if (reduceMotion) {
+      // One static frame, fully drawn, and no loop is ever scheduled.
+      render(0);
+    } else {
+      play();
+    }
+
+    const onResize = () => {
+      resize();
+      remeasure();
+      if (!running) render(0);
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) pause();
+      else play();
+    };
+
+    // The canvas is fixed and contributes no height, so watching the document
+    // for its own growth cannot feed back into itself.
+    const observer = new ResizeObserver(remeasure);
     observer.observe(document.documentElement);
-    window.addEventListener("resize", measure);
+
+    window.addEventListener("resize", onResize);
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
+      pause();
       observer.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
-  const lines = mobile ? MOBILE_LINES : DESKTOP_LINES;
-  const built = useMemo(
-    () =>
-      build(
-        lines,
-        screens,
-        mobile ? MOBILE_AMP : DESKTOP_AMP,
-        mobile ? MOBILE_SWEEP : DESKTOP_SWEEP,
-      ),
-    [lines, screens, mobile],
-  );
-
-  const { scrollYProgress } = useScroll();
-
-  // The spring is the "flows with you" part: the ribbon trails the scroll by a
-  // few frames and settles, instead of being welded to the scrollbar.
-  const smooth = useSpring(scrollYProgress, {
-    stiffness: 78,
-    damping: 24,
-    mass: 0.35,
-  });
-
-  const toArc = useCallback((q: number) => sample(built.qs, built.arcs, q), [built]);
-  const arc = useTransform(smooth, toArc);
-
-  // Crossfade stops, in document fractions. Held down over the hero because the
-  // shader canvas is still at full strength there and two fields at once reads
-  // as clutter; full vibrancy from a screen and a half down, where the canvas
-  // has gone and these are the only thing carrying the page.
-  const fadeMid = Math.min(0.4, (0.9 * SCREEN) / built.height);
-  const fadeFull = Math.min(0.6, (1.7 * SCREEN) / built.height);
-
   return (
-    <svg
+    <canvas
+      ref={canvasRef}
       aria-hidden
-      viewBox={`0 0 ${SCREEN} ${built.height}`}
-      preserveAspectRatio="none"
-      fill="none"
-      className="absolute inset-0 h-full w-full"
-    >
-      <defs>
-        <linearGradient
-          id={GRADIENT_ID}
-          gradientUnits="userSpaceOnUse"
-          x1="0"
-          y1="0"
-          x2="0"
-          y2={built.height}
-        >
-          <stop offset="0" stopColor="var(--color-accent)" stopOpacity="0.22" />
-          <stop offset={fadeMid} stopColor="var(--color-accent)" stopOpacity="0.45" />
-          <stop offset={fadeFull} stopColor="var(--color-accent)" stopOpacity="1" />
-          <stop offset="0.93" stopColor="var(--color-accent)" stopOpacity="0.85" />
-          <stop offset="1" stopColor="var(--color-accent)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      {built.paths.map((d, i) => (
-        <Stroke
-          key={lines[i].seed}
-          line={lines[i]}
-          d={d}
-          index={i}
-          arc={arc}
-          reduceMotion={reduceMotion}
-        />
-      ))}
-    </svg>
+      // 100lvh rather than 100% so a collapsing mobile URL bar does not
+      // reallocate the drawing buffer on every scroll nudge.
+      style={{ display: "block", width: "100%", height: "100lvh" }}
+    />
   );
 }

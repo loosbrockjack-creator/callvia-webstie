@@ -166,18 +166,18 @@ function compile(
 }
 
 /**
- * `timeRef` swaps the field's own clock for a value someone else owns, which is
- * how the backdrop drives it from scroll position instead of wall time. The
- * render loop still runs, it just reads the number rather than accumulating
- * one, and skips the GL draw entirely on frames where it has not moved. Leave
- * the prop off and the field animates on its own as before.
+ * `driveRef` layers a caller-owned value on top of the field's own clock, which
+ * is how the backdrop pushes it forward and back with scroll position. The
+ * field keeps animating on its own either way, so it is never still; scrolling
+ * just moves it further, and scrolling up unwinds it. `paused` skips the
+ * fragment pass while the field is scrolled out of sight.
  */
 export function ShaderBackground({
   className,
-  timeRef,
+  driveRef,
 }: {
   className?: string;
-  timeRef?: RefObject<number>;
+  driveRef?: RefObject<{ offset: number; paused: boolean }>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -278,21 +278,22 @@ export function ShaderBackground({
     let visible = true;
     let contextLost = false;
 
-    // Only ever moves when the externally owned value does, so a still page
-    // costs one comparison per frame rather than a full-screen fragment pass.
-    let lastDrawn = Number.NaN;
-
     const loop = (ts: number) => {
       if (lastTs === 0) lastTs = ts;
       elapsed += (ts - lastTs) / 1000;
       lastTs = ts;
 
       const resized = resize();
-      const t = timeRef ? timeRef.current : elapsed;
-      if (resized || t !== lastDrawn) {
-        draw(t);
-        lastDrawn = t;
+      const drive = driveRef?.current;
+
+      // Faded out of sight below the hero. Keep accumulating time so coming
+      // back up does not jump, but skip the full-screen fragment pass.
+      if (drive?.paused && !resized) {
+        frameId = requestAnimationFrame(loop);
+        return;
       }
+
+      draw(elapsed + (drive?.offset ?? 0));
       frameId = requestAnimationFrame(loop);
     };
 
@@ -320,10 +321,6 @@ export function ShaderBackground({
       // One frame, then nothing. No loop is ever scheduled.
       draw(STATIC_FRAME_TIME);
     } else {
-      // Paint the resting frame immediately. Under a timeRef the loop would
-      // otherwise sit on an unchanged value and never draw at all.
-      draw(timeRef ? timeRef.current : 0);
-      lastDrawn = timeRef ? timeRef.current : 0;
       start();
     }
 
@@ -368,7 +365,7 @@ export function ShaderBackground({
       gl.deleteShader(fragShader);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [timeRef]);
+  }, [driveRef]);
 
   return (
     <canvas
