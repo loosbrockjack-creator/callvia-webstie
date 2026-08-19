@@ -54,8 +54,8 @@ export function Footer() {
                   Callvia
                 </span>
                 <p className="mt-5 text-sm leading-relaxed" style={{ color: "#777777" }}>
-                  AI receptionists that answer every call, capture every lead, and
-                  send you a clear summary. 24/7.
+                  The receptionist built for the trades so you never leave a job
+                  on the table.
                 </p>
                 <a
                   href="mailto:team@callvia.io"
@@ -105,7 +105,7 @@ export function Footer() {
                   <p style={{ color: "#444444" }}>
                     © {new Date().getFullYear()} Callvia. All rights reserved.
                   </p>
-                  <p style={{ color: "#444444" }}>Built for small businesses.</p>
+                  <p style={{ color: "#444444" }}>Built for the trades.</p>
                 </div>
               </AnimatedContainer>
             </div>
@@ -116,11 +116,25 @@ export function Footer() {
   );
 }
 
-// Outlined display type. textLength + lengthAdjust="spacing" force the word to
-// span the container exactly (letter-spacing absorbs the difference, glyphs are
-// never stretched), so it stays flush edge to edge at any width. The stroke is
-// vector-effect="non-scaling-stroke" so it renders a true hairline, not a line
-// that thickens with the viewBox scale.
+// Outlined display type, drawn as one path rather than SVG <text>.
+//
+// Geist's uppercase L is built with an overlapping corner: the stem's right
+// edge runs down past the foot's top edge, then a segment doubles back up to
+// meet it. Filled, that overlap is invisible solid ink. Outlined, the doubling
+// back shows as a diagonal chamfer inside each L. It is in the glyph at every
+// weight, so no CSS fixes it.
+//
+// So the word is pre-shaped: real Geist 600 outlines, harfbuzz kerning, the
+// spacing that textLength="1000" used to produce, and the two L corners squared
+// off. The path is authored against the same viewBox and baseline as before, so
+// it renders identically apart from the corners. Regenerating it means
+// re-extracting from the font, which is why the shape is documented here.
+//
+// The stroke is vector-effect="non-scaling-stroke" so it stays a true hairline
+// instead of thickening with the viewBox scale.
+const WORDMARK_PATH =
+  "M70.6 143.0Q52.3 143.0 38.2 134.6Q24.1 126.2 16.1 110.5Q8.2 94.7 8.2 72.7Q8.2 51.1 15.9 35.3Q23.7 19.4 37.8 10.7Q51.9 2.1 70.9 2.1Q96.7 2.1 111.0 14.9Q125.3 27.7 129.5 50.8L103.7 52.0Q101.3 38.7 93.1 31.1Q84.9 23.6 70.9 23.6Q59.4 23.6 51.1 29.6Q42.8 35.6 38.2 46.7Q33.7 57.7 33.7 72.7Q33.7 87.9 38.3 98.9Q42.9 109.8 51.2 115.7Q59.6 121.5 70.8 121.5Q85.8 121.5 94.0 113.3Q102.3 105.1 104.4 90.7L130.3 91.9Q127.7 107.7 120.1 119.2Q112.5 130.6 100.1 136.8Q87.7 143.0 70.6 143.0Z M173.9 140.0 222.5 5.1H252.7L301.3 140.0H275.4L264.3 108.1H210.9L199.7 140.0ZM218.1 87.0H257.1L237.7 30.1Z M354.9 140.0V5.1H379.6V118.5H443.6V140.0Z M499.3 140.0V5.1H524.0V118.5H588.0V140.0Z M658.5 140.0 609.8 5.1H635.7L673.5 112.4L711.3 5.1H737.2L688.3 140.0Z M789.3 140.0V5.1H814.0V140.0Z M868.9 140.0 917.6 5.1H947.8L996.4 140.0H970.5L959.3 108.1H905.9L894.8 140.0ZM913.2 87.0H952.2L932.7 30.1Z";
+
 function Wordmark() {
   return (
     <svg
@@ -137,21 +151,13 @@ function Wordmark() {
           <stop offset="100%" stopColor="#7c5cfc" stopOpacity="0.55" />
         </linearGradient>
       </defs>
-      <text
-        x="0"
-        y="140"
-        textLength="1000"
-        lengthAdjust="spacing"
-        fontSize="190"
-        fontWeight="600"
+      <path
+        d={WORDMARK_PATH}
         fill="none"
         stroke="url(#cv-wordmark-stroke)"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
-        style={{ fontFamily: "var(--font-geist-sans), sans-serif" }}
-      >
-        CALLVIA
-      </text>
+      />
     </svg>
   );
 }
