@@ -16,6 +16,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useHasFinePointer } from "@/components/ui/use-fine-pointer";
+import { usePrefersReducedMotion } from "@/components/ui/use-reduced-motion";
 
 interface CursorCardsContainerProps {
   children: React.ReactNode;
@@ -36,13 +37,33 @@ interface CursorCardProps {
   // Optional entrance reveal, matching the site's scroll-in pattern.
   reveal?: boolean;
   revealDelay?: number;
+  // Optional hover lift. Driven here rather than in CSS because framer-motion
+  // owns this element's inline transform, so a `:hover { transform }` rule in
+  // globals.css would simply lose to it.
+  lift?: boolean;
 }
 
-interface InternalCursorCardProps extends CursorCardProps {
+export interface InternalCursorCardProps extends CursorCardProps {
   globalMouseX?: number;
   globalMouseY?: number;
   isWithinRange?: boolean;
   hasFinePointer?: boolean;
+}
+
+// The container used to inject pointer props by checking `child.type ===
+// CursorCard`, which silently failed the moment a card was wrapped in another
+// component: the wrapper rendered, the glow never arrived, and nothing warned.
+// That is exactly the bug in BuildFunnel's cost card. Components that
+// ultimately render a CursorCard and forward these props can now opt in by
+// setting this marker on themselves.
+type CursorCardAware = { acceptsCursorCardProps?: boolean };
+
+function acceptsCursorCardProps(type: unknown): boolean {
+  if (type === CursorCard) return true;
+  return (
+    typeof type === "function" &&
+    (type as CursorCardAware).acceptsCursorCardProps === true
+  );
 }
 
 function useMousePosition(proximityRange: number) {
@@ -155,7 +176,7 @@ export function CursorCardsContainer({
     useMousePosition(proximityRange);
 
   const enhancedChildren = React.Children.map(children, (child) => {
-    if (React.isValidElement(child) && child.type === CursorCard) {
+    if (React.isValidElement(child) && acceptsCursorCardProps(child.type)) {
       return React.cloneElement(
         child as React.ReactElement<InternalCursorCardProps>,
         {
@@ -188,12 +209,14 @@ export function CursorCard({
   cardColor = "#0d0d0d",
   reveal = false,
   revealDelay = 0,
+  lift = false,
   globalMouseX = 0,
   globalMouseY = 0,
   isWithinRange = false,
   hasFinePointer = false,
 }: InternalCursorCardProps) {
   const elementRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const { localMouseX, localMouseY, isCardActive } = useCardActivation(
     elementRef,
     globalMouseX,
@@ -215,20 +238,54 @@ export function CursorCard({
     ${illuminationColor}, transparent 100%)
   `;
 
-  const revealProps: MotionProps = reveal
-    ? {
-        initial: { opacity: 0, y: 24 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, margin: "-60px" },
-        transition: { duration: 0.6, ease: "easeOut", delay: revealDelay },
-      }
-    : {};
+  // Reduced motion gets no entrance: the card is simply there.
+  //
+  // It has to say so explicitly rather than by dropping the props. The hook
+  // reports false on the first render and corrects in an effect, so by the
+  // time it flips, framer-motion has already written opacity:0 and a 24px
+  // offset as inline styles. Removing `initial`/`whileInView` does not clear
+  // those, and with no whileInView left to fire, the card stays invisible
+  // forever. Animating to the resting state instead guarantees it resolves.
+  //
+  // Note this reads the project's own hook, not framer-motion's, which was
+  // observed returning false on this page even with the media query matching.
+  // See use-reduced-motion.ts.
+  const revealProps: MotionProps = !reveal
+    ? {}
+    : prefersReducedMotion
+      ? {
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0 },
+        }
+      : {
+          initial: { opacity: 0, y: 24 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, margin: "-60px" },
+          transition: { duration: 0.6, ease: "easeOut", delay: revealDelay },
+        };
+
+  // A touch device has no hover, and a lift that fires on tap just makes the
+  // card feel loose under the finger. Fine pointers only.
+  const liftProps: MotionProps =
+    lift && hasFinePointer && !prefersReducedMotion
+      ? {
+          whileHover: {
+            y: -2,
+            transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] },
+          },
+          whileTap: {
+            scale: 0.995,
+            transition: { duration: 0.12, ease: [0.32, 0.72, 0, 1] },
+          },
+        }
+      : {};
 
   return (
     <motion.div
       ref={elementRef}
       className={cn("group relative", className)}
       {...revealProps}
+      {...liftProps}
     >
       {/* Gradient layer, revealed at the 1px edge as the glowing border.
           Without a cursor it can't animate, so touch gets a static accent

@@ -2,23 +2,34 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Feather, HandTap, PhoneCall, Receipt } from "@phosphor-icons/react";
 import { WaveformMark } from "./WaveformMark";
 import { GradientButton } from "./ui/gradient-button";
+import { Card, CardBody, IconPlate } from "./ui/card";
+import { CursorCardsContainer } from "./ui/cursor-cards";
+import { SectionLabel } from "./ui/section-label";
 
+// Tier 2 of the card system: same shell and same hover as the homepage grids,
+// but no graphic well. There is nothing to draw for a principle, and inventing
+// a diagram for one would have been filler.
 const PRINCIPLES = [
   {
+    icon: <PhoneCall size={18} weight="light" />,
     title: "The call comes first",
     body: "For a service business, the phone is the front door. A missed call is a missed customer, often gone to the next name on the list. Everything I build starts there.",
   },
   {
+    icon: <HandTap size={18} weight="light" />,
     title: "You stay in control",
     body: "Callvia answers, qualifies, and hands off. It never pretends to be something it is not, and it always routes the moment that matters back to you.",
   },
   {
+    icon: <Feather size={18} weight="light" />,
     title: "Simple beats clever",
     body: "No dashboards to babysit, no scripts to maintain. You tell me how you work, and your receptionist just handles the calls the way you would.",
   },
   {
+    icon: <Receipt size={18} weight="light" />,
     title: "Prove it before you pay for it",
     body: "You start with a free trial before any money changes hands. If Callvia does not pay for itself within the trial, you walk away. No charge, no hard feelings, no pressure to keep something that is not working for you.",
   },
@@ -46,12 +57,13 @@ export function AboutContent() {
         </motion.div>
 
         <div className="relative z-10 max-w-3xl mx-auto text-center">
+          {/* Above the fold, so this one animates on load rather than on
+              scroll and keeps its own motion props. */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-6"
-            style={{ color: "#7c5cfc" }}
+            className="mb-6 text-xs uppercase tracking-widest text-accent"
           >
             About Callvia
           </motion.p>
@@ -78,16 +90,9 @@ export function AboutContent() {
       {/* Founder letter */}
       <section className="px-6 pt-8 md:pt-10 pb-12 md:pb-20 border-t border-white/5">
         <div className="max-w-4xl mx-auto">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6 }}
-            className="text-xs tracking-widest uppercase mb-4 text-center"
-            style={{ color: "#7c5cfc" }}
-          >
+          <SectionLabel className="mb-4 text-center">
             From the founder
-          </motion.p>
+          </SectionLabel>
 
           {/* Portrait, sized for the source photo's actual portrait crop (2:3) */}
           <motion.div
@@ -97,10 +102,10 @@ export function AboutContent() {
             transition={{ duration: 0.7 }}
             className="w-full max-w-[420px] mx-auto"
           >
-            <div
-              className="relative aspect-[2/3] rounded-2xl overflow-hidden border"
-              style={{ borderColor: "#1f1f1f" }}
-            >
+            {/* Card radius and shadow, but no tray. A photograph is already
+                the thing you are meant to look at; framing it in a bezel would
+                be a container around a container. */}
+            <div className="relative aspect-[2/3] overflow-hidden rounded-card border border-line shadow-card">
               <Image
                 src="/founder.png"
                 alt="Jack Loosbrock, founder of Callvia"
@@ -112,7 +117,7 @@ export function AboutContent() {
             </div>
             <div className="mt-4 text-center">
               <p className="text-sm text-white">Jack Loosbrock</p>
-              <p className="text-xs" style={{ color: "#666666" }}>
+              <p className="text-xs text-dim">
                 Founder, Callvia · Iowa State University, Sophomore
               </p>
             </div>
@@ -160,11 +165,10 @@ export function AboutContent() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-10 pt-6 border-t"
-              style={{ borderColor: "#1f1f1f" }}
+              className="mt-10 border-t border-line pt-6"
             >
               <p className="text-white font-medium">Jack Loosbrock</p>
-              <p className="text-sm" style={{ color: "#666666" }}>
+              <p className="text-sm text-dim">
                 Founder, Callvia
               </p>
             </motion.div>
@@ -185,24 +189,26 @@ export function AboutContent() {
           >
             What I build around.
           </motion.h2>
-          <div className="grid sm:grid-cols-2 gap-5">
+          {/* gap-4 to match the homepage grids. These were gap-5 for no
+              reason, which is the kind of thing you only notice when the two
+              pages sit side by side. */}
+          <CursorCardsContainer className="grid gap-4 sm:grid-cols-2">
             {PRINCIPLES.map((p, i) => (
-              <motion.div
-                key={p.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.6, delay: i * 0.08 }}
-                className="rounded-2xl border p-7"
-                style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
-              >
-                <h3 className="text-white text-lg font-medium mb-3">{p.title}</h3>
-                <p className="text-sm leading-relaxed text-muted">
-                  {p.body}
-                </p>
-              </motion.div>
+              <Card key={p.title} reveal revealDelay={i * 0.08}>
+                <CardBody className="p-7">
+                  <div className="flex items-start gap-3.5">
+                    <IconPlate>{p.icon}</IconPlate>
+                    <h3 className="mt-1.5 text-lg font-medium text-white text-balance">
+                      {p.title}
+                    </h3>
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-muted text-pretty">
+                    {p.body}
+                  </p>
+                </CardBody>
+              </Card>
             ))}
-          </div>
+          </CursorCardsContainer>
         </div>
       </section>
 

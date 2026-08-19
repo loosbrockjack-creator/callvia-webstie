@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
 import { TiltCard } from "@/components/ui/tilt-card";
+import { SectionLabel } from "@/components/ui/section-label";
 import { TRADES } from "@/lib/estimate";
 
 const SCAN_STATUSES = [
@@ -83,16 +84,7 @@ export function MissedCallTool() {
   return (
     <section id="tool" className="py-16 md:py-32 px-6 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-5 text-center"
-          style={{ color: "#7c5cfc" }}
-        >
-          Run your numbers
-        </motion.p>
+        <SectionLabel className="text-center">Run your numbers</SectionLabel>
 
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -122,7 +114,10 @@ export function MissedCallTool() {
           transition={{ duration: 0.7, delay: 0.15 }}
           className="mt-12 max-w-2xl mx-auto"
         >
-          <TiltCard max={5} className="border border-line bg-surface p-8 md:p-10">
+          <TiltCard
+            max={5}
+            className="rounded-card border border-line bg-surface p-8 md:p-10 shadow-card"
+          >
             <AnimatePresence mode="wait">
               {phase === "form" && (
                 <motion.div

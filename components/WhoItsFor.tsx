@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 
+import { SectionLabel } from "@/components/ui/section-label";
+
 const industries = [
   { name: "HVAC" },
   { name: "Plumbing" },
@@ -15,6 +17,9 @@ const stats = [
   { value: "100%", label: "Calls captured" },
 ];
 
+// The other uncarded section. These are a list of names, and a name does not
+// need a container built around it. The rows keep the hover they already had,
+// retuned onto tokens and onto the shared easing curve.
 export function WhoItsFor() {
   return (
     <section id="who-its-for" className="py-16 md:py-32 px-6 border-t border-white/5">
@@ -22,16 +27,7 @@ export function WhoItsFor() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left column */}
           <div>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6 }}
-              className="text-xs tracking-widest uppercase mb-5"
-              style={{ color: "#7c5cfc" }}
-            >
-              Who It&#39;s For
-            </motion.p>
+            <SectionLabel>Who It&#39;s For</SectionLabel>
 
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -51,8 +47,7 @@ export function WhoItsFor() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="mt-6 text-base leading-relaxed max-w-md"
-              style={{ color: "#888888" }}
+              className="mt-6 text-base leading-relaxed max-w-md text-muted text-pretty"
             >
               A missed call is a missed job. Callvia answers every call you want it to, and texts you the lead the moment something needs your attention. You stay in control of every customer.
             </motion.p>
@@ -67,10 +62,10 @@ export function WhoItsFor() {
             >
               {stats.map((s) => (
                 <div key={s.label}>
-                  <div className="text-2xl font-bold text-white">{s.value}</div>
-                  <div className="text-xs mt-0.5" style={{ color: "#555555" }}>
-                    {s.label}
+                  <div className="text-2xl font-bold text-white tabular-nums">
+                    {s.value}
                   </div>
+                  <div className="text-xs mt-0.5 text-dim">{s.label}</div>
                 </div>
               ))}
             </motion.div>
@@ -84,7 +79,7 @@ export function WhoItsFor() {
             transition={{ duration: 0.8, delay: 0.15 }}
             className="pt-2"
           >
-            <div className="border-t border-white/8">
+            <div className="border-t border-white/5">
               {industries.map((industry, i) => (
                 <motion.div
                   key={industry.name}
@@ -92,14 +87,13 @@ export function WhoItsFor() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 + i * 0.08 }}
-                  className="group flex items-center py-7 px-5 -mx-5 border-b cursor-default rounded-xl transition-all duration-300 hover:bg-white/[0.03] hover:px-6"
-                  style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                  className="group flex items-center py-7 px-5 -mx-5 border-b border-white/5 cursor-default rounded-xl transition-colors duration-300 ease-card hover:bg-white/[0.03]"
                 >
-                  <div className="flex items-center gap-6">
-                    <span
-                      className="text-xs font-mono w-5 shrink-0 transition-colors duration-300 group-hover:text-[#7c5cfc]"
-                      style={{ color: "#333333" }}
-                    >
+                  {/* The nudge on hover used to be `hover:px-6`, which reflows
+                      the row every frame it animates. A transform on the inner
+                      content looks identical and stays off the layout path. */}
+                  <div className="flex items-center gap-6 transition-transform duration-300 ease-card group-hover:translate-x-1">
+                    <span className="text-xs font-mono w-5 shrink-0 text-faint transition-colors duration-300 group-hover:text-accent">
                       0{i + 1}
                     </span>
                     <span

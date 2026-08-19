@@ -30,6 +30,29 @@
   --color-success: #4ade80;
   --color-warning: #fbbf24;
   --color-danger: #f87171;
+
+  /* Card geometry. The inner radius is the outer minus the 6px tray padding
+     (p-1.5), which is what makes the two curves concentric instead of looking
+     like one rounded box stacked on another. Change one, change both. */
+  --radius-card: 22px;
+  --radius-card-inner: 16px;
+  --radius-plate: 10px;
+
+  /* Tinted rather than pure black, and all cast downward so the whole page
+     reads as one light source from above. `plate` is the inner highlight that
+     makes a raised surface catch light along its top edge. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 16px 40px -16px rgba(0, 0, 0, 0.8);
+  --shadow-plate: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+
+  /* The recurring accent glows, previously written out as 12 separate
+     arbitrary shadow strings across the app. */
+  --shadow-glow-accent: 0 0 30px rgba(124, 92, 252, 0.35);
+  --shadow-glow-accent-strong: 0 0 40px rgba(124, 92, 252, 0.5);
+
+  /* Heavy, physical easing. Weighted so motion decelerates late, the way a
+     real object with mass settles. Used for every card transition. */
+  --ease-card: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 html,
@@ -84,6 +107,14 @@ body {
 
 /* Applied to animated SVG rects */
 .waveform-bar {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Same fix, generalised for the in-card graphics. An SVG child scales about
+   the SVG user-space origin by default, which flings a rect in from the corner
+   instead of growing it where it sits. */
+.svg-fill-box {
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -242,4 +273,10 @@ body {
 /* The backdrop shader and the scroll-following stroke handle reduced motion in
    JS rather than here: the canvas paints one static frame instead of starting a
    render loop, and the stroke renders fully drawn with no scroll travel. See
-   components/ui/shader-background.tsx and components/ui/scroll-follow-line.tsx. */
+   components/ui/shader-background.tsx and components/ui/scroll-follow-line.tsx.
+
+   The card system does the same, for the same reason: its motion is driven by
+   framer-motion gestures and inline transforms, which a CSS rule here cannot
+   override. The card lift, the entrance reveal and every in-card graphic read
+   usePrefersReducedMotion and render their finished state instead. See
+   components/ui/card.tsx and components/graphics/. */

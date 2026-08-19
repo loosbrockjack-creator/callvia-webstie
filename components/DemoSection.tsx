@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 
+import { SectionLabel } from "@/components/ui/section-label";
+
 export function DemoSection() {
   return (
     <section id="demo" className="relative py-16 md:py-36 px-6 border-t border-white/5 overflow-hidden">
@@ -15,17 +17,7 @@ export function DemoSection() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center text-center">
-        {/* Section label */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-xs tracking-widest uppercase mb-5"
-          style={{ color: "#7c5cfc" }}
-        >
-          Demo
-        </motion.p>
+        <SectionLabel>Demo</SectionLabel>
 
         {/* Heading */}
         <motion.h2
@@ -59,11 +51,11 @@ export function DemoSection() {
           transition={{ duration: 0.85, delay: 0.2 }}
           className="group mt-14 w-full flex flex-col items-center gap-4"
         >
-          {/* Phone icon */}
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center border transition-all duration-300 group-hover:border-accent/40 group-hover:bg-accent/10"
-            style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
-          >
+          {/* Same raised surface and top-edge highlight as the card system's
+              IconPlate, at medallion scale. It used to be a one-off with its
+              border and fill written inline as rgba, which is why it never
+              quite matched anything else on the page. */}
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-raised shadow-plate ring-1 ring-white/10 transition-colors duration-300 ease-card group-hover:bg-accent/10 group-hover:ring-accent/40">
             <svg
               width="24"
               height="24"

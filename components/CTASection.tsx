@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BOOKING_URL } from "@/lib/site";
+import { SectionLabel } from "@/components/ui/section-label";
 
 export function CTASection() {
   return (
@@ -26,16 +27,7 @@ export function CTASection() {
       />
 
       <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="text-xs tracking-widest uppercase mb-6"
-          style={{ color: "#7c5cfc" }}
-        >
-          Get started
-        </motion.p>
+        <SectionLabel className="mb-6">Get started</SectionLabel>
 
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
@@ -69,7 +61,7 @@ export function CTASection() {
         >
           <a
             href="/build"
-            className="btn-shine inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_40px_rgba(124,92,252,0.4)] hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
+            className="btn-shine inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-sm font-semibold text-white shadow-glow-accent-strong transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_0_56px_rgba(124,92,252,0.55)]"
           >
             Build My Receptionist
           </a>
@@ -93,11 +85,13 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, delay: 0.3 }}
-          className="mt-6 inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03]"
+          className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-surface-raised px-4 py-2 shadow-plate ring-1 ring-white/10"
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="7" cy="7" r="6" stroke="#4ade80" strokeWidth="1.2" />
-            <path d="M4.5 7l2 2 3-3" stroke="#4ade80" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* currentColor off text-success rather than the hex it resolves to,
+              which is what the rest of the app already does for state. */}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="text-success">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
+            <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-sm font-medium text-white/90">
             <span className="text-white">$0</span> to try it. No credit card, no commitment
