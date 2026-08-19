@@ -70,7 +70,13 @@ const IDLE_RATE = 0.34;
 // Radians of extra travel per screen scrolled. This is what makes the streak
 // run with you and unwind when you scroll back up. Kept under the point where
 // the waves visibly race the page.
-const SCROLL_RATE = 0.6;
+//
+// Lower on touch. Momentum scrolling delivers position in coarse jumps rather
+// than the near-continuous stream a wheel or trackpad gives, so at the desktop
+// rate the waves lurch between frames instead of flowing, and scrolling back up
+// unwinds them in visible steps.
+const DESKTOP_SCROLL_RATE = 0.6;
+const MOBILE_SCROLL_RATE = 0.26;
 
 // How far a sweep will bend to reach a gap between sections, in units. Past
 // about half a screen the sweep rhythm starts reading as uneven, which is worse
@@ -265,18 +271,30 @@ export function FlowLines() {
 
     let mobile = narrow.matches;
     let screens = 7;
-    let geo = geometryFor(screens, mobile, []);
+    let gaps: number[] = [];
+    let measured = false;
+    let geo = geometryFor(screens, mobile, gaps);
 
     let vw = 1;
     let vh = 1;
     let dpr = 1;
 
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+      // 1.25 rather than a phone's native 2 or 3. The lines are soft-edged and
+      // additively blended, so the extra pixels buy nothing visible and cost
+      // real fill rate on a device redrawing the whole frame every scroll tick.
+      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 2);
       vw = canvas.clientWidth;
       vh = canvas.clientHeight;
-      canvas.width = Math.max(1, Math.round(vw * dpr));
-      canvas.height = Math.max(1, Math.round(vh * dpr));
+
+      const w = Math.max(1, Math.round(vw * dpr));
+      const h = Math.max(1, Math.round(vh * dpr));
+      // Assigning either dimension clears the canvas even when the value is
+      // unchanged, and iOS fires resize on every URL bar nudge, so guard it.
+      if (w === canvas.width && h === canvas.height) return;
+
+      canvas.width = w;
+      canvas.height = h;
     };
 
     /**
@@ -313,19 +331,44 @@ export function FlowLines() {
       return gaps;
     };
 
+    /**
+     * A rebuild swaps in a different sweep count and a different set of routed
+     * gaps, so every line on screen moves at once. On a phone that is the whole
+     * bug: anything that nudges the document height fires the observer, and the
+     * streak visibly jumps to a new path mid-scroll. So the rebuild is gated on
+     * the inputs having actually changed, not on something merely having fired.
+     */
     const remeasure = () => {
       const nextMobile = narrow.matches;
       const raw = document.documentElement.scrollHeight / Math.max(1, canvas.clientHeight);
       // Quantised so a one-pixel reflow does not rebuild the geometry. The
       // canvas is fixed and adds no height, so this cannot feed back.
-      const next = Math.max(1.6, Math.round(raw * 4) / 4);
-      screens = next;
+      const nextScreens = Math.max(1.6, Math.round(raw * 4) / 4);
+      const nextGaps = measureGaps();
+
+      const same =
+        measured &&
+        nextMobile === mobile &&
+        nextScreens === screens &&
+        nextGaps.length === gaps.length &&
+        // A unit is a hundredth of a screen, so this ignores sub-pixel drift
+        // and rounding without letting a real reflow through.
+        nextGaps.every((g, i) => Math.abs(g - gaps[i]) < 1.5);
+
+      if (same) return;
+
+      measured = true;
+      screens = nextScreens;
       mobile = nextMobile;
-      geo = geometryFor(screens, mobile, measureGaps());
+      gaps = nextGaps;
+      geo = geometryFor(screens, mobile, gaps);
     };
 
     // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
-    // behind and it eases back up instead of snapping.
+    // behind and it eases back up instead of snapping. Tighter on touch: a
+    // momentum flick covers far more of the page per frame than a wheel does,
+    // and at the desktop weight the tip falls a long way behind and then hauls
+    // itself back, which reads as the streak re-drawing itself.
     let tip = Number.NaN;
 
     const render = (t: number) => {
@@ -334,10 +377,11 @@ export function FlowLines() {
 
       const tipTarget = (screenY + LEAD) * SCREEN;
       if (Number.isNaN(tip)) tip = tipTarget;
-      tip += (tipTarget - tip) * 0.1;
+      tip += (tipTarget - tip) * (mobile ? 0.24 : 0.1);
 
       const drawTip = reduceMotion ? Number.POSITIVE_INFINITY : tip;
-      const phase = (reduceMotion ? 0 : t * IDLE_RATE) + screenY * SCROLL_RATE;
+      const scrollRate = mobile ? MOBILE_SCROLL_RATE : DESKTOP_SCROLL_RATE;
+      const phase = (reduceMotion ? 0 : t * IDLE_RATE) + screenY * scrollRate;
 
       // Only the span crossing the viewport, plus a margin. It has to clear the
       // furthest a line sits from the spine (offset plus wobble), or a line
@@ -442,8 +486,28 @@ export function FlowLines() {
       frameId = 0;
     };
 
+    // measureGaps reads getBoundingClientRect on every section, which forces a
+    // synchronous layout. The observer can fire more than once per scroll tick,
+    // so coalesce to a single read per frame.
+    let queued = 0;
+    const queueRemeasure = () => {
+      if (queued) return;
+      queued = requestAnimationFrame(() => {
+        queued = 0;
+        remeasure();
+        if (!running) render(0);
+      });
+    };
+
     resize();
     remeasure();
+
+    // The first measure runs before webfonts swap in and before anything below
+    // the fold has settled, so the geometry it produces is built on a document
+    // height that is about to change. Re-measure once things stop moving, which
+    // is what stops the streak visibly re-laying-out a second after load.
+    document.fonts?.ready.then(queueRemeasure).catch(() => {});
+    window.addEventListener("load", queueRemeasure, { once: true });
 
     if (reduceMotion) {
       // One static frame, fully drawn, and no loop is ever scheduled.
@@ -465,7 +529,7 @@ export function FlowLines() {
 
     // The canvas is fixed and contributes no height, so watching the document
     // for its own growth cannot feed back into itself.
-    const observer = new ResizeObserver(remeasure);
+    const observer = new ResizeObserver(queueRemeasure);
     observer.observe(document.documentElement);
 
     window.addEventListener("resize", onResize);
@@ -473,7 +537,9 @@ export function FlowLines() {
 
     return () => {
       pause();
+      if (queued) cancelAnimationFrame(queued);
       observer.disconnect();
+      window.removeEventListener("load", queueRemeasure);
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
     };
@@ -483,9 +549,11 @@ export function FlowLines() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      // 100lvh rather than 100% so a collapsing mobile URL bar does not
-      // reallocate the drawing buffer on every scroll nudge.
-      style={{ display: "block", width: "100%", height: "100lvh" }}
+      // 100svh rather than 100% or 100dvh: both of those track the iOS URL
+      // bar, which would reallocate the drawing buffer on every scroll
+      // nudge. svh is fixed, and unlike lvh it is never clipped by the
+      // browser chrome, so the full canvas is always on screen.
+      style={{ display: "block", width: "100%", height: "100svh" }}
     />
   );
 }

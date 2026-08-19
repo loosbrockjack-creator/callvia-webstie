@@ -78,10 +78,12 @@ export function SiteBackdrop() {
   return (
     <>
       {/* One screen tall at the top of the document, so it scrolls away with
-          the hero. No opacity animation anywhere: it leaves by going up. */}
+          the hero. No opacity animation anywhere: it leaves by going up.
+          100svh so it is the same height as the hero and stays that height
+          while the iOS URL bar moves. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 z-0 h-[100lvh] overflow-hidden pointer-events-none"
+        className="absolute inset-x-0 top-0 z-0 h-[100svh] overflow-hidden pointer-events-none"
       >
         {/* Stands in when WebGL is unavailable, and keeps the page from being
             flat black for the frame before the canvas paints. */}

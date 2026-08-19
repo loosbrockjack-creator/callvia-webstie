@@ -8,7 +8,11 @@ import { GradientButton } from "./ui/gradient-button";
 // the backdrop fades itself down past the first viewport.
 export function Hero() {
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
+    // 100svh, not 100dvh. dvh tracks the iOS URL bar, so every collapse and
+    // re-expand resized the hero, shifted every section under it, and made the
+    // streak in SiteBackdrop rebuild its whole path mid-scroll. svh is the
+    // small-viewport height and never changes, so the page holds still.
+    <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
       {/* Legibility scrim, not decoration. The strands are brightest through the
           middle of the viewport, which is exactly where the headline sits.
           Black rather than purple so it darkens without adding more accent. */}
