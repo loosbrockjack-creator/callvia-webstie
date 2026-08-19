@@ -13,13 +13,12 @@
 // beside them carry the meaning, so the SVGs are aria-hidden rather than
 // captioned, which would just read the same sentence twice to a screen reader.
 
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import {
   containerVariants,
   drawVariants,
-  EASE_CARD,
   FILL,
   popVariants,
   riseVariants,
@@ -30,18 +29,6 @@ import {
 } from "@/components/graphics/shared";
 
 const MONO = "var(--font-geist-mono), ui-monospace, monospace";
-
-/** Grow from the left edge. Needs both properties inline: `transform-box`
- *  alone still leaves the origin at the centre of the box. */
-const growVariants: Variants = {
-  hidden: { scaleX: 0 },
-  shown: { scaleX: 1, transition: { duration: 0.75, ease: EASE_CARD } },
-};
-
-const growFromLeft = {
-  transformBox: "fill-box" as const,
-  transformOrigin: "left center",
-};
 
 function GraphicFrame({
   children,
@@ -87,7 +74,7 @@ export function BookingGraphic() {
   const bookedRow = 1;
 
   return (
-    <GraphicFrame viewBox="0 0 280 112">
+    <GraphicFrame viewBox="0 -13 280 130">
       {days.map((day, i) => (
         <motion.text
           key={day}
@@ -161,7 +148,7 @@ export function LeadCaptureGraphic() {
   ];
 
   return (
-    <GraphicFrame viewBox="0 0 280 112">
+    <GraphicFrame viewBox="0 -12 280 130">
       {fields.map((field, i) => {
         const y = 4 + i * 28;
         return (
@@ -217,7 +204,7 @@ export function UrgencyGraphic() {
   const knobX = segments[activeIndex].x + 41;
 
   return (
-    <GraphicFrame viewBox="0 0 280 112">
+    <GraphicFrame viewBox="0 -15 280 130">
       <motion.text
         variants={riseVariants}
         x={140}
@@ -279,7 +266,7 @@ export function UrgencyGraphic() {
 /** Urgent call routing: the call reaching you, or a text if it cannot. */
 export function RoutingGraphic() {
   return (
-    <GraphicFrame viewBox="0 0 280 120">
+    <GraphicFrame viewBox="0 -5 280 130">
       <motion.path
         variants={drawVariants}
         d="M66 60 H98"
@@ -386,16 +373,39 @@ export function RoutingGraphic() {
 
 /* -------------------------------------------------------------------------- */
 
-/** Call summaries: the message that lands the moment the call ends. */
+/**
+ * Call summaries: the message that lands the moment the call ends.
+ *
+ * The field set mirrors the real text Callvia sends, in the real order:
+ * Name, Number, Address, Job Type, Urgency, then the summary paragraph. The
+ * product's own output is the most credible thing this card could show, so it
+ * is worth matching rather than inventing a prettier shape.
+ *
+ * What is not literal is the styling. The real SMS is a flat wall of plain
+ * text because that is all SMS can be; rendered that way here it would read as
+ * a screenshot dropped into the page. Setting the labels in dim mono against
+ * aligned values is the same label/value treatment the rest of the site uses,
+ * so it belongs here while still being recognisably the same message.
+ *
+ * The caller matches the Lead capture card deliberately: same name, number,
+ * address and job. The two cards are one call, captured and then sent on.
+ */
 export function SummaryGraphic() {
+  const fields = [
+    { label: "NAME", value: "Dana R." },
+    { label: "NUMBER", value: "(612) 555-0148" },
+    { label: "ADDRESS", value: "418 Cedar Ave, Ankeny" },
+    { label: "JOB TYPE", value: "Water heater leaking" },
+  ];
+
   return (
-    <GraphicFrame viewBox="0 0 280 116">
+    <GraphicFrame viewBox="0 0 280 130">
       <motion.rect
         variants={riseVariants}
         x={8}
-        y={4}
+        y={0}
         width={264}
-        height={108}
+        height={130}
         rx={12}
         fill={FILL.panel}
         stroke={STROKE.hairline}
@@ -403,44 +413,89 @@ export function SummaryGraphic() {
       />
 
       <motion.g variants={riseVariants}>
-        <circle cx={24} cy={24} r={3.5} fill={FILL.active} />
-        <text x={36} y={27.5} fontSize={9.5} fontWeight={600} fill={TEXT.bright}>
+        {/* Dimmed from `active`: the urgency chip below is this card's one
+            bright element, and two of them would cancel each other out. */}
+        <circle cx={24} cy={17} r={3.5} fill={STROKE.strong} />
+        <text x={36} y={20.5} fontSize={9.5} fontWeight={600} fill={TEXT.bright}>
           Callvia
         </text>
         <text
           x={256}
-          y={27.5}
+          y={20.5}
           textAnchor="end"
           fontSize={8}
           fontFamily={MONO}
           fill={TEXT.label}
         >
-          2:41 PM
+          11:13 AM
         </text>
       </motion.g>
 
       <motion.path
         variants={drawVariants}
-        d="M20 40 H260"
+        d="M20 29 H260"
         stroke={STROKE.faint}
         strokeWidth={1}
       />
 
-      <motion.text variants={riseVariants} x={20} y={62} fontSize={10} fill={TEXT.bright}>
-        Dana R. &middot; water heater leaking
-      </motion.text>
-      <motion.text variants={riseVariants} x={20} y={80} fontSize={9.5} fill={TEXT.value}>
-        418 Cedar Ave, Ankeny
-      </motion.text>
-      <motion.text
-        variants={riseVariants}
-        x={20}
-        y={99}
-        fontSize={9.5}
-        fontFamily={MONO}
-        fill={TEXT.value}
-      >
-        (612) 555-0148
+      {fields.map((field, i) => {
+        const y = 44 + i * 15;
+        return (
+          <motion.g key={field.label} variants={riseVariants}>
+            <text
+              x={20}
+              y={y}
+              fontSize={7}
+              fontFamily={MONO}
+              letterSpacing={0.8}
+              fill={TEXT.label}
+            >
+              {field.label}
+            </text>
+            <text x={80} y={y} fontSize={9} fill={TEXT.value}>
+              {field.value}
+            </text>
+          </motion.g>
+        );
+      })}
+
+      {/* Urgency is the whole reason the text arrives before you are off the
+          ladder, so it is the one thing set as a chip rather than a value. */}
+      <motion.g variants={riseVariants}>
+        <text
+          x={20}
+          y={104}
+          fontSize={7}
+          fontFamily={MONO}
+          letterSpacing={0.8}
+          fill={TEXT.label}
+        >
+          URGENCY
+        </text>
+        <rect x={78} y={95} width={58} height={13} rx={6.5} fill={FILL.active} />
+        <text
+          x={107}
+          y={104}
+          textAnchor="middle"
+          fontSize={7.5}
+          fontWeight={600}
+          fontFamily={MONO}
+          letterSpacing={0.5}
+          fill={FILL.onActive}
+        >
+          IMMEDIATE
+        </text>
+      </motion.g>
+
+      <motion.path
+        variants={drawVariants}
+        d="M20 114 H260"
+        stroke={STROKE.faint}
+        strokeWidth={1}
+      />
+
+      <motion.text variants={riseVariants} x={20} y={125} fontSize={8} fill={TEXT.label}>
+        Call summary: water heater leaking into the utility room.
       </motion.text>
     </GraphicFrame>
   );
@@ -448,79 +503,97 @@ export function SummaryGraphic() {
 
 /* -------------------------------------------------------------------------- */
 
-/** Custom call handling: the controls behind how it answers. */
+/**
+ * Custom call handling: the questions from the Build My Receptionist flow.
+ *
+ * This card used to show three sliders labelled GREETING, HOURS and
+ * TRANSFERS, which was nonsense. A greeting is not a quantity and neither are
+ * business hours, so there was nothing for a slider to express. What the
+ * product actually does is ask a short list of questions and build the
+ * receptionist from the answers, so the card now shows exactly that.
+ *
+ * The questions and their options are lifted from QUESTIONS in
+ * components/BuildFunnel.tsx (`answerWhen`, `urgent`, `booking`), shortened to
+ * fit. If the wording changes there, change it here too: the point of this
+ * card is that it shows the real flow.
+ */
 export function HandlingGraphic() {
-  const controls = [
-    { label: "GREETING", fill: 0.72 },
-    { label: "HOURS", fill: 0.45 },
-    { label: "TRANSFERS", fill: 0.88 },
+  // Rough advance width for the label font at these sizes. Laying the chips
+  // out in script keeps the row packed correctly when the copy changes,
+  // instead of leaving hand-tuned x values to drift out of date.
+  const chipWidth = (text: string) => Math.round(text.length * 4.35 + 18);
+
+  const groups = [
+    {
+      question: "When should it answer?",
+      options: ["24/7", "After hours", "Missed calls"],
+      selected: "After hours",
+    },
+    {
+      question: "When something is urgent?",
+      options: ["Call me now", "Text an alert", "Flag it"],
+      selected: "Call me now",
+    },
+    {
+      question: "Book appointments?",
+      options: ["Yes", "No"],
+      selected: "Yes",
+    },
   ];
-  const trackX = 100;
-  const trackWidth = 162;
 
   return (
-    <GraphicFrame viewBox="0 0 280 112">
-      {controls.map((control, i) => {
-        const y = 16 + i * 28;
-        const knobX = trackX + trackWidth * control.fill;
+    <GraphicFrame viewBox="0 0 280 130">
+      {groups.map((group, gi) => {
+        const labelY = 12 + gi * 42;
+        const chipY = labelY + 6;
+        let x = 20;
+
         return (
-          <motion.g key={control.label} variants={riseVariants}>
-            <text
-              x={8}
-              y={y + 3}
-              fontSize={7.5}
-              fontFamily={MONO}
-              letterSpacing={1}
-              fill={TEXT.label}
+          <g key={group.question}>
+            <motion.text
+              variants={riseVariants}
+              x={20}
+              y={labelY}
+              fontSize={8.5}
+              fill={TEXT.value}
             >
-              {control.label}
-            </text>
-            <rect
-              x={trackX}
-              y={y - 2}
-              width={trackWidth}
-              height={4}
-              rx={2}
-              fill={STROKE.hairline}
-            />
-            <motion.rect
-              variants={growVariants}
-              style={growFromLeft}
-              x={trackX}
-              y={y - 2}
-              width={trackWidth * control.fill}
-              height={4}
-              rx={2}
-              fill={STROKE.strong}
-            />
-            <motion.g variants={slideVariants(-(knobX - trackX))}>
-              <circle
-                cx={knobX}
-                cy={y}
-                r={5}
-                fill={FILL.recess}
-                stroke={STROKE.active}
-                strokeWidth={1.3}
-              />
-            </motion.g>
-          </motion.g>
+              {group.question}
+            </motion.text>
+
+            {group.options.map((option) => {
+              const w = chipWidth(option);
+              const isSelected = option === group.selected;
+              const chipX = x;
+              x += w + 6;
+
+              return (
+                <motion.g key={option} variants={riseVariants}>
+                  <rect
+                    x={chipX}
+                    y={chipY}
+                    width={w}
+                    height={15}
+                    rx={7.5}
+                    fill={isSelected ? FILL.active : FILL.panel}
+                    stroke={isSelected ? "none" : STROKE.hairline}
+                    strokeWidth={0.75}
+                  />
+                  <text
+                    x={chipX + w / 2}
+                    y={chipY + 10.3}
+                    textAnchor="middle"
+                    fontSize={7.5}
+                    fontWeight={isSelected ? 600 : 400}
+                    fill={isSelected ? FILL.onActive : TEXT.value}
+                  >
+                    {option}
+                  </text>
+                </motion.g>
+              );
+            })}
+          </g>
         );
       })}
-
-      <motion.g variants={riseVariants}>
-        <text
-          x={8}
-          y={103}
-          fontSize={7.5}
-          fontFamily={MONO}
-          letterSpacing={1}
-          fill={TEXT.label}
-        >
-          AFTER HOURS
-        </text>
-        <rect x={trackX} y={92} width={34} height={16} rx={8} fill={FILL.active} />
-        <circle cx={trackX + 26} cy={100} r={5.5} fill={FILL.onActive} />
-      </motion.g>
     </GraphicFrame>
   );
 }

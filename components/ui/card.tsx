@@ -75,7 +75,7 @@ export function CardWell({
   return (
     <div
       className={cn(
-        "relative h-[148px] sm:h-[168px] overflow-hidden rounded-card-inner bg-surface-raised shadow-plate",
+        "relative h-[160px] sm:h-[190px] overflow-hidden rounded-card-inner bg-surface-raised shadow-plate",
         className
       )}
     >
