@@ -54,7 +54,7 @@ export function Footer() {
                   Callvia
                 </span>
                 <p className="mt-5 text-sm leading-relaxed" style={{ color: "#777777" }}>
-                  The receptionist built for the trades so you never leave a job
+                  The receptionist built for the trades, so you never leave a job
                   on the table.
                 </p>
                 <a

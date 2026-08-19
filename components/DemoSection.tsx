@@ -47,7 +47,7 @@ export function DemoSection() {
           transition={{ duration: 0.7, delay: 0.12 }}
           className="mt-5 max-w-lg text-base leading-relaxed text-muted"
         >
-          This is a live demo call via receptionist set up for a home services contractor. Call it right now and see exactly what your customers experience. Ask it anything. Try to confuse it. See how it performs before you commit to a single thing.
+          This is a live demo Callvia receptionist set up for a home services contractor. Call it right now and see exactly what your customers experience. Ask it anything. Try to confuse it. See how it performs before you commit to a single thing.
         </motion.p>
 
         {/* Phone number */}
