@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaveformMark } from "./WaveformMark";
+import { TiltCard } from "@/components/ui/tilt-card";
 import { TRADES } from "@/lib/estimate";
 
 const SCAN_STATUSES = [
@@ -119,142 +120,143 @@ export function MissedCallTool() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, delay: 0.15 }}
-          className="mt-12 max-w-2xl mx-auto rounded-2xl border p-8 md:p-10"
-          style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
+          className="mt-12 max-w-2xl mx-auto"
         >
-          <AnimatePresence mode="wait">
-            {phase === "form" && (
-              <motion.div
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col gap-7"
-              >
-                {/* Trade */}
-                <div>
-                  <label className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-                    Your trade
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {TRADES.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setTrade(t)}
-                        aria-pressed={trade?.id === t.id}
-                        className={
-                          "px-4 py-2 text-sm rounded-full border transition-all duration-200 active:scale-[0.98] " +
-                          (trade?.id === t.id
-                            ? "border-accent text-white bg-accent/12"
-                            : "border-line text-muted hover:border-line-strong hover:text-white")
-                        }
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Missed calls per week */}
-                <div>
-                  <label htmlFor="mct-calls" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-                    Missed calls per week
-                  </label>
-                  <input
-                    id="mct-calls"
-                    type="number"
-                    min={1}
-                    max={500}
-                    value={calls}
-                    onChange={(e) => setCalls(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
-                    style={{ background: "#000000", borderColor: "#1f1f1f" }}
-                  />
-                </div>
-
-                {/* Repeat vs new customer share */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
-                      Share that are repeat customers
-                    </label>
-                    <span className="text-sm font-semibold tabular-nums text-accent-hover">
-                      {repeatSharePct}%
-                    </span>
-                  </div>
-                  <input
-                    id="mct-repeat"
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={repeatSharePct}
-                    onChange={(e) => setRepeatSharePct(parseInt(e.target.value, 10))}
-                    className="roi-slider"
-                    style={{
-                      background: `linear-gradient(90deg, #7c5cfc 0%, #9b7ffd ${repeatSharePct}%, #171717 ${repeatSharePct}%, #171717 100%)`,
-                    }}
-                  />
-                  <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
-                    People who already know you are more likely to wait or call back. New callers usually just try the next name on Google.
-                  </p>
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label htmlFor="mct-phone" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-                    Business phone number
-                  </label>
-                  <input
-                    id="mct-phone"
-                    type="tel"
-                    inputMode="tel"
-                    placeholder="(612) 555-0134"
-                    value={phone}
-                    onChange={(e) => setPhone(formatPhone(e.target.value))}
-                    className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
-                    style={{ background: "#000000", borderColor: "#1f1f1f" }}
-                  />
-                  <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
-                    Used once for a live carrier lookup. Never called, texted, stored, or shared.
-                  </p>
-                </div>
-
-                {error && (
-                  <p className="text-sm" style={{ color: "#f87171" }}>
-                    {error}
-                  </p>
-                )}
-
-                <button
-                  type="button"
-                  onClick={runAnalysis}
-                  className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
+          <TiltCard max={5} className="border border-line bg-surface p-8 md:p-10">
+            <AnimatePresence mode="wait">
+              {phase === "form" && (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col gap-7"
                 >
-                  Analyze My Line
-                </button>
-              </motion.div>
-            )}
+                  {/* Trade */}
+                  <div>
+                    <label className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
+                      Your trade
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {TRADES.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setTrade(t)}
+                          aria-pressed={trade?.id === t.id}
+                          className={
+                            "px-4 py-2 text-sm rounded-full border transition-all duration-200 active:scale-[0.98] " +
+                            (trade?.id === t.id
+                              ? "border-accent text-white bg-accent/12"
+                              : "border-line text-muted hover:border-line-strong hover:text-white")
+                          }
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-            {phase === "scanning" && (
-              <motion.div
-                key="scanning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center py-10"
-              >
-                <WaveformMark size={140} animated opacity={0.85} />
-                <p className="mt-8 text-sm tracking-wide text-muted">
-                  {SCAN_STATUSES[statusIdx]}
-                  <span className="animate-pulse">…</span>
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  {/* Missed calls per week */}
+                  <div>
+                    <label htmlFor="mct-calls" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
+                      Missed calls per week
+                    </label>
+                    <input
+                      id="mct-calls"
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={calls}
+                      onChange={(e) => setCalls(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
+                      style={{ background: "#000000", borderColor: "#1f1f1f" }}
+                    />
+                  </div>
+
+                  {/* Repeat vs new customer share */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label htmlFor="mct-repeat" className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
+                        Share that are repeat customers
+                      </label>
+                      <span className="text-sm font-semibold tabular-nums text-white">
+                        {repeatSharePct}%
+                      </span>
+                    </div>
+                    <input
+                      id="mct-repeat"
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={repeatSharePct}
+                      onChange={(e) => setRepeatSharePct(parseInt(e.target.value, 10))}
+                      className="roi-slider"
+                      style={{
+                        background: `linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.25) ${repeatSharePct}%, #171717 ${repeatSharePct}%, #171717 100%)`,
+                      }}
+                    />
+                    <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
+                      People who already know you are more likely to wait or call back. New callers usually just try the next name on Google.
+                    </p>
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label htmlFor="mct-phone" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
+                      Business phone number
+                    </label>
+                    <input
+                      id="mct-phone"
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="(612) 555-0134"
+                      value={phone}
+                      onChange={(e) => setPhone(formatPhone(e.target.value))}
+                      className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
+                      style={{ background: "#000000", borderColor: "#1f1f1f" }}
+                    />
+                    <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>
+                      Used once for a live carrier lookup. Never called, texted, stored, or shared.
+                    </p>
+                  </div>
+
+                  {error && (
+                    <p className="text-sm" style={{ color: "#f87171" }}>
+                      {error}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={runAnalysis}
+                    className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)]"
+                  >
+                    Analyze My Line
+                  </button>
+                </motion.div>
+              )}
+
+              {phase === "scanning" && (
+                <motion.div
+                  key="scanning"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center py-10"
+                >
+                  <WaveformMark size={140} animated opacity={0.85} />
+                  <p className="mt-8 text-sm tracking-wide text-muted">
+                    {SCAN_STATUSES[statusIdx]}
+                    <span className="animate-pulse">…</span>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TiltCard>
         </motion.div>
       </div>
     </section>

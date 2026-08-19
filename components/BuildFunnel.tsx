@@ -633,7 +633,7 @@ export function BuildFunnel() {
                       <span className="text-xs tracking-widest uppercase" style={{ color: "#555555" }}>
                         Share that are repeat customers
                       </span>
-                      <span className="text-sm font-semibold tabular-nums text-accent-hover">
+                      <span className="text-sm font-semibold tabular-nums text-white">
                         {repeatShare}%
                       </span>
                     </div>
@@ -646,7 +646,7 @@ export function BuildFunnel() {
                       onChange={(e) => setRepeatShare(parseInt(e.target.value, 10))}
                       className="roi-slider"
                       style={{
-                        background: `linear-gradient(90deg, #7c5cfc 0%, #9b7ffd ${repeatShare}%, #171717 ${repeatShare}%, #171717 100%)`,
+                        background: `linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.25) ${repeatShare}%, #171717 ${repeatShare}%, #171717 100%)`,
                       }}
                     />
                     <p className="mt-2.5 text-xs leading-relaxed" style={{ color: "#555555" }}>

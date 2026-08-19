@@ -145,7 +145,9 @@ body {
   left: 160%;
 }
 
-/* ROI slider (MissedCallTool + build funnel). Black track, purple fill, flat thumb.
+/* ROI slider (MissedCallTool + build funnel). Black track, faint white fill,
+   black thumb. Deliberately no accent: the number beside it is the thing worth
+   reading, not the control.
    The fill/track split is a dynamic gradient set inline from the React value;
    the track pseudo-elements stay transparent so that gradient shows through. */
 .roi-slider {
@@ -177,37 +179,41 @@ body {
   height: 18px;
   margin-top: -6px;
   border-radius: 50%;
-  background: #7c5cfc;
-  border: 2px solid #0d0d0d;
-  transition: transform 0.15s ease;
+  background: #000000;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 .roi-slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #7c5cfc;
-  border: 2px solid #0d0d0d;
-  transition: transform 0.15s ease;
+  background: #000000;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .roi-slider:hover::-webkit-slider-thumb {
   transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 .roi-slider:active::-webkit-slider-thumb {
   transform: scale(1.1);
 }
 .roi-slider:hover::-moz-range-thumb {
   transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 .roi-slider:active::-moz-range-thumb {
   transform: scale(1.1);
 }
 
 .roi-slider:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px rgba(124, 92, 252, 0.25);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
 }
 .roi-slider:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 4px rgba(124, 92, 252, 0.25);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
