@@ -72,6 +72,19 @@ const IDLE_RATE = 0.34;
 // the waves visibly race the page.
 const SCROLL_RATE = 0.6;
 
+// How far a sweep will bend to reach a gap between sections, in units. Past
+// about half a screen the sweep rhythm starts reading as uneven, which is worse
+// than the overlap it was avoiding.
+const MAX_ROUTE_SHIFT = 50;
+
+// Minimum spacing between two consecutive routed sweeps, so a cluster of short
+// sections cannot pull two sweeps on top of each other.
+const MIN_ROUTE_GAP = 60;
+
+// A candidate gap has to be at least this tall to be worth routing into.
+// Sections are py-16/md:py-32, so a real boundary clears this comfortably.
+const MIN_SECTION_UNITS = 25;
+
 const ACCENT = "124, 92, 252";
 const ACCENT_HOT = "154, 129, 255";
 
@@ -107,25 +120,100 @@ function makeLines(count: number, spread: number, scale: number): Line[] {
   });
 }
 
+/**
+ * A monotone remap of the spine's vertical position, as matching arrays of
+ * control points. Identity at both ends, so only the middle of the run moves.
+ */
+type Warp = { from: number[]; to: number[] };
+
 type Geometry = {
   sweeps: number;
   span: number;
   amp: number;
   lines: Line[];
+  warp: Warp;
 };
 
-function geometryFor(screens: number, mobile: boolean): Geometry {
+/**
+ * Pull the flat middle of each sweep onto a gap between sections.
+ *
+ * A sweep spends most of its length running flat across the page and only a
+ * little of it diving at the turns, and the turns happen out near the edges
+ * where there is no copy anyway. So landing the flat runs in the black bands
+ * between sections is most of what it takes to keep the streak off the words.
+ *
+ * Expressed as a warp rather than as per-sweep offsets because the spine has to
+ * stay one continuous monotone curve: shifting individual sweeps would break it
+ * at the joins, and the visible-span scan relies on y increasing with p.
+ */
+function buildWarp(sweeps: number, span: number, endY: number, gaps: number[]): Warp {
+  const from = [STREAK_TOP];
+  const to = [STREAK_TOP];
+
+  let searchFrom = 0;
+  let placed = STREAK_TOP;
+
+  for (let k = 0; k < sweeps; k++) {
+    const mid = STREAK_TOP + (k + 0.5) * span;
+
+    let pick = -1;
+    let pickDistance = Number.POSITIVE_INFINITY;
+    for (let j = searchFrom; j < gaps.length; j++) {
+      const gap = gaps[j];
+      if (gap <= placed + MIN_ROUTE_GAP) continue;
+      if (gap >= endY - MIN_ROUTE_GAP) break;
+
+      const distance = Math.abs(gap - mid);
+      if (distance < pickDistance) {
+        pickDistance = distance;
+        pick = j;
+      } else if (gap > mid) {
+        // Ordered, so everything past here is further away.
+        break;
+      }
+    }
+
+    if (pick < 0 || pickDistance > MAX_ROUTE_SHIFT) continue;
+
+    from.push(mid);
+    to.push(gaps[pick]);
+    placed = gaps[pick];
+    searchFrom = pick + 1;
+  }
+
+  from.push(endY);
+  to.push(Math.max(endY, placed + MIN_ROUTE_GAP));
+  return { from, to };
+}
+
+function warpY(y: number, warp: Warp): number {
+  const { from, to } = warp;
+  const last = from.length - 1;
+  if (y <= from[0] || y >= from[last]) return y;
+
+  for (let i = 1; i <= last; i++) {
+    if (y <= from[i]) {
+      const t = (y - from[i - 1]) / (from[i] - from[i - 1]);
+      return to[i - 1] + (to[i] - to[i - 1]) * t;
+    }
+  }
+  return y;
+}
+
+function geometryFor(screens: number, mobile: boolean, gaps: number[]): Geometry {
   const sweepScreens = mobile ? MOBILE_SWEEP : DESKTOP_SWEEP;
   const sweeps = Math.max(2, Math.round((screens - STREAK_TOP / SCREEN) / sweepScreens));
   // Overshoot the bottom a little so the last sweep is still travelling when it
   // leaves the frame, rather than parking on the footer.
   const endY = screens * SCREEN + 0.16 * SCREEN;
+  const span = (endY - STREAK_TOP) / sweeps;
 
   return {
     sweeps,
-    span: (endY - STREAK_TOP) / sweeps,
+    span,
     amp: mobile ? MOBILE_AMP : DESKTOP_AMP,
     lines: mobile ? makeLines(7, SPREAD * 0.8, 0.85) : makeLines(12, SPREAD, 1),
+    warp: buildWarp(sweeps, span, endY, gaps),
   };
 }
 
@@ -140,7 +228,9 @@ function spineY(p: number, geo: Geometry): number {
   const k = Math.min(geo.sweeps - 1, Math.floor(p));
   const u = Math.min(1, p - k);
   const eased = u + (0.75 / (2 * Math.PI)) * Math.sin(2 * Math.PI * u);
-  return STREAK_TOP + (k + eased) * geo.span;
+  // Warped after the fact, so everything downstream (the visible-span scan, the
+  // leading tip) sees the same routed position the lines are drawn at.
+  return warpY(STREAK_TOP + (k + eased) * geo.span, geo.warp);
 }
 
 /**
@@ -175,7 +265,7 @@ export function FlowLines() {
 
     let mobile = narrow.matches;
     let screens = 7;
-    let geo = geometryFor(screens, mobile);
+    let geo = geometryFor(screens, mobile, []);
 
     let vw = 1;
     let vh = 1;
@@ -189,17 +279,49 @@ export function FlowLines() {
       canvas.height = Math.max(1, Math.round(vh * dpr));
     };
 
+    /**
+     * The black bands between sections, in units, as candidate routes for the
+     * streak. Every section here is a direct child of main carrying its own
+     * vertical padding and a top border, so the boundary between two of them is
+     * the middle of the gap.
+     */
+    const measureGaps = (): number[] => {
+      const vh = canvas.clientHeight || 1;
+      const main = document.querySelector("main");
+      if (!main) return [];
+
+      const gaps: number[] = [];
+      let previousBottom = Number.NaN;
+
+      for (const child of Array.from(main.children)) {
+        if (!(child instanceof HTMLElement)) continue;
+        // The nav is fixed, so it holds no position in the document flow.
+        if (getComputedStyle(child).position === "fixed") continue;
+
+        const rect = child.getBoundingClientRect();
+        if (rect.height < vh * 0.2) continue;
+
+        const top = ((rect.top + window.scrollY) / vh) * SCREEN;
+        const bottom = ((rect.bottom + window.scrollY) / vh) * SCREEN;
+
+        if (!Number.isNaN(previousBottom) && top - previousBottom > -MIN_SECTION_UNITS) {
+          gaps.push((previousBottom + top) / 2);
+        }
+        previousBottom = bottom;
+      }
+
+      return gaps;
+    };
+
     const remeasure = () => {
       const nextMobile = narrow.matches;
       const raw = document.documentElement.scrollHeight / Math.max(1, canvas.clientHeight);
       // Quantised so a one-pixel reflow does not rebuild the geometry. The
       // canvas is fixed and adds no height, so this cannot feed back.
       const next = Math.max(1.6, Math.round(raw * 4) / 4);
-      if (next !== screens || nextMobile !== mobile) {
-        screens = next;
-        mobile = nextMobile;
-        geo = geometryFor(screens, mobile);
-      }
+      screens = next;
+      mobile = nextMobile;
+      geo = geometryFor(screens, mobile, measureGaps());
     };
 
     // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
