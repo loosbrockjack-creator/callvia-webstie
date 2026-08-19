@@ -70,13 +70,7 @@ const IDLE_RATE = 0.34;
 // Radians of extra travel per screen scrolled. This is what makes the streak
 // run with you and unwind when you scroll back up. Kept under the point where
 // the waves visibly race the page.
-//
-// Lower on touch. Momentum scrolling delivers position in coarse jumps rather
-// than the near-continuous stream a wheel or trackpad gives, so at the desktop
-// rate the waves lurch between frames instead of flowing, and scrolling back up
-// unwinds them in visible steps.
-const DESKTOP_SCROLL_RATE = 0.6;
-const MOBILE_SCROLL_RATE = 0.26;
+const SCROLL_RATE = 0.6;
 
 // How far a sweep will bend to reach a gap between sections, in units. Past
 // about half a screen the sweep rhythm starts reading as uneven, which is worse
@@ -280,10 +274,7 @@ export function FlowLines() {
     let dpr = 1;
 
     const resize = () => {
-      // 1.25 rather than a phone's native 2 or 3. The lines are soft-edged and
-      // additively blended, so the extra pixels buy nothing visible and cost
-      // real fill rate on a device redrawing the whole frame every scroll tick.
-      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 2);
+      dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
       vw = canvas.clientWidth;
       vh = canvas.clientHeight;
 
@@ -365,10 +356,7 @@ export function FlowLines() {
     };
 
     // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
-    // behind and it eases back up instead of snapping. Tighter on touch: a
-    // momentum flick covers far more of the page per frame than a wheel does,
-    // and at the desktop weight the tip falls a long way behind and then hauls
-    // itself back, which reads as the streak re-drawing itself.
+    // behind and it eases back up instead of snapping.
     let tip = Number.NaN;
 
     const render = (t: number) => {
@@ -377,11 +365,10 @@ export function FlowLines() {
 
       const tipTarget = (screenY + LEAD) * SCREEN;
       if (Number.isNaN(tip)) tip = tipTarget;
-      tip += (tipTarget - tip) * (mobile ? 0.24 : 0.1);
+      tip += (tipTarget - tip) * 0.1;
 
       const drawTip = reduceMotion ? Number.POSITIVE_INFINITY : tip;
-      const scrollRate = mobile ? MOBILE_SCROLL_RATE : DESKTOP_SCROLL_RATE;
-      const phase = (reduceMotion ? 0 : t * IDLE_RATE) + screenY * scrollRate;
+      const phase = (reduceMotion ? 0 : t * IDLE_RATE) + screenY * SCROLL_RATE;
 
       // Only the span crossing the viewport, plus a margin. It has to clear the
       // furthest a line sits from the spine (offset plus wobble), or a line
@@ -549,11 +536,9 @@ export function FlowLines() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      // 100svh rather than 100% or 100dvh: both of those track the iOS URL
-      // bar, which would reallocate the drawing buffer on every scroll
-      // nudge. svh is fixed, and unlike lvh it is never clipped by the
-      // browser chrome, so the full canvas is always on screen.
-      style={{ display: "block", width: "100%", height: "100svh" }}
+      // 100lvh rather than 100% so a collapsing mobile URL bar does not
+      // reallocate the drawing buffer on every scroll nudge.
+      style={{ display: "block", width: "100%", height: "100lvh" }}
     />
   );
 }

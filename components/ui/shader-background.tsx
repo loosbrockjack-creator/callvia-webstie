@@ -372,11 +372,9 @@ export function ShaderBackground({
       ref={canvasRef}
       aria-hidden
       className={className}
-      // 100svh rather than 100% or 100dvh: both of those track the iOS URL
-      // bar, which would reallocate the drawing buffer on every scroll
-      // nudge. svh is fixed, and unlike lvh it is never clipped by the
-      // browser chrome, so the full canvas is always on screen.
-      style={{ display: "block", width: "100%", height: "100svh" }}
+      // 100lvh rather than 100% so a collapsing mobile URL bar does not
+      // reallocate the drawing buffer on every scroll nudge.
+      style={{ display: "block", width: "100%", height: "100lvh" }}
     />
   );
 }

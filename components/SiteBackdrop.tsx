@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useScroll, useSpring, useTransform } from "framer-motion";
 import { ShaderBackground } from "./ui/shader-background";
 import { FlowLines } from "./ui/flow-lines";
+import { useHasFinePointer } from "./ui/use-fine-pointer";
 
 /**
  * The moving background for the marketing surfaces. Mounted once in the root
@@ -18,6 +19,14 @@ import { FlowLines } from "./ui/flow-lines";
  * you. The streak starts below it and waves down the rest of the page. Neither
  * stops when the page does: they flow on their own clock, and scroll position
  * pushes them further along and unwinds them on the way back up.
+ *
+ * The streak is desktop only. It is drawn in document space onto a fixed canvas
+ * and repositioned every frame from scroll position, which needs the scroll
+ * stream to be smooth and the document height to be stable. Touch devices give
+ * neither: momentum scrolling arrives in coarse jumps, and the browser chrome
+ * resizes the viewport as it hides and shows. The result on a phone was visibly
+ * unstable, so it does not render there at all. The field stays on everywhere,
+ * as the hero background it has always been.
  */
 
 // Same reasoning as FloatingBookCall's HIDDEN_PREFIXES: this is a marketing
@@ -44,6 +53,13 @@ const PX_PER_SECOND = 260;
 export function SiteBackdrop() {
   const pathname = usePathname();
   const { scrollY } = useScroll();
+
+  // Gates the streak. A fine pointer is the honest test here: the problem is
+  // touch scrolling and dynamic browser chrome, not screen size, so this is
+  // right in landscape and on tablets where a width breakpoint is not. Starts
+  // false, so server and first client render agree on no streak, and only a
+  // real mouse or trackpad turns it on.
+  const hasFinePointer = useHasFinePointer();
 
   // Sprung so the field eases into its new position on a flick rather than
   // tracking the scrollbar frame for frame.
@@ -78,12 +94,10 @@ export function SiteBackdrop() {
   return (
     <>
       {/* One screen tall at the top of the document, so it scrolls away with
-          the hero. No opacity animation anywhere: it leaves by going up.
-          100svh so it is the same height as the hero and stays that height
-          while the iOS URL bar moves. */}
+          the hero. No opacity animation anywhere: it leaves by going up. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 z-0 h-[100svh] overflow-hidden pointer-events-none"
+        className="absolute inset-x-0 top-0 z-0 h-[100lvh] overflow-hidden pointer-events-none"
       >
         {/* Stands in when WebGL is unavailable, and keeps the page from being
             flat black for the frame before the canvas paints. */}
@@ -100,13 +114,17 @@ export function SiteBackdrop() {
 
       {/* The streak is drawn in document space but rasterised one viewport at a
           time, so it runs from below the hero to the footer at the rate you
-          actually scroll while only ever painting visible pixels. */}
-      <div
-        aria-hidden
-        className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
-      >
-        <FlowLines />
-      </div>
+          actually scroll while only ever painting visible pixels. Not mounted
+          at all on touch, so there is no canvas, no render loop and no observer
+          on the devices it misbehaved on. */}
+      {hasFinePointer && (
+        <div
+          aria-hidden
+          className="fixed inset-0 z-0 overflow-hidden pointer-events-none"
+        >
+          <FlowLines />
+        </div>
+      )}
     </>
   );
 }
