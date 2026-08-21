@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Feather, HandTap, PhoneCall, Receipt } from "@phosphor-icons/react";
-import { WaveformMark } from "./WaveformMark";
 import { GradientButton } from "./ui/gradient-button";
 import { Card, CardBody, IconPlate } from "./ui/card";
 import { CursorCardsContainer } from "./ui/cursor-cards";
@@ -47,15 +46,6 @@ export function AboutContent() {
               "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,252,0.04) 0%, transparent 65%)",
           }}
         />
-        <motion.div
-          className="absolute inset-x-0 top-0 flex justify-center pointer-events-none"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
-        >
-          <WaveformMark size={520} animated opacity={0.05} className="blur-[24px]" />
-        </motion.div>
-
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           {/* Above the fold, so this one animates on load rather than on
               scroll and keeps its own motion props. */}
