@@ -61,8 +61,8 @@ const TIP_FADE = 30;
 
 // Vertical spread of the streak, and the excursion of each line's own wobble.
 // Both stay tight enough that it reads as one band.
-const SPREAD = 21;
-const WOBBLE = 4.5;
+const SPREAD = 15;
+const WOBBLE = 3.5;
 
 // Radians per second the wave travels along the lines while the page is still.
 const IDLE_RATE = 0.34;
@@ -85,8 +85,40 @@ const MIN_ROUTE_GAP = 60;
 // Sections are py-16/md:py-32, so a real boundary clears this comfortably.
 const MIN_SECTION_UNITS = 25;
 
+// Word-bearing blocks the streak should try to miss. Deliberately the block
+// elements rather than every inline span: a heading and its paragraph are what
+// occupy vertical space, and descending into their children just produces the
+// same bands again.
+const TEXT_SELECTOR = "h1, h2, h3, h4, p, li, blockquote";
+
+// Anything painting an opaque fill over the streak. Copy inside one of these is
+// already hidden, so it does not need routing around.
+const OPAQUE_SELECTOR = ".rounded-card, footer";
+
+// Breathing room added above and below each block of copy, in units, so a line
+// routed into a gap does not graze a descender.
+const TEXT_MARGIN = 2.5;
+
+// Routing gets the streak out of the way where there is somewhere to go. Where
+// there is not (the founder letter is one unbroken column of paragraphs with no
+// gap tall enough to hold the band) the streak has to cross the copy, so it
+// dims to this fraction of its alpha while it does and comes back afterwards.
+// It reads as the streak passing behind the words rather than through them.
+const TEXT_DIM = 0.07;
+
+// Units over which that dimming eases in and out. Long enough not to look like
+// a switch, short enough that the streak is actually dark by the first line.
+const TEXT_DIM_FADE = 6;
+
 const ACCENT = "124, 92, 252";
 const ACCENT_HOT = "154, 129, 255";
+
+type Layout = {
+  /** Midpoints of copy-free bands, as routing targets. */
+  gaps: number[];
+  /** Merged spans that contain copy, as dimming zones. */
+  bands: Array<[number, number]>;
+};
 
 type Line = {
   seed: number;
@@ -266,6 +298,7 @@ export function FlowLines() {
     let mobile = narrow.matches;
     let screens = 7;
     let gaps: number[] = [];
+    let bands: Array<[number, number]> = [];
     let measured = false;
     let geo = geometryFor(screens, mobile, gaps);
 
@@ -289,37 +322,74 @@ export function FlowLines() {
     };
 
     /**
-     * The black bands between sections, in units, as candidate routes for the
-     * streak. Every section here is a direct child of main carrying its own
-     * vertical padding and a top border, so the boundary between two of them is
-     * the middle of the gap.
+     * Vertical bands with no copy in them, in units, as candidate routes.
+     *
+     * This used to return the boundary between one section and the next, which
+     * is a rough proxy: a section boundary is usually clear, but so is the
+     * space above a card grid, and a boundary is not clear at all when the next
+     * section opens with an eyebrow right under it. Measuring the copy itself
+     * and taking the space left over routes the streak around the words rather
+     * than around the markup.
+     *
+     * Text inside a card is deliberately not protected. Cards paint an opaque
+     * fill, so a line crossing one is already invisible and routing around it
+     * would spend the streak's limited travel budget on overlaps nobody sees.
+     * If `.rounded-card` ever stops matching, the failure is benign: card copy
+     * starts counting as protected and the routing just gets more cautious.
      */
-    const measureGaps = (): number[] => {
+    const measureLayout = (): Layout => {
       const vh = canvas.clientHeight || 1;
       const main = document.querySelector("main");
-      if (!main) return [];
+      if (!main) return { gaps: [], bands: [] };
 
-      const gaps: number[] = [];
-      let previousBottom = Number.NaN;
+      const toUnits = (px: number) => ((px + window.scrollY) / vh) * SCREEN;
 
-      for (const child of Array.from(main.children)) {
-        if (!(child instanceof HTMLElement)) continue;
-        // The nav is fixed, so it holds no position in the document flow.
-        if (getComputedStyle(child).position === "fixed") continue;
+      const blocks: Array<[number, number]> = [];
+      for (const el of Array.from(main.querySelectorAll(TEXT_SELECTOR))) {
+        if (!(el instanceof HTMLElement)) continue;
+        if (!el.textContent || !el.textContent.trim()) continue;
+        if (el.closest(OPAQUE_SELECTOR)) continue;
 
-        const rect = child.getBoundingClientRect();
-        if (rect.height < vh * 0.2) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.height <= 0 || rect.width <= 0) continue;
 
-        const top = ((rect.top + window.scrollY) / vh) * SCREEN;
-        const bottom = ((rect.bottom + window.scrollY) / vh) * SCREEN;
-
-        if (!Number.isNaN(previousBottom) && top - previousBottom > -MIN_SECTION_UNITS) {
-          gaps.push((previousBottom + top) / 2);
-        }
-        previousBottom = bottom;
+        blocks.push([
+          toUnits(rect.top) - TEXT_MARGIN,
+          toUnits(rect.bottom) + TEXT_MARGIN,
+        ]);
       }
 
-      return gaps;
+      if (!blocks.length) return { gaps: [], bands: [] };
+
+      // Merge into occupied spans, then take the midpoint of every clear span
+      // between them that is tall enough to be worth aiming at.
+      blocks.sort((a, b) => a[0] - b[0]);
+      const occupied: Array<[number, number]> = [blocks[0]];
+      for (let i = 1; i < blocks.length; i++) {
+        const last = occupied[occupied.length - 1];
+        if (blocks[i][0] <= last[1]) {
+          last[1] = Math.max(last[1], blocks[i][1]);
+        } else {
+          occupied.push(blocks[i]);
+        }
+      }
+
+      const gaps: number[] = [];
+      for (let i = 1; i < occupied.length; i++) {
+        const top = occupied[i - 1][1];
+        const bottom = occupied[i][0];
+        if (bottom - top >= MIN_SECTION_UNITS) gaps.push((top + bottom) / 2);
+      }
+
+      // The run below the last block, so the streak has somewhere to sit on the
+      // way into the footer instead of being pinned by the final paragraph.
+      const docUnits = (document.documentElement.scrollHeight / vh) * SCREEN;
+      const tail = occupied[occupied.length - 1][1];
+      if (docUnits - tail >= MIN_SECTION_UNITS) {
+        gaps.push((tail + docUnits) / 2);
+      }
+
+      return { gaps, bands: occupied };
     };
 
     /**
@@ -335,7 +405,8 @@ export function FlowLines() {
       // Quantised so a one-pixel reflow does not rebuild the geometry. The
       // canvas is fixed and adds no height, so this cannot feed back.
       const nextScreens = Math.max(1.6, Math.round(raw * 4) / 4);
-      const nextGaps = measureGaps();
+      const next = measureLayout();
+      const nextGaps = next.gaps;
 
       const same =
         measured &&
@@ -344,7 +415,8 @@ export function FlowLines() {
         nextGaps.length === gaps.length &&
         // A unit is a hundredth of a screen, so this ignores sub-pixel drift
         // and rounding without letting a real reflow through.
-        nextGaps.every((g, i) => Math.abs(g - gaps[i]) < 1.5);
+        nextGaps.every((g, i) => Math.abs(g - gaps[i]) < 1.5) &&
+        next.bands.length === bands.length;
 
       if (same) return;
 
@@ -352,7 +424,27 @@ export function FlowLines() {
       screens = nextScreens;
       mobile = nextMobile;
       gaps = nextGaps;
+      bands = next.bands;
       geo = geometryFor(screens, mobile, gaps);
+    };
+
+    /**
+     * How much of a line's alpha survives at document position `y`: 1 in the
+     * clear, TEXT_DIM inside a block of copy, eased across TEXT_DIM_FADE.
+     */
+    const textFade = (y: number): number => {
+      let factor = 1;
+      for (let i = 0; i < bands.length; i++) {
+        const [a, b] = bands[i];
+        if (y < a - TEXT_DIM_FADE) break; // sorted, so nothing later can match
+        if (y > b + TEXT_DIM_FADE) continue;
+        const inside = Math.min(
+          smoothstep(a - TEXT_DIM_FADE, a, y),
+          smoothstep(b + TEXT_DIM_FADE, b, y)
+        );
+        factor = Math.min(factor, 1 - (1 - TEXT_DIM) * inside);
+      }
+      return factor;
     };
 
     // Exponentially smoothed rather than hard-tracked, so a flick pulls the tip
@@ -415,7 +507,11 @@ export function FlowLines() {
             ? smoothstep(drawTip, drawTip - TIP_FADE, y0)
             : 1;
 
-          pts.push([(x * vw) / SCREEN, (y * vh) / SCREEN - scrollY, tail]);
+          pts.push([
+            (x * vw) / SCREEN,
+            (y * vh) / SCREEN - scrollY,
+            tail * textFade(y),
+          ]);
         }
 
         if (pts.length < 3) continue;
@@ -429,10 +525,19 @@ export function FlowLines() {
           const scale = pass === 0 ? 0.09 : 1;
           ctx.lineWidth = width;
 
-          const chunk = 8;
+          // Shorter than it was: a chunk spans real vertical distance, and at
+          // eight points it straddled a whole paragraph, so the dimming
+          // resolved as one blocky step instead of a fade.
+          const chunk = 4;
           for (let i = 0; i < pts.length - 1; i += chunk) {
             const end = Math.min(pts.length - 1, i + chunk);
-            const alpha = line.alpha * scale * pts[Math.floor((i + end) / 2)][2];
+            // Minimum rather than midpoint, so a chunk crossing the edge of a
+            // block of copy dims with it rather than half-ignoring it.
+            let factor = pts[i][2];
+            for (let j = i + 1; j <= end; j++) {
+              if (pts[j][2] < factor) factor = pts[j][2];
+            }
+            const alpha = line.alpha * scale * factor;
             if (alpha < 0.004) continue;
 
             ctx.strokeStyle = `rgba(${tint}, ${alpha})`;
