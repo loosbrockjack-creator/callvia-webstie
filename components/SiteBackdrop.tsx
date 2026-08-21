@@ -36,6 +36,9 @@ const HIDDEN_PREFIXES = [
   "/privacy",
   "/terms",
   "/service-agreement",
+  // The login page carries its own line field in its brand panel, and two
+  // sets of purple lines on one screen is one too many.
+  "/login",
 ];
 
 export function SiteBackdrop() {

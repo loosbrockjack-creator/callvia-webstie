@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { BuildFunnel } from "@/components/BuildFunnel";
+import { QuietBackdrop } from "@/components/ui/quiet-backdrop";
 
 export const metadata = {
   title: "Build My Receptionist | Callvia",
@@ -9,8 +10,9 @@ export const metadata = {
 
 export default function BuildPage() {
   return (
-    <main className="min-h-[100dvh] bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+    <main className="relative min-h-[100dvh] bg-black text-white">
+      <QuietBackdrop />
+      <div className="relative z-10 max-w-3xl mx-auto px-6 py-16 md:py-24">
         <div className="mb-14 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <a
             href="/"

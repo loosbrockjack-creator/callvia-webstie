@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { At, EnvelopeSimple } from "@phosphor-icons/react";
 
 type Status = "idle" | "sending" | "sent";
 
+// Presentation only was reworked for the split auth layout: the form is no
+// longer inside its own card, because on that page the panel is the container
+// and a card inside it would be a box in a box. The behaviour is untouched:
+// same endpoint, same validation, same deliberately identical confirmation
+// whether or not the address matches an account, so this cannot be used to
+// discover who has one.
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -34,55 +41,52 @@ export function LoginForm() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="rounded-2xl border p-10 text-center"
-        style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
+        className="rounded-card border border-line bg-surface p-8 text-center shadow-card"
       >
-        <div
-          className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full"
-          style={{ background: "rgba(124,92,252,0.12)", border: "1px solid rgba(124,92,252,0.4)" }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
-            <path
-              d="M4 7l8 5 8-5M4 7v10a1 1 0 001 1h14a1 1 0 001-1V7M4 7a1 1 0 011-1h14a1 1 0 011 1"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h3 className="text-white text-xl font-light">Check your inbox.</h3>
-        <p className="mt-2 text-sm leading-relaxed max-w-xs mx-auto text-muted">
-          If that email is tied to a Callvia account, we just sent a secure link to log in. It expires in 15 minutes.
+        <span className="mx-auto mb-5 flex size-12 items-center justify-center rounded-full bg-accent/12 text-accent ring-1 ring-accent/40">
+          <EnvelopeSimple size={22} weight="light" />
+        </span>
+        <h2 className="text-xl font-light text-white">Check your inbox.</h2>
+        <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted text-pretty">
+          If that email is tied to a Callvia account, we just sent a secure link
+          to log in. It expires in 15 minutes.
         </p>
       </motion.div>
     );
   }
 
   return (
-    <div
-      className="rounded-2xl border p-8 md:p-10 flex flex-col gap-5"
-      style={{ background: "#0d0d0d", borderColor: "#1f1f1f" }}
-    >
-      <div>
-        <label htmlFor="login-email" className="block text-xs tracking-widest uppercase mb-3" style={{ color: "#555555" }}>
-          Account email
-        </label>
+    <div className="flex flex-col gap-3">
+      <label
+        htmlFor="login-email"
+        className="text-xs uppercase tracking-widest text-dim"
+      >
+        Account email
+      </label>
+
+      <div className="relative">
         <input
           id="login-email"
           type="email"
           inputMode="email"
+          autoComplete="email"
           placeholder="you@yourbusiness.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          className="w-full px-4 py-3 rounded-lg text-white text-base outline-none border transition-colors duration-200 focus:border-accent"
-          style={{ background: "#000000", borderColor: "#1f1f1f" }}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "login-error" : undefined}
+          // text-base, not text-sm: anything smaller makes iOS Safari zoom the
+          // whole viewport when the field takes focus.
+          className="w-full rounded-xl border border-line bg-black py-3 pl-11 pr-4 text-base text-white outline-none transition-colors duration-200 placeholder:text-faint focus:border-accent"
         />
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-dim">
+          <At size={16} weight="bold" />
+        </span>
       </div>
 
       {error && (
-        <p className="text-sm" style={{ color: "#f87171" }}>
+        <p id="login-error" role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -91,13 +95,14 @@ export function LoginForm() {
         type="button"
         onClick={submit}
         disabled={status === "sending"}
-        className="btn-shine inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:shadow-[0_0_40px_rgba(124,92,252,0.5)] disabled:opacity-60"
+        className="btn-shine mt-1 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-white shadow-glow-accent transition-all duration-200 hover:bg-accent-hover hover:shadow-glow-accent-strong disabled:opacity-60"
       >
         {status === "sending" ? "Sending…" : "Email Me a Login Link"}
       </button>
 
-      <p className="text-xs leading-relaxed" style={{ color: "#555555" }}>
-        No password needed. We email a secure link to the address on your account, so only you can log in.
+      <p className="mt-2 text-xs leading-relaxed text-dim text-pretty">
+        No password needed. We email a secure link to the address on your
+        account, so only you can log in.
       </p>
     </div>
   );

@@ -8,7 +8,10 @@ import { BOOKING_URL } from "@/lib/site";
 // Hidden on internal/task flows where a marketing CTA doesn't belong:
 // admin dashboard, the tokenized contract-signing flow, and the build
 // funnel/report (which are themselves the conversion path).
-const HIDDEN_PREFIXES = ["/admin", "/agreement", "/build", "/report"];
+// `/login` is here for the same reason as the rest: someone on the auth screen
+// is an existing customer trying to get into their account, and a sales pill
+// floating over it is aimed at the wrong person.
+const HIDDEN_PREFIXES = ["/admin", "/agreement", "/build", "/report", "/login"];
 
 export function FloatingBookCall() {
   const pathname = usePathname();
