@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { DataTable, type Column } from "./ui/DataTable";
 import { Badge } from "./ui/Badge";
+import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ui/overlays";
+import { useToast } from "./ui/Toast";
 
 export interface AdminClient {
   id: string;
@@ -22,6 +27,21 @@ function formatPhone(digits: string | null): string {
 }
 
 export function ClientTable({ clients }: { clients: AdminClient[] }) {
+  const toast = useToast();
+  const [deleting, setDeleting] = useState<AdminClient | null>(null);
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/clients/${deleting.id}/archive`, { method: "POST" });
+    if (res.ok) {
+      toast.success(`Deleted ${deleting.businessName}.`);
+      setDeleting(null);
+      window.location.reload();
+    } else {
+      toast.error("Could not delete.");
+    }
+  }
+
   const columns: Column<AdminClient>[] = [
     {
       key: "business",
@@ -73,33 +93,50 @@ export function ClientTable({ clients }: { clients: AdminClient[] }) {
       mobile: "actions",
       className: "text-right",
       cell: (c) => (
-        <Link
-          href={`/admin/clients/${c.id}`}
-          className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
-        >
-          Open
-        </Link>
+        <span className="flex flex-wrap items-center gap-2 md:justify-end">
+          <Button size="sm" variant="ghost" icon={<Trash2 size={14} />} onClick={() => setDeleting(c)}>
+            Delete
+          </Button>
+          <Link
+            href={`/admin/clients/${c.id}`}
+            className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
+          >
+            Open
+          </Link>
+        </span>
       ),
     },
   ];
 
   return (
-    <DataTable
-      rows={clients}
-      columns={columns}
-      rowKey={(c) => c.id}
-      searchText={(c) => `${c.businessName} ${c.contactName} ${c.email} ${c.phone ?? ""}`}
-      searchPlaceholder="Search by business, contact, email, or phone"
-      filter={{
-        label: "State",
-        options: [
-          { value: "active", label: "Active" },
-          { value: "inactive", label: "No plan" },
-        ],
-        match: (c, v) => (v === "active" ? c.hasActive : !c.hasActive),
-      }}
-      emptyTitle="No clients yet."
-      emptyHint="A client record is created the first time you send them an agreement."
-    />
+    <>
+      <DataTable
+        rows={clients}
+        columns={columns}
+        rowKey={(c) => c.id}
+        searchText={(c) => `${c.businessName} ${c.contactName} ${c.email} ${c.phone ?? ""}`}
+        searchPlaceholder="Search by business, contact, email, or phone"
+        filter={{
+          label: "State",
+          options: [
+            { value: "active", label: "Active" },
+            { value: "inactive", label: "No plan" },
+          ],
+          match: (c, v) => (v === "active" ? c.hasActive : !c.hasActive),
+        }}
+        emptyTitle="No clients yet."
+        emptyHint="A client record is created the first time you send them an agreement."
+      />
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        title={`Delete ${deleting?.businessName ?? ""}?`}
+        description="This removes the business, and every agreement, trial, and onboarding form tied to it, from your dashboard and analytics. Nothing is permanently erased -- signed contracts stay on file for compliance -- but there's no way to bring it back from here."
+        confirmLabel="Delete"
+        destructive
+      />
+    </>
   );
 }

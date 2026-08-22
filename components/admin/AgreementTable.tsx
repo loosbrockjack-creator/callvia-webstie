@@ -19,6 +19,7 @@ function shortDate(iso: string | null): string {
 export function AgreementTable({ agreements }: { agreements: AdminAgreement[] }) {
   const toast = useToast();
   const [voiding, setVoiding] = useState<AdminAgreement | null>(null);
+  const [deleting, setDeleting] = useState<AdminAgreement | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function resend(a: AdminAgreement) {
@@ -53,6 +54,18 @@ export function AgreementTable({ agreements }: { agreements: AdminAgreement[] })
       window.location.reload();
     } else {
       toast.error("Could not void.");
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/agreements/${deleting.id}/archive`, { method: "POST" });
+    if (res.ok) {
+      toast.success(`Deleted the agreement for ${deleting.businessName}.`);
+      setDeleting(null);
+      window.location.reload();
+    } else {
+      toast.error("Could not delete.");
     }
   }
 
@@ -126,6 +139,9 @@ export function AgreementTable({ agreements }: { agreements: AdminAgreement[] })
               Void
             </Button>
           )}
+          <Button size="sm" variant="ghost" onClick={() => setDeleting(a)}>
+            Delete
+          </Button>
           <Link
             href={`/admin/agreements/${a.id}`}
             className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
@@ -163,6 +179,16 @@ export function AgreementTable({ agreements }: { agreements: AdminAgreement[] })
         confirmLabel="Void agreement"
         destructive
         reasonLabel="Reason"
+      />
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        title={`Delete the agreement for ${deleting?.businessName ?? ""}?`}
+        description="This removes it from Agreements and from your revenue numbers. The record, and any signed PDF, stay on file for compliance -- this just clears it off the dashboard."
+        confirmLabel="Delete"
+        destructive
       />
     </>
   );

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { BentoCell } from "./bento";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export function StatTile({
   deltaPct,
   deltaLabel = "vs last week",
   hint,
+  icon,
 }: {
   label: string;
   value: string;
@@ -44,13 +46,25 @@ export function StatTile({
   deltaLabel?: string;
   /** Shown in place of a delta when a comparison is not meaningful. */
   hint?: string;
+  /** A small neutral icon plate, top-right. Decoration only, never a signal. */
+  icon?: ReactNode;
 }) {
   const up = (deltaPct ?? 0) >= 0;
   const Chevron = up ? ChevronUp : ChevronDown;
 
   return (
     <BentoCell className="flex flex-col justify-between gap-5 sm:gap-6">
-      <p className="text-sm text-muted">{label}</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm text-muted">{label}</p>
+        {icon && (
+          <span
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-raised text-dim"
+            aria-hidden
+          >
+            {icon}
+          </span>
+        )}
+      </div>
       <div>
         {/* Steps down on small screens so a value like $18,290 never wraps
             mid-number in the 2-up mobile grid. */}

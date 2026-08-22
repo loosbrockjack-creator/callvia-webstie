@@ -7,7 +7,7 @@ import { formatCents } from "@/lib/money";
 import { formatTrialDate } from "@/lib/agreement/render";
 import { trialView } from "@/lib/admin/metrics";
 import { BentoCell, BentoGrid, PanelHeader } from "@/components/admin/ui/bento";
-import { StatusBadge } from "@/components/admin/ui/Badge";
+import { Badge, StatusBadge } from "@/components/admin/ui/Badge";
 
 export const metadata = {
   title: "Agreement | Callvia",
@@ -59,7 +59,12 @@ export default async function AgreementDetailPage(props: PageProps<"/admin/agree
             subtitle={
               isTrial ? "Free trial agreement. No payment involved." : row.package_name
             }
-            trend={<StatusBadge status={row.status} />}
+            trend={
+              <span className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={row.status} />
+                {row.archived_at && <Badge tone="neutral">Archived</Badge>}
+              </span>
+            }
             action={
               row.pdf_sha256 ? (
                 <a

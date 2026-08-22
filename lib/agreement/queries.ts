@@ -96,6 +96,7 @@ export interface AgreementRow {
   admin_note: string | null;
   created_at: Date;
   updated_at: Date;
+  archived_at: Date | null;
 }
 
 // Every read joins the client so callers always have the party details.
@@ -120,7 +121,7 @@ const SELECT_AGREEMENT = `
          a.stripe_payment_intent_id, a.stripe_invoice_id, a.subscription_status,
          a.paid_at, a.amount_paid_cents,
          a.pdf_sha256, a.pdf_generated_at, a.pdf_emailed_at,
-         a.voided_at, a.voided_reason, a.admin_note, a.created_at, a.updated_at
+         a.voided_at, a.voided_reason, a.admin_note, a.created_at, a.updated_at, a.archived_at
   from agreements a
   join clients c on c.id = a.client_id
 `;
@@ -136,7 +137,10 @@ export async function findAgreementById(id: string): Promise<AgreementRow | null
 }
 
 export async function listAgreements(): Promise<AgreementRow[]> {
-  return q<AgreementRow>(`${SELECT_AGREEMENT} order by a.created_at desc limit 200`, []);
+  return q<AgreementRow>(
+    `${SELECT_AGREEMENT} where a.archived_at is null order by a.created_at desc limit 200`,
+    [],
+  );
 }
 
 // For the client dashboard: the client's current agreement. "Current" ranks
@@ -163,10 +167,14 @@ export async function findCurrentAgreementForClient(clientId: string): Promise<A
   return rows[0] ?? null;
 }
 
-// For the client dashboard: full agreement history, newest first.
+// For the client dashboard, and for the admin's client detail sub-panels:
+// full agreement history, newest first. Excludes archived rows -- a real
+// client's agreements are never archived, so this is a no-op for them, and it
+// is what keeps a deleted trial/agreement from still appearing under a client
+// who has not themselves been deleted.
 export async function listAgreementsForClient(clientId: string): Promise<AgreementRow[]> {
   return q<AgreementRow>(
-    `${SELECT_AGREEMENT} where a.client_id = $1 order by a.created_at desc limit 50`,
+    `${SELECT_AGREEMENT} where a.client_id = $1 and a.archived_at is null order by a.created_at desc limit 50`,
     [clientId],
   );
 }
@@ -333,6 +341,7 @@ export async function listRecentEvents(limit = 12): Promise<RecentEvent[]> {
        from agreement_events e
        join agreements a on a.id = e.agreement_id
        join clients c    on c.id = a.client_id
+      where a.archived_at is null
       order by e.at desc
       limit $1`,
     [limit],
@@ -358,7 +367,8 @@ export async function listClients(): Promise<ClientListRow[]> {
             count(*) filter (where a.kind = 'trial')::int   as trial_count,
             bool_or(a.status = 'active')                    as has_active
        from clients c
-       left join agreements a on a.client_id = c.id
+       left join agreements a on a.client_id = c.id and a.archived_at is null
+      where c.archived_at is null
       group by c.id
       order by c.created_at desc
       limit 200`,
@@ -375,12 +385,16 @@ export interface ClientRow {
   stripe_customer_id: string | null;
   notes: string | null;
   created_at: Date;
+  archived_at: Date | null;
 }
 
+// Deliberately not filtered by archived_at: an admin who still has a direct
+// link to a deleted client should see the record with an "Archived" badge,
+// not a 404.
 export async function findClientById(id: string): Promise<ClientRow | null> {
   const rows = await q<ClientRow>(
     `select id::text as id, business_name, contact_name, email, phone,
-            stripe_customer_id, notes, created_at
+            stripe_customer_id, notes, created_at, archived_at
        from clients where id = $1`,
     [id],
   );
@@ -616,6 +630,19 @@ export async function voidAgreement(id: string, reason: string): Promise<boolean
   );
   if (rows.length === 0) return false;
   await logEvent(id, "voided", { actor: "admin", data: { reason } });
+  return true;
+}
+
+// Soft only, same posture as voidAgreement: never deletes the row or its PDF.
+// Distinct from void -- this is a dashboard/analytics visibility toggle, not a
+// contract lifecycle event, so it carries no status change and no reason.
+export async function archiveAgreement(id: string): Promise<boolean> {
+  const rows = await q<{ id: string }>(
+    `update agreements set archived_at = now() where id = $1 and archived_at is null returning id`,
+    [id],
+  );
+  if (rows.length === 0) return false;
+  await logEvent(id, "archived", { actor: "admin" });
   return true;
 }
 

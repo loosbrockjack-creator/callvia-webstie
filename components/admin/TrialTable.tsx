@@ -7,7 +7,7 @@ import { formatTrialDate } from "@/lib/agreement/render";
 import { DataTable, type Column } from "./ui/DataTable";
 import { Badge, StatusBadge } from "./ui/Badge";
 import { Button } from "./ui/Button";
-import { Modal } from "./ui/overlays";
+import { ConfirmDialog, Modal } from "./ui/overlays";
 import { Input, Select } from "./ui/form";
 import { useToast } from "./ui/Toast";
 import type { AdminAgreement } from "./types";
@@ -36,6 +36,7 @@ export function TrialTable({ trials }: { trials: AdminAgreement[] }) {
   const [monthly, setMonthly] = useState(dollars(PACKAGES[0]?.monthlyCents ?? 0));
   const [convertError, setConvertError] = useState<string | null>(null);
   const [convertBusy, setConvertBusy] = useState(false);
+  const [deleting, setDeleting] = useState<AdminAgreement | null>(null);
 
   function openConvert(t: AdminAgreement) {
     const p = PACKAGES[0];
@@ -94,6 +95,20 @@ export function TrialTable({ trials }: { trials: AdminAgreement[] }) {
     } catch {
       setConvertError("Network error. Try again.");
       setConvertBusy(false);
+    }
+  }
+
+  // Deleting a converted trial does not touch the paid agreement it was
+  // converted to -- separate rows, no cascade between them.
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/agreements/${deleting.id}/archive`, { method: "POST" });
+    if (res.ok) {
+      toast.success(`Deleted ${deleting.businessName}'s trial.`);
+      setDeleting(null);
+      window.location.reload();
+    } else {
+      toast.error("Could not delete.");
     }
   }
 
@@ -185,6 +200,9 @@ export function TrialTable({ trials }: { trials: AdminAgreement[] }) {
               </Button>
             )
           )}
+          <Button size="sm" variant="ghost" onClick={() => setDeleting(t)}>
+            Delete
+          </Button>
           <Link
             href={`/admin/agreements/${t.id}`}
             className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
@@ -255,6 +273,16 @@ export function TrialTable({ trials }: { trials: AdminAgreement[] }) {
           {convertError && <p className="text-sm text-danger">{convertError}</p>}
         </div>
       </Modal>
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        title={`Delete ${deleting?.businessName ?? ""}'s trial?`}
+        description="This removes it from Trials and from the dashboard. The record stays on file -- this just clears it out of view."
+        confirmLabel="Delete"
+        destructive
+      />
     </>
   );
 }

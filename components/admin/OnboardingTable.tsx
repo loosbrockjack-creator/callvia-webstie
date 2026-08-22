@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { DataTable, type Column } from "./ui/DataTable";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
-import { Modal } from "./ui/overlays";
+import { ConfirmDialog, Modal } from "./ui/overlays";
 import { Checkbox, Input } from "./ui/form";
 import { useToast } from "./ui/Toast";
 
@@ -49,6 +49,7 @@ export function OnboardingTable({ forms }: { forms: AdminOnboarding[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<AdminOnboarding | null>(null);
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +93,18 @@ export function OnboardingTable({ forms }: { forms: AdminOnboarding[] }) {
       }
     } finally {
       setBusyId(null);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const res = await fetch(`/api/admin/onboarding/${deleting.id}/archive`, { method: "POST" });
+    if (res.ok) {
+      toast.success(`Deleted the form for ${deleting.businessName ?? deleting.email}.`);
+      setDeleting(null);
+      window.location.reload();
+    } else {
+      toast.error("Could not delete.");
     }
   }
 
@@ -151,6 +164,9 @@ export function OnboardingTable({ forms }: { forms: AdminOnboarding[] }) {
               Resend
             </Button>
           )}
+          <Button size="sm" variant="ghost" onClick={() => setDeleting(f)}>
+            Delete
+          </Button>
           <Link
             href={`/admin/onboarding/${f.id}`}
             className="inline-flex min-h-[38px] items-center px-2 text-sm text-muted transition-colors hover:text-white"
@@ -240,6 +256,16 @@ export function OnboardingTable({ forms }: { forms: AdminOnboarding[] }) {
           </Button>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        title="Delete this onboarding form?"
+        description="This removes it from Onboarding. The submitted answers stay on file -- this just clears it out of view."
+        confirmLabel="Delete"
+        destructive
+      />
     </>
   );
 }

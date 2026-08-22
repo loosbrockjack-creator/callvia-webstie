@@ -71,7 +71,12 @@ export default async function OnboardingDetailPage(
           <PanelHeader
             title={row.business_name ?? row.contact_name ?? row.email}
             subtitle="What they told us about how to handle their calls."
-            trend={<Badge tone={status.tone}>{status.label}</Badge>}
+            trend={
+              <span className="flex flex-wrap items-center gap-2">
+                <Badge tone={status.tone}>{status.label}</Badge>
+                {row.archived_at && <Badge tone="neutral">Archived</Badge>}
+              </span>
+            }
           />
 
           {ordered.length === 0 ? (

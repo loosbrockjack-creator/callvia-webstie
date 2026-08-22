@@ -40,6 +40,7 @@ export interface OnboardingRow {
   admin_note: string | null;
   created_at: Date;
   updated_at: Date;
+  archived_at: Date | null;
 }
 
 const SELECT_ONBOARDING = `
@@ -49,7 +50,7 @@ const SELECT_ONBOARDING = `
          o.status, o.answers,
          o.sent_at, o.first_viewed_at, o.last_viewed_at, o.view_count,
          o.submitted_at, host(o.submitted_ip) as submitted_ip, o.submitted_user_agent,
-         o.voided_at, o.voided_reason, o.admin_note, o.created_at, o.updated_at
+         o.voided_at, o.voided_reason, o.admin_note, o.created_at, o.updated_at, o.archived_at
     from onboarding_forms o
 `;
 
@@ -66,12 +67,18 @@ export async function findOnboardingById(id: string): Promise<OnboardingRow | nu
 }
 
 export async function listOnboarding(): Promise<OnboardingRow[]> {
-  return q<OnboardingRow>(`${SELECT_ONBOARDING} order by o.created_at desc limit 200`, []);
+  return q<OnboardingRow>(
+    `${SELECT_ONBOARDING} where o.archived_at is null order by o.created_at desc limit 200`,
+    [],
+  );
 }
 
+// For the admin's client detail sub-panel. Excludes archived rows, same
+// reasoning as listAgreementsForClient: a real client's forms are never
+// archived, so this only ever hides a deleted test form.
 export async function listOnboardingForClient(clientId: string): Promise<OnboardingRow[]> {
   return q<OnboardingRow>(
-    `${SELECT_ONBOARDING} where o.client_id = $1 order by o.created_at desc limit 50`,
+    `${SELECT_ONBOARDING} where o.client_id = $1 and o.archived_at is null order by o.created_at desc limit 50`,
     [clientId],
   );
 }
@@ -193,6 +200,16 @@ export async function voidOnboarding(id: string, reason: string): Promise<boolea
       where id = $1 and status <> 'void'
       returning id`,
     [id, reason],
+  );
+  return rows.length > 0;
+}
+
+// Soft only, same posture as voidOnboarding: dashboard/analytics visibility,
+// not a status change. Submitted answers are untouched.
+export async function archiveOnboarding(id: string): Promise<boolean> {
+  const rows = await q<{ id: string }>(
+    `update onboarding_forms set archived_at = now() where id = $1 and archived_at is null returning id`,
+    [id],
   );
   return rows.length > 0;
 }

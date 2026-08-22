@@ -11,6 +11,7 @@ import { formatTrialDate } from "@/lib/agreement/render";
 import { BentoCell, BentoGrid, EmptyState, PanelHeader } from "@/components/admin/ui/bento";
 import { Badge, StatusBadge } from "@/components/admin/ui/Badge";
 import { RevokeSessionsButton } from "@/components/admin/RevokeSessionsButton";
+import { ArchiveClientButton } from "@/components/admin/ArchiveClientButton";
 
 export const metadata = {
   title: "Client | Callvia",
@@ -85,7 +86,10 @@ export default async function ClientDetailPage(props: PageProps<"/admin/clients/
             title={client.business_name}
             subtitle={`Client since ${shortDate(client.created_at)}.`}
             trend={
-              live ? <Badge tone="success">Active</Badge> : <Badge tone="neutral">No plan</Badge>
+              <span className="flex flex-wrap items-center gap-2">
+                {live ? <Badge tone="success">Active</Badge> : <Badge tone="neutral">No plan</Badge>}
+                {client.archived_at && <Badge tone="neutral">Archived</Badge>}
+              </span>
             }
           />
           <dl>
@@ -119,8 +123,9 @@ export default async function ClientDetailPage(props: PageProps<"/admin/clients/
             />
           </dl>
 
-          <div className="mt-6 border-t border-line pt-5">
+          <div className="mt-6 flex flex-wrap gap-3 border-t border-line pt-5">
             <RevokeSessionsButton clientId={client.id} />
+            <ArchiveClientButton clientId={client.id} businessName={client.business_name} />
           </div>
         </BentoCell>
 

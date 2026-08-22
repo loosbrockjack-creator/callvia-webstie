@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Clock, FileText, Inbox } from "lucide-react";
+import { ArrowRight, Clock, FileText, Hourglass, Inbox, Users, Wallet } from "lucide-react";
 import { requireAdminPage } from "@/lib/require-admin";
 import { listAgreements, listRecentEvents } from "@/lib/agreement/queries";
 import {
@@ -69,12 +69,14 @@ export default async function OverviewPage() {
           value={formatCents(m.mrrCents)}
           deltaPct={m.mrrDeltaPct}
           hint={m.mrrCents === 0 ? "No live subscriptions" : "No prior week to compare"}
+          icon={<Wallet size={15} />}
         />
         <StatTile
           label="Active clients"
           value={String(m.activeClients)}
           deltaPct={null}
           hint={m.activeClients === 1 ? "1 business paying" : `${m.activeClients} businesses paying`}
+          icon={<Users size={15} />}
         />
         <StatTile
           label="Awaiting payment"
@@ -85,6 +87,7 @@ export default async function OverviewPage() {
               ? "Nothing outstanding"
               : `${m.awaitingCount} signed, not yet paid`
           }
+          icon={<Clock size={15} />}
         />
         <StatTile
           label="Trials running"
@@ -92,6 +95,7 @@ export default async function OverviewPage() {
           deltaPct={m.signedDeltaPct}
           deltaLabel="signings vs last week"
           hint={m.trialsRunning === 0 ? "No trials in flight" : undefined}
+          icon={<Hourglass size={15} />}
         />
       </BentoGrid>
 
